@@ -1,0 +1,16 @@
+{
+  "name": "label-generator",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
+    "start": "nodemon server/app.js",
+    "build": "npm run build --prefix client"
+  },
+  "dependencies": {
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "concurrently": "^7.4.0",
+    "nodemon": "^2.0.20"
+  }
+}
