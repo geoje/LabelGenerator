@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
     "start": "nodemon server/app.js",
-    "build": "npm run build --prefix client"
+    "build": "npm run build --prefix client",
+    "test": "node server/test.js"
   },
   "dependencies": {
     "express": "^4.18.1"

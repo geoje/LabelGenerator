@@ -1,35 +1,20 @@
-import { MantineProvider } from "@mantine/core";
-import React, { useEffect } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
-import WebFont from "webfontloader";
+import { MantineProvider } from "@mantine/core";
 
-import Nav from "./page/nav";
-import Draw from "./page/draw";
-import Print from "./page/print";
+import { Provider } from "react-redux";
+import { store } from "./store";
 
-import "./index.css";
-
-function App() {
-  // Download Font
-  useEffect(() => {
-    WebFont.load({
-      google: {
-        families: ["Poppins"],
-      },
-    });
-  });
-
-  return (
-    <>
-      <Nav />
-      <Draw />
-      <Print />
-    </>
-  );
-}
+import Nav from "./page/nav/nav";
+import Design from "./page/design/design";
+import Print from "./page/print/print";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <MantineProvider withGlobalStyles withNormalizeCSS>
-    <App />
+    <Provider store={store}>
+      <Nav />
+      <Design />
+      <Print />
+    </Provider>
   </MantineProvider>
 );
