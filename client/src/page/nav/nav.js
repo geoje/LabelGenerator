@@ -14,9 +14,7 @@ export default function Nav() {
         style={{ borderBottom: "1px solid rgb(233, 236, 239)" }}
       >
         <Grid.Col span={6} md={3} lg={4} order={2} orderMd={1}>
-          <Button variant="default" onClick={() => dispatch(prev())}>
-            Back
-          </Button>
+          {step > 0 && <Button onClick={() => dispatch(prev())}>Back</Button>}
         </Grid.Col>
         <Grid.Col span={12} md={6} lg={4} order={1} orderMd={2}>
           <Stepper
@@ -32,9 +30,11 @@ export default function Nav() {
           </Stepper>
         </Grid.Col>
         <Grid.Col span={6} md={3} lg={4} order={3}>
-          <Group position="right">
-            <Button onClick={() => dispatch(next())}>Next</Button>
-          </Group>
+          {step < 2 && (
+            <Group position="right">
+              <Button onClick={() => dispatch(next())}>Next</Button>
+            </Group>
+          )}
         </Grid.Col>
       </Grid>
     </>
