@@ -11,7 +11,10 @@ export default function Nav() {
       <Grid
         m={0}
         p="xs"
-        style={{ borderBottom: "1px solid rgb(233, 236, 239)" }}
+        style={{
+          borderBottom: "1px solid rgb(233, 236, 239)",
+          backgroundColor: "#fff",
+        }}
       >
         <Grid.Col span={6} md={3} lg={4} order={2} orderMd={1}>
           {step > 0 && <Button onClick={() => dispatch(prev())}>Back</Button>}
