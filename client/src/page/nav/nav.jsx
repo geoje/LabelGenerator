@@ -3,6 +3,7 @@ import { Stepper, Button, Grid, Group } from "@mantine/core";
 import { next, prev, set } from "./stepSlice";
 
 export default function Nav() {
+  // Provider
   const dispatch = useDispatch();
   const step = useSelector((state) => state.step.value);
 

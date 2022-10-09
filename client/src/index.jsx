@@ -6,7 +6,7 @@ import { Provider, useSelector } from "react-redux";
 import { store } from "./store";
 
 import Nav from "./page/nav/nav";
-import Data from "./page/data/data";
+import Import from "./page/import/import";
 import Design from "./page/design/design";
 import Print from "./page/print/print";
 
@@ -16,7 +16,7 @@ function App() {
   return (
     <>
       <Nav />
-      {step === 0 ? <Data /> : step === 1 ? <Design /> : <Print />}
+      {step === 0 ? <Import /> : step === 1 ? <Design /> : <Print />}
     </>
   );
 }
@@ -25,7 +25,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <MantineProvider withGlobalStyles withNormalizeCSS>
     <NotificationsProvider>
       <Provider store={store}>
-        <App />
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
       </Provider>
     </NotificationsProvider>
   </MantineProvider>
