@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 
-import count from "./page/counter/countSlice";
 import step from "./page/nav/stepSlice";
 import data from "./page/import/dataSlice";
+import qrFormat from "./page/import/qrFormatSlice";
 
 export const store = configureStore({
-  reducer: { count, step, data },
+  reducer: { step, data, qrFormat },
 });

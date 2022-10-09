@@ -7,6 +7,9 @@ import {
   Button,
   MultiSelect,
   Table,
+  ScrollArea,
+  Box,
+  CloseButton,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { IconUpload, IconFileSpreadsheet, IconX } from "@tabler/icons";
@@ -14,8 +17,8 @@ import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import * as XLSX from "xlsx";
-import { set } from "./dataSlice";
-
+import { set as setData } from "./dataSlice";
+import { set as setQRFormat } from "./qrFormatSlice";
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
 function StringReplaceAt(str, index, replacement) {
@@ -33,19 +36,19 @@ function DataTable() {
   for (let key of Object.keys(data[0])) keys.push(key);
 
   return (
-    <Table>
+    <Table fontSize="xs" highlightOnHover style={{ whiteSpace: "nowrap" }}>
       <thead>
         <tr>
           {keys.map((key) => (
-            <th key={key}>{key}</th>
+            <th key={"th" + key}>{key}</th>
           ))}
         </tr>
       </thead>
       <tbody>
         {data.map((e, i) => (
-          <tr>
+          <tr key={"tr" + i}>
             {keys.map((key) => (
-              <td key={i + key}>{e[key]}</td>
+              <td key={"td" + i + key}>{e[key]}</td>
             ))}
           </tr>
         ))}
@@ -53,30 +56,152 @@ function DataTable() {
     </Table>
   );
 }
-
-export default function Import() {
-  const theme = useMantineTheme();
-  const [workbook, setWorkbook] = useState(null);
-  const [format, setFormat] = useState([
-    { value: "react", label: "React" },
-    { value: "ng", label: "Angular" },
-  ]);
-
+function FormatMultiSelect() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
+
+  const GRP_DATA = "Data Header";
+  const GRP_CUST = "Custom Created";
+  const [custom, setCustom] = useState([
+    { value: Math.random().toString(), label: "|", group: GRP_CUST },
+    { value: Math.random().toString(), label: ",", group: GRP_CUST },
+  ]);
+
+  return (
+    <MultiSelect
+      label="(2) QR Code Data Format"
+      data={Object.keys(data ? data[0] : {})
+        .map((v) => {
+          return { value: v, label: v, group: GRP_DATA };
+        })
+        .concat(custom)}
+      placeholder="Sesetlect items or create customization with an input"
+      searchable
+      creatable
+      clearable
+      mt="md"
+      maxDropdownHeight={400}
+      transitionDuration={100}
+      transition="pop-top-left"
+      transitionTimingFunction="ease"
+      valueComponent={({
+        value,
+        label,
+        group,
+        onRemove,
+        classNames,
+        ...others
+      }) => {
+        return (
+          <div {...others}>
+            <Box
+              sx={(theme) => ({
+                display: "flex",
+                cursor: "default",
+                alignItems: "center",
+                color:
+                  group === GRP_DATA
+                    ? theme.colorScheme === "dark"
+                      ? theme.colors.blue[6]
+                      : theme.colors.blue[8]
+                    : theme.colorScheme === "dark"
+                    ? theme.colors.dark[0]
+                    : theme.colors.gray[7],
+                backgroundColor:
+                  group === GRP_DATA
+                    ? theme.colorScheme === "dark"
+                      ? theme.white
+                      : theme.colors.blue[0]
+                    : theme.colorScheme === "dark"
+                    ? theme.colors.dark[7]
+                    : theme.colors.gray[1],
+                paddingLeft: 10,
+                borderRadius: 4,
+              })}
+            >
+              <Box sx={{ lineHeight: 1, fontSize: 12 }}>{label}</Box>
+              <CloseButton
+                onMouseDown={onRemove}
+                variant="transparent"
+                size={22}
+                iconSize={14}
+                tabIndex={-1}
+                sx={(theme) => ({
+                  color:
+                    group === GRP_DATA
+                      ? theme.colorScheme === "dark"
+                        ? theme.colors.blue[6]
+                        : theme.colors.blue[8]
+                      : theme.colorScheme === "dark"
+                      ? theme.colors.dark[0]
+                      : theme.colors.gray[7],
+                })}
+              />
+            </Box>
+          </div>
+        );
+      }}
+      getCreateLabel={(query) => `+ Create ${query}`}
+      onCreate={(query) => {
+        const item = {
+          value: Math.random().toString(),
+          label: query,
+          group: GRP_CUST,
+        };
+        setCustom((current) => [...current, item]);
+        return item;
+      }}
+      onChange={(value) =>
+        dispatch(
+          setQRFormat(
+            value.map((v) => {
+              const literal = custom.find((c) => c.value === v);
+              return {
+                value: literal ? literal.label : v,
+                literal: literal !== undefined,
+              };
+            })
+          )
+        )
+      }
+    />
+  );
+}
+function QRCodePaper() {
+  // Provider
+  const data = useSelector((state) => state.data.value);
+  const qrFormat = useSelector((state) => state.qrFormat.value);
+  console.log(qrFormat);
+
+  return (
+    <>
+      <Text color="gray.9" weight="500" size={14} mb={1}>
+        (3) QR Code Result
+      </Text>
+      <Paper shadow="xs" p="md" withBorder></Paper>
+    </>
+  );
+}
+
+export default function Import() {
+  // Provider
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.data.value);
+
+  const theme = useMantineTheme();
+  const [workbook, setWorkbook] = useState(null);
 
   /** Raw Excel data to Array
    * {'A1': 'id', 'A2': 'abc', 'B1': 'pw', 'B2': '123', ...} to
    * [ {'id': 'abc', 'pw': '123'}, ...]
    */
-  const setData = (rawData) => {
+  const refineData = (rawData) => {
     const range = {
       row: [...rawData["!ref"].matchAll(/\d+/g)].map((r) => Number(r[0])),
       col: [...rawData["!ref"].matchAll(/[a-zA-Z]+/g)].map((r) => r[0]),
     };
-    let refinedData = [];
-    for (let i = range.row[0] + 1; i <= range.row[1]; i++) refinedData.push({});
+    let refinedData = Array(range.row[1] - range.row[0] + 1).fill({});
 
     /** Excel header string increasement
      * A > B > ... > Z > AA > AB > ... > AZ > BA > BB > ... > ZZ > AAA > ...
@@ -88,7 +213,7 @@ export default function Import() {
           : "A" + StringReplaceAt(a, i, "A")
         : StringReplaceAt(a, i, String.fromCharCode(a.charCodeAt(i) + 1));
 
-    // Read rawData and write refinedData
+    // Convert rawData to write refinedData
     for (
       let x = range.col[0];
       x !== range.col[1];
@@ -103,7 +228,7 @@ export default function Import() {
       )
         refinedData[i][h] = rawData[x + y]?.v || "";
 
-    dispatch(set(refinedData));
+    dispatch(setData(refinedData));
   };
 
   // File Reader
@@ -115,7 +240,7 @@ export default function Import() {
     if (wb.SheetNames.length >= 2) setWorkbook(wb);
     // Single sheet
     else if (wb.SheetNames.length === 1) {
-      setData(wb.Sheets[wb.SheetNames[0]]);
+      refineData(wb.Sheets[wb.SheetNames[0]]);
     }
     // No sheets
     else {
@@ -131,9 +256,14 @@ export default function Import() {
   return (
     <Grid m={0} p="sm">
       <Grid.Col sm={8} p="sm">
+        <Text color="gray.9" weight="500" size={14} mb={1}>
+          (1) Import Data
+        </Text>
         <Paper shadow="xs" p="md" withBorder>
           {data ? (
-            <DataTable />
+            <ScrollArea style={{ height: 760 }}>
+              <DataTable />
+            </ScrollArea>
           ) : (
             <>
               <Group position="center">
@@ -235,7 +365,7 @@ export default function Import() {
                         size="xs"
                         radius="xl"
                         onClick={() => {
-                          setData(workbook.Sheets[name]);
+                          refineData(workbook.Sheets[name]);
                           setWorkbook(null);
                         }}
                       >
@@ -250,19 +380,8 @@ export default function Import() {
         </Paper>
       </Grid.Col>
       <Grid.Col sm={4} p="sm">
-        <MultiSelect
-          label="QR Code Data Format"
-          data={format}
-          placeholder="Select items"
-          searchable
-          creatable
-          getCreateLabel={(query) => `+ Create ${query}`}
-          onCreate={(query) => {
-            const item = { value: query, label: query };
-            setFormat((current) => [...current, item]);
-            return item;
-          }}
-        />
+        <QRCodePaper />
+        <FormatMultiSelect />
       </Grid.Col>
     </Grid>
   );
