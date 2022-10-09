@@ -10,12 +10,16 @@ import {
   ScrollArea,
   Box,
   CloseButton,
+  Stack,
+  Divider,
+  NumberInput,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { IconUpload, IconFileSpreadsheet, IconX } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
 import { set as setData } from "./dataSlice";
 import { set as setQRFormat } from "./qrFormatSlice";
@@ -172,14 +176,35 @@ function QRCodePaper() {
   // Provider
   const data = useSelector((state) => state.data.value);
   const qrFormat = useSelector((state) => state.qrFormat.value);
-  console.log(qrFormat);
+
+  const [index, setIndex] = useState(1);
+
+  const content = qrFormat
+    .map((o) => (o.literal ? o.value : data[index][o.value]))
+    .join("");
 
   return (
     <>
       <Text color="gray.9" weight="500" size={14} mb={1}>
         (3) QR Code Result
       </Text>
-      <Paper shadow="xs" p="md" withBorder></Paper>
+      <Paper shadow="xs" p="md" withBorder>
+        <Stack align="center" spacing={0}>
+          <QRCodeSVG value={content} />
+          <Text>{content}</Text>
+        </Stack>
+        <Divider my="sm" />
+        <Stack align="center" spacing={0}>
+          <NumberInput
+            defaultValue={1}
+            placeholder={`1 ~ ${data.length}`}
+            label="Choose Index"
+            onChange={(val) => {
+              setIndex(val);
+            }}
+          />
+        </Stack>
+      </Paper>
     </>
   );
 }
