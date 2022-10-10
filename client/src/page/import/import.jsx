@@ -157,6 +157,8 @@ function FormatMultiSelect() {
           group: GRP_CUST,
         };
         setCustom((current) => [...current, item]);
+        custom.push(item);
+        console.log("onCreate", item, custom);
         return item;
       }}
       onChange={(value) => {
@@ -172,8 +174,33 @@ function FormatMultiSelect() {
           )
         );
 
-        // Keep just one default seperator '|' and ','
-        console.log(custom, value);
+        /* Keep just one default seperator '|' and ',' */
+        // Remove duplicated in unused
+        let newCustom = custom.filter((o) => value.includes(o.value));
+        let uniqueUnusedCustom = custom
+          .filter((o) => !value.includes(o.value))
+          .filter(
+            (o1, i, a) => a.findIndex((o2) => o2.label === o1.label) === i
+          );
+
+        // Add used label
+        const GRP_CUST = "Custom Created";
+        newCustom = newCustom
+          .map((o) => o.label)
+          .filter((v, i, a) => a.indexOf(v) === i)
+          .filter((v) => !uniqueUnusedCustom.some((o) => o.label === v))
+          .map((v) => {
+            return {
+              value: Math.random().toString(),
+              label: v,
+              group: GRP_CUST,
+            };
+          }) // Used label exclude uniqueUnusedCustom
+          .concat(uniqueUnusedCustom)
+          .concat(newCustom);
+
+        console.log("onChange", value, custom, newCustom);
+        setCustom(newCustom);
       }}
     />
   );
