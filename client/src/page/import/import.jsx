@@ -13,11 +13,12 @@ import {
   Stack,
   Divider,
   NumberInput,
+  ActionIcon,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { IconUpload, IconFileSpreadsheet, IconX } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
@@ -178,9 +179,10 @@ function QRCodePaper() {
   const qrFormat = useSelector((state) => state.qrFormat.value);
 
   const [index, setIndex] = useState(1);
+  const handlers = useRef();
 
   const content = qrFormat
-    .map((o) => (o.literal ? o.value : data[index][o.value]))
+    .map((o) => (o.literal ? o.value : data[index - 1][o.value]))
     .join("");
 
   return (
@@ -191,19 +193,47 @@ function QRCodePaper() {
       <Paper shadow="xs" p="md" withBorder>
         <Stack align="center" spacing={0}>
           <QRCodeSVG value={content} />
-          <Text>{content}</Text>
+          <Text size="xs" align="center">
+            {content}
+          </Text>
         </Stack>
         <Divider my="sm" />
-        <Stack align="center" spacing={0}>
+        <Group spacing={5} position="center">
+          <ActionIcon
+            size={36}
+            variant="default"
+            disabled={!data.length}
+            onClick={() => handlers.current.decrement()}
+          >
+            –
+          </ActionIcon>
+
           <NumberInput
-            defaultValue={1}
-            placeholder={`1 ~ ${data.length}`}
-            label="Choose Index"
-            onChange={(val) => {
-              setIndex(val);
-            }}
+            hideControls
+            value={index}
+            onChange={(val) =>
+              setIndex(
+                Math.min(Math.max(Number.isNaN(val) ? 1 : val, 1), data.length)
+              )
+            }
+            handlersRef={handlers}
+            step={1}
+            min={1}
+            max={data.length}
+            disabled={!data.length}
+            autoComplete="off"
+            styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
           />
-        </Stack>
+
+          <ActionIcon
+            size={36}
+            variant="default"
+            disabled={!data.length}
+            onClick={() => handlers.current.increment()}
+          >
+            +
+          </ActionIcon>
+        </Group>
       </Paper>
     </>
   );
@@ -226,7 +256,8 @@ export default function Import() {
       row: [...rawData["!ref"].matchAll(/\d+/g)].map((r) => Number(r[0])),
       col: [...rawData["!ref"].matchAll(/[a-zA-Z]+/g)].map((r) => r[0]),
     };
-    let refinedData = Array(range.row[1] - range.row[0] + 1).fill({});
+    let refinedData = [];
+    for (let i = range.row[0] + 1; i <= range.row[1]; i++) refinedData.push({});
 
     /** Excel header string increasement
      * A > B > ... > Z > AA > AB > ... > AZ > BA > BB > ... > ZZ > AAA > ...
@@ -253,7 +284,6 @@ export default function Import() {
       )
         refinedData[i][h] = rawData[x + y]?.v || "";
 
-    console.log(refinedData);
     dispatch(setData(refinedData));
   };
 
