@@ -41,7 +41,12 @@ function DataTable() {
   if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
 
   return (
-    <Table fontSize="xs" highlightOnHover style={{ whiteSpace: "nowrap" }}>
+    <Table
+      fontSize="xs"
+      striped
+      highlightOnHover
+      style={{ whiteSpace: "nowrap" }}
+    >
       <thead>
         <tr>
           {keys.map((key) => (
