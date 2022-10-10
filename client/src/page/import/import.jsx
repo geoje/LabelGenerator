@@ -73,6 +73,64 @@ function FormatMultiSelect() {
     { value: Math.random().toString(), label: ",", group: GRP_CUST },
   ]);
 
+  const valueComponent = ({
+    value,
+    label,
+    group,
+    onRemove,
+    classNames,
+    ...others
+  }) => {
+    return (
+      <div {...others}>
+        <Box
+          sx={(theme) => ({
+            display: "flex",
+            cursor: "default",
+            alignItems: "center",
+            color:
+              group === GRP_DATA
+                ? theme.colorScheme === "dark"
+                  ? theme.colors.blue[1]
+                  : theme.colors.blue[8]
+                : theme.colorScheme === "dark"
+                ? theme.colors.dark[0]
+                : theme.colors.gray[7],
+            backgroundColor:
+              group === GRP_DATA
+                ? theme.colorScheme === "dark"
+                  ? "rgba(24, 100, 171, 0.45)"
+                  : theme.colors.blue[0]
+                : theme.colorScheme === "dark"
+                ? theme.colors.dark[7]
+                : theme.colors.gray[1],
+            paddingLeft: 10,
+            borderRadius: 4,
+          })}
+        >
+          <Box sx={{ lineHeight: 1, fontSize: 12 }}>{label}</Box>
+          <CloseButton
+            onMouseDown={onRemove}
+            variant="transparent"
+            size={22}
+            iconSize={14}
+            tabIndex={-1}
+            sx={(theme) => ({
+              color:
+                group === GRP_DATA
+                  ? theme.colorScheme === "dark"
+                    ? theme.colors.blue[1]
+                    : theme.colors.blue[8]
+                  : theme.colorScheme === "dark"
+                  ? theme.colors.dark[0]
+                  : theme.colors.gray[7],
+            })}
+          />
+        </Box>
+      </div>
+    );
+  };
+
   return (
     <MultiSelect
       label="(2) QR Code Data Format"
@@ -90,63 +148,7 @@ function FormatMultiSelect() {
       transitionDuration={100}
       transition="pop-top-left"
       transitionTimingFunction="ease"
-      valueComponent={({
-        value,
-        label,
-        group,
-        onRemove,
-        classNames,
-        ...others
-      }) => {
-        return (
-          <div {...others}>
-            <Box
-              sx={(theme) => ({
-                display: "flex",
-                cursor: "default",
-                alignItems: "center",
-                color:
-                  group === GRP_DATA
-                    ? theme.colorScheme === "dark"
-                      ? theme.colors.blue[6]
-                      : theme.colors.blue[8]
-                    : theme.colorScheme === "dark"
-                    ? theme.colors.dark[0]
-                    : theme.colors.gray[7],
-                backgroundColor:
-                  group === GRP_DATA
-                    ? theme.colorScheme === "dark"
-                      ? theme.white
-                      : theme.colors.blue[0]
-                    : theme.colorScheme === "dark"
-                    ? theme.colors.dark[7]
-                    : theme.colors.gray[1],
-                paddingLeft: 10,
-                borderRadius: 4,
-              })}
-            >
-              <Box sx={{ lineHeight: 1, fontSize: 12 }}>{label}</Box>
-              <CloseButton
-                onMouseDown={onRemove}
-                variant="transparent"
-                size={22}
-                iconSize={14}
-                tabIndex={-1}
-                sx={(theme) => ({
-                  color:
-                    group === GRP_DATA
-                      ? theme.colorScheme === "dark"
-                        ? theme.colors.blue[6]
-                        : theme.colors.blue[8]
-                      : theme.colorScheme === "dark"
-                      ? theme.colors.dark[0]
-                      : theme.colors.gray[7],
-                })}
-              />
-            </Box>
-          </div>
-        );
-      }}
+      valueComponent={valueComponent}
       getCreateLabel={(query) => `+ Create ${query}`}
       onCreate={(query) => {
         const item = {
@@ -157,7 +159,7 @@ function FormatMultiSelect() {
         setCustom((current) => [...current, item]);
         return item;
       }}
-      onChange={(value) =>
+      onChange={(value) => {
         dispatch(
           setQRFormat(
             value.map((v) => {
@@ -168,8 +170,11 @@ function FormatMultiSelect() {
               };
             })
           )
-        )
-      }
+        );
+
+        // Keep just one default seperator '|' and ','
+        console.log(custom, value);
+      }}
     />
   );
 }
@@ -187,12 +192,12 @@ function QRCodePaper() {
 
   return (
     <>
-      <Text color="gray.9" weight="500" size={14} mb={1}>
+      <Text weight="500" size={14} mb={1}>
         (3) QR Code Result
       </Text>
       <Paper shadow="xs" p="md" withBorder>
         <Stack align="center" spacing={0}>
-          <QRCodeSVG value={content} />
+          <QRCodeSVG value={content} size={160} includeMargin />
           <Text size="xs" align="center">
             {content}
           </Text>
@@ -312,7 +317,7 @@ export default function Import() {
   return (
     <Grid m={0} p="sm">
       <Grid.Col sm={8} p="sm">
-        <Text color="gray.9" weight="500" size={14} mb={1}>
+        <Text weight="500" size={14} mb={1}>
           (1) Import Data
         </Text>
         <Paper shadow="xs" p="md" withBorder>
