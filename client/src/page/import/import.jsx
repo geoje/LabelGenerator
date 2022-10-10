@@ -37,7 +37,7 @@ function DataTable() {
   // Provider
   const data = useSelector((state) => state.data.value);
   const keys = [];
-  for (let key of Object.keys(data[0])) keys.push(key);
+  if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
 
   return (
     <Table fontSize="xs" highlightOnHover style={{ whiteSpace: "nowrap" }}>
@@ -49,10 +49,10 @@ function DataTable() {
         </tr>
       </thead>
       <tbody>
-        {data.map((e, i) => (
+        {data.map((v, i) => (
           <tr key={"tr" + i}>
             {keys.map((key) => (
-              <td key={"td" + i + key}>{e[key]}</td>
+              <td key={"td" + i + key}>{v[key]}</td>
             ))}
           </tr>
         ))}
@@ -75,7 +75,7 @@ function FormatMultiSelect() {
   return (
     <MultiSelect
       label="(2) QR Code Data Format"
-      data={Object.keys(data ? data[0] : {})
+      data={Object.keys(data.length ? data[0] : {})
         .map((v) => {
           return { value: v, label: v, group: GRP_DATA };
         })
@@ -285,7 +285,7 @@ export default function Import() {
           (1) Import Data
         </Text>
         <Paper shadow="xs" p="md" withBorder>
-          {data ? (
+          {data.length ? (
             <ScrollArea style={{ height: 760 }}>
               <DataTable />
             </ScrollArea>

@@ -1,8 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+/**
+ * [ {'id': 'abc', 'pw': '123'}, ...]
+ */
 const slice = createSlice({
   name: "data",
-  initialState: { value: null },
+  initialState: { value: [] },
   reducers: {
     set: (state, action) => {
       state.value = action.payload;

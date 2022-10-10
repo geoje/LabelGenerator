@@ -7,7 +7,7 @@ import { createSlice } from "@reduxjs/toolkit";
  */
 const slice = createSlice({
   name: "qrFormat",
-  initialState: { value: null },
+  initialState: { value: [] },
   reducers: {
     set: (state, action) => {
       state.value = action.payload;
