@@ -253,6 +253,7 @@ export default function Import() {
       )
         refinedData[i][h] = rawData[x + y]?.v || "";
 
+    console.log(refinedData);
     dispatch(setData(refinedData));
   };
 
