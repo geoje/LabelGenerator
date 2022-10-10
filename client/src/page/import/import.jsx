@@ -199,7 +199,6 @@ function FormatMultiSelect() {
           .concat(uniqueUnusedCustom)
           .concat(newCustom);
 
-        console.log("onChange", value, custom, newCustom);
         setCustom(newCustom);
       }}
     />
