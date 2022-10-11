@@ -148,7 +148,6 @@ function FormatMultiSelect() {
       searchable
       creatable
       clearable
-      mt="md"
       maxDropdownHeight={400}
       transitionDuration={100}
       transition="pop-top-left"
@@ -237,11 +236,11 @@ function QRCodePaper() {
         <Group spacing={5} position="center">
           <ActionIcon
             size={36}
-            variant="default"
+            variant="filled"
             disabled={!data.length}
             onClick={() => handlers.current.decrement()}
           >
-            –
+            ◁
           </ActionIcon>
 
           <NumberInput
@@ -257,17 +256,16 @@ function QRCodePaper() {
             min={1}
             max={data.length}
             disabled={!data.length}
-            autoComplete="off"
             styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
           />
 
           <ActionIcon
             size={36}
-            variant="default"
+            variant="filled"
             disabled={!data.length}
             onClick={() => handlers.current.increment()}
           >
-            +
+            ▷
           </ActionIcon>
         </Group>
       </Paper>
@@ -472,8 +470,14 @@ export default function Import() {
         </Paper>
       </Grid.Col>
       <Grid.Col sm={4} p="sm">
-        <QRCodePaper />
-        <FormatMultiSelect />
+        <Grid>
+          <Grid.Col orderSm={2}>
+            <FormatMultiSelect />
+          </Grid.Col>
+          <Grid.Col orderSm={1}>
+            <QRCodePaper />
+          </Grid.Col>
+        </Grid>
       </Grid.Col>
     </Grid>
   );
