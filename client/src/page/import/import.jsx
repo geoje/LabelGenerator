@@ -23,7 +23,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
 import { set as setData } from "./dataSlice";
-import { set as setQRFormat } from "./qrFormatSlice";
+import { setFormat, setCustom, setSelected } from "./qrSlice";
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
 function StringReplaceAt(str, index, replacement) {
@@ -70,13 +70,11 @@ function FormatMultiSelect() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
+  let custom = useSelector((state) => state.qr.custom);
+  const selected = useSelector((state) => state.qr.selected);
 
   const GRP_DATA = "Data Header";
   const GRP_CUST = "Custom Created";
-  const [custom, setCustom] = useState([
-    { value: Math.random().toString(), label: "|", group: GRP_CUST },
-    { value: Math.random().toString(), label: ",", group: GRP_CUST },
-  ]);
 
   const valueComponent = ({
     value,
@@ -139,11 +137,6 @@ function FormatMultiSelect() {
   return (
     <MultiSelect
       label="(2) QR Code Data Format"
-      data={Object.keys(data.length ? data[0] : {})
-        .map((v) => {
-          return { value: v, label: v, group: GRP_DATA };
-        })
-        .concat(custom)}
       placeholder="Sesetlect items or create customization with an input"
       searchable
       creatable
@@ -152,6 +145,12 @@ function FormatMultiSelect() {
       transitionDuration={100}
       transition="pop-top-left"
       transitionTimingFunction="ease"
+      data={Object.keys(data.length ? data[0] : {})
+        .map((v) => {
+          return { value: v, label: v, group: GRP_DATA };
+        })
+        .concat(custom)}
+      defaultValue={selected}
       valueComponent={valueComponent}
       getCreateLabel={(query) => `+ Create ${query}`}
       onCreate={(query) => {
@@ -160,14 +159,14 @@ function FormatMultiSelect() {
           label: query,
           group: GRP_CUST,
         };
-        setCustom((current) => [...current, item]);
-        custom.push(item);
-        console.log("onCreate", item, custom);
+
+        dispatch(setCustom((custom = [...custom, item])));
         return item;
       }}
       onChange={(value) => {
+        dispatch(setSelected([...value]));
         dispatch(
-          setQRFormat(
+          setFormat(
             value.map((v) => {
               const literal = custom.find((c) => c.value === v);
               return {
@@ -203,7 +202,7 @@ function FormatMultiSelect() {
           .concat(uniqueUnusedCustom)
           .concat(newCustom);
 
-        setCustom(newCustom);
+        dispatch(setCustom(newCustom));
       }}
     />
   );
@@ -211,12 +210,12 @@ function FormatMultiSelect() {
 function QRCodePaper() {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const qrFormat = useSelector((state) => state.qrFormat.value);
+  const format = useSelector((state) => state.qr.format);
 
   const [index, setIndex] = useState(1);
   const handlers = useRef();
 
-  const content = qrFormat
+  const content = format
     .map((o) => (o.literal ? o.value : data[index - 1][o.value]))
     .join("");
 
