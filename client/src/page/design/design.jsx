@@ -31,8 +31,8 @@ function FabricJSCanvas(props) {
   }, []);
   const initCanvas = () =>
     new fabric.Canvas("canvas", {
-      width: props.w,
-      height: props.h,
+      width: 359,
+      height: 76,
       backgroundColor: "white",
     });
   return <canvas id="canvas" />;
