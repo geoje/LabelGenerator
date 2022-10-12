@@ -16,7 +16,13 @@ import {
   ActionIcon,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
-import { IconUpload, IconFileSpreadsheet, IconX } from "@tabler/icons";
+import {
+  IconUpload,
+  IconFileSpreadsheet,
+  IconX,
+  IconChevronRight,
+  IconChevronLeft,
+} from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -239,7 +245,7 @@ function QRCodePaper() {
             disabled={!data.length}
             onClick={() => handlers.current.decrement()}
           >
-            ◁
+            <IconChevronLeft />
           </ActionIcon>
 
           <NumberInput
@@ -264,7 +270,7 @@ function QRCodePaper() {
             disabled={!data.length}
             onClick={() => handlers.current.increment()}
           >
-            ▷
+            <IconChevronRight />
           </ActionIcon>
         </Group>
       </Paper>
