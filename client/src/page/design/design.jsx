@@ -24,6 +24,7 @@ import {
 } from "@tabler/icons";
 
 function FabricJSCanvas(props) {
+  console.log(props);
   const [, setCanvas] = useState("");
 
   useEffect(() => {
@@ -89,9 +90,9 @@ export default function Design() {
 
                 setSize(
                   value === "inch"
-                    ? { w: size.w * 2.54, h: size.h * 2.54, unit: value }
-                    : value === "cm"
                     ? { w: size.w / 2.54, h: size.h / 2.54, unit: value }
+                    : value === "cm"
+                    ? { w: size.w * 2.54, h: size.h * 2.54, unit: value }
                     : size
                 );
               }}
@@ -133,7 +134,22 @@ export default function Design() {
               </ActionIcon>
             </Group>
             <Paper radius={0} shadow="xs" withBorder>
-              <FabricJSCanvas />
+              <FabricJSCanvas
+                w={Math.round(
+                  size.unit === "inch"
+                    ? size.w * 96
+                    : size.unit === "cm"
+                    ? (size.w * 96) / 2.54
+                    : size.w
+                )}
+                h={Math.round(
+                  size.unit === "inch"
+                    ? size.h * 96
+                    : size.unit === "cm"
+                    ? (size.h * 96) / 2.54
+                    : size.h
+                )}
+              />
             </Paper>
           </Stack>
           <Group spacing={5} position="center">
@@ -171,22 +187,7 @@ export default function Design() {
               disabled={!data.length}
               onClick={() => handlers.current.increment()}
             >
-              <IconChevronRight
-                w={
-                  size.unit === "inch"
-                    ? size.w * 96
-                    : size.unit === "cm"
-                    ? size.w * 37.795275591
-                    : size.w
-                }
-                h={
-                  size.unit === "inch"
-                    ? size.h * 96
-                    : size.unit === "cm"
-                    ? size.h * 37.795275591
-                    : size.h
-                }
-              />
+              <IconChevronRight />
             </ActionIcon>
           </Group>
         </Stack>
