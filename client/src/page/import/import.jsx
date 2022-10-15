@@ -264,6 +264,15 @@ function FormatMultiSelect() {
                   : theme.white,
             })}
           >
+            <ActionIcon
+              variant="subtle"
+              onClick={() => {
+                closeImportFormat();
+              }}
+              style={{ float: "right" }}
+            >
+              <IconX />
+            </ActionIcon>
             <JsonInput
               label="Import format from text"
               placeholder="Enter the variable text"
@@ -275,6 +284,7 @@ function FormatMultiSelect() {
                 setErrorImportFormat(null);
                 setTextImportFormat(value);
               }}
+              mt="xs"
             />
             <Button
               mt="xs"
