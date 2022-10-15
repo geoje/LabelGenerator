@@ -389,7 +389,9 @@ function QRCodePaper() {
   const [index, setIndex] = useState(1);
   const handlers = useRef();
 
+  const keys = data.length ? Object.keys(data[0]) : [];
   const content = format
+    .filter((o) => o.literal || keys.includes(o.value))
     .map((o) => (o.literal ? o.value : data[index - 1][o.value]))
     .join("");
 
