@@ -9,6 +9,7 @@ import {
   Select,
   Divider,
   Button,
+  Title,
 } from "@mantine/core";
 import { fabric } from "fabric";
 import React, { useEffect, useRef } from "react";
@@ -18,6 +19,8 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconCircle,
+  IconDeviceFloppy,
+  IconFolder,
   IconQrcode,
   IconSquare,
   IconTypography,
@@ -112,12 +115,12 @@ export default function Design() {
     <Grid m={0} p="sm">
       <Grid.Col md={2} p="sm">
         <Stack spacing={0}>
-          <Text weight="500" size={14} align="center" mb={1}>
+          <Title order={6} align="center">
             Layout Size
-          </Text>
+          </Title>
           <Divider my="sm" />
           <Grid mb={0}>
-            <Grid.Col xs={6}>
+            <Grid.Col span={6} xs={3} md={6}>
               <NumberInput
                 ref={wInput}
                 value={size.w}
@@ -125,7 +128,7 @@ export default function Design() {
                 step={0.01}
               />
             </Grid.Col>
-            <Grid.Col xs={6}>
+            <Grid.Col span={6} xs={3} md={6}>
               <NumberInput
                 ref={hInput}
                 value={size.h}
@@ -133,10 +136,7 @@ export default function Design() {
                 step={0.01}
               />
             </Grid.Col>
-          </Grid>
-
-          <Grid>
-            <Grid.Col xs={6}>
+            <Grid.Col span={6} xs={3} md={6}>
               <Select
                 placeholder="Unit"
                 data={unitList.map((s) => {
@@ -149,7 +149,7 @@ export default function Design() {
                 }}
               />
             </Grid.Col>
-            <Grid.Col xs={6}>
+            <Grid.Col span={6} xs={3} md={6}>
               <Button
                 sx={{ width: "100%" }}
                 onClick={() => {
@@ -168,9 +168,9 @@ export default function Design() {
           </Grid>
         </Stack>
         <Stack spacing={0} mt={48}>
-          <Text weight="500" align="center" size={14} mb={1}>
+          <Title order={6} align="center">
             Detail
-          </Text>
+          </Title>
           <Divider my="sm" />
         </Stack>
       </Grid.Col>
@@ -178,6 +178,14 @@ export default function Design() {
         <Stack>
           <Stack align="center" spacing="xs">
             <Group position="center" spacing="xs">
+              <ActionIcon variant="subtle" onClick={() => {}}>
+                <IconFolder />
+              </ActionIcon>
+              <ActionIcon variant="subtle" onClick={() => {}}>
+                <IconDeviceFloppy />
+              </ActionIcon>
+
+              <Divider orientation="vertical" />
               <ActionIcon variant="subtle" onClick={() => {}}>
                 <IconSquare />
               </ActionIcon>
@@ -187,12 +195,13 @@ export default function Design() {
               <ActionIcon variant="subtle" onClick={() => {}}>
                 <IconTypography />
               </ActionIcon>
+
+              <Divider orientation="vertical" />
               <ActionIcon
                 variant="subtle"
                 onClick={() => {
                   console.log(format);
                 }}
-                ml="md"
               >
                 <IconQrcode />
               </ActionIcon>
@@ -246,15 +255,15 @@ export default function Design() {
       </Grid.Col>
       <Grid.Col md={2} p="sm">
         <Stack spacing={0}>
-          <Text weight="500" align="center" size={14} mb={1}>
+          <Title order={6} align="center">
             Layer
-          </Text>
+          </Title>
           <Divider my="sm" />
         </Stack>
         <Stack spacing={0} mt={48}>
-          <Text weight="500" align="center" size={14} mb={1}>
+          <Title order={6} align="center">
             Variable
-          </Text>
+          </Title>
           <Divider my="sm" />
         </Stack>
       </Grid.Col>
