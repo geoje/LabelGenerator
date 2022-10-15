@@ -14,6 +14,7 @@ import {
   Divider,
   NumberInput,
   ActionIcon,
+  Title,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import {
@@ -22,6 +23,12 @@ import {
   IconX,
   IconChevronRight,
   IconChevronLeft,
+  IconForms,
+  IconSquareNumber3,
+  IconDeviceFloppy,
+  IconSquareNumber2,
+  IconSquareNumber1,
+  IconTrash,
 } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { useState, useRef } from "react";
@@ -141,76 +148,84 @@ function FormatMultiSelect() {
   };
 
   return (
-    <MultiSelect
-      label="(2) QR Code Data Format"
-      placeholder="Sesetlect items or create customization with an input"
-      searchable
-      creatable
-      clearable
-      maxDropdownHeight={400}
-      transitionDuration={100}
-      transition="pop-top-left"
-      transitionTimingFunction="ease"
-      data={Object.keys(data.length ? data[0] : {})
-        .map((v) => {
-          return { value: v, label: v, group: GRP_DATA };
-        })
-        .concat(custom)}
-      defaultValue={selected}
-      valueComponent={valueComponent}
-      getCreateLabel={(query) => `+ Create ${query}`}
-      onCreate={(query) => {
-        const item = {
-          value: Math.random().toString(),
-          label: query,
-          group: GRP_CUST,
-        };
+    <>
+      <Group spacing={0}>
+        <IconSquareNumber2 />
+        <Title order={6} mr="sm">
+          QR Code Content Format
+        </Title>
+        <IconForms />
+      </Group>
+      <MultiSelect
+        placeholder="Select items or create customization with an input"
+        searchable
+        creatable
+        clearable
+        maxDropdownHeight={400}
+        transitionDuration={100}
+        transition="pop-top-left"
+        transitionTimingFunction="ease"
+        data={Object.keys(data.length ? data[0] : {})
+          .map((v) => {
+            return { value: v, label: v, group: GRP_DATA };
+          })
+          .concat(custom)}
+        defaultValue={selected}
+        valueComponent={valueComponent}
+        getCreateLabel={(query) => `+ Create ${query}`}
+        onCreate={(query) => {
+          const item = {
+            value: Math.random().toString(),
+            label: query,
+            group: GRP_CUST,
+          };
 
-        dispatch(setCustom((custom = [...custom, item])));
-        return item;
-      }}
-      onChange={(value) => {
-        dispatch(setSelected([...value]));
-        dispatch(
-          setFormat(
-            value.map((v) => {
-              const literal = custom.find((c) => c.value === v);
-              return {
-                value: literal ? literal.label : v,
-                literal: literal !== undefined,
-              };
-            })
-          )
-        );
-
-        /* Keep just one default seperator '|' and ',' */
-        // Remove duplicated in unused
-        let newCustom = custom.filter((o) => value.includes(o.value));
-        let uniqueUnusedCustom = custom
-          .filter((o) => !value.includes(o.value))
-          .filter(
-            (o1, i, a) => a.findIndex((o2) => o2.label === o1.label) === i
+          dispatch(setCustom((custom = [...custom, item])));
+          return item;
+        }}
+        onChange={(value) => {
+          dispatch(setSelected([...value]));
+          dispatch(
+            setFormat(
+              value.map((v) => {
+                const literal = custom.find((c) => c.value === v);
+                return {
+                  value: literal ? literal.label : v,
+                  literal: literal !== undefined,
+                };
+              })
+            )
           );
 
-        // Add used label
-        const GRP_CUST = "Custom Created";
-        newCustom = newCustom
-          .map((o) => o.label)
-          .filter((v, i, a) => a.indexOf(v) === i)
-          .filter((v) => !uniqueUnusedCustom.some((o) => o.label === v))
-          .map((v) => {
-            return {
-              value: Math.random().toString(),
-              label: v,
-              group: GRP_CUST,
-            };
-          }) // Used label exclude uniqueUnusedCustom
-          .concat(uniqueUnusedCustom)
-          .concat(newCustom);
+          /* Keep just one default seperator '|' and ',' */
+          // Remove duplicated in unused
+          let newCustom = custom.filter((o) => value.includes(o.value));
+          let uniqueUnusedCustom = custom
+            .filter((o) => !value.includes(o.value))
+            .filter(
+              (o1, i, a) => a.findIndex((o2) => o2.label === o1.label) === i
+            );
 
-        dispatch(setCustom(newCustom));
-      }}
-    />
+          // Add used label
+          const GRP_CUST = "Custom Created";
+          newCustom = newCustom
+            .map((o) => o.label)
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .filter((v) => !uniqueUnusedCustom.some((o) => o.label === v))
+            .map((v) => {
+              return {
+                value: Math.random().toString(),
+                label: v,
+                group: GRP_CUST,
+              };
+            }) // Used label exclude uniqueUnusedCustom
+            .concat(uniqueUnusedCustom)
+            .concat(newCustom);
+
+          dispatch(setCustom(newCustom));
+        }}
+      />
+    </>
   );
 }
 function QRCodePaper() {
@@ -227,9 +242,13 @@ function QRCodePaper() {
 
   return (
     <>
-      <Text weight="500" size={14} mb={1}>
-        (3) QR Code Result
-      </Text>
+      <Group spacing={0}>
+        <IconSquareNumber3 />
+        <Title order={6} mr="sm">
+          QR Code Result
+        </Title>
+        <IconDeviceFloppy />
+      </Group>
       <Paper shadow="xs" p="md" withBorder>
         <Stack align="center" spacing={0}>
           <Paper
@@ -301,10 +320,30 @@ export default function Import() {
    * [ {'id': 'abc', 'pw': '123'}, ...]
    */
   const refineData = (rawData) => {
+    // No data reference found
+    if (!rawData["!ref"]) {
+      showNotification({
+        title: "No data reference found",
+        message: "Cannot load data reference in file",
+        color: "red",
+      });
+      return;
+    }
+
     const range = {
       row: [...rawData["!ref"].matchAll(/\d+/g)].map((r) => Number(r[0])),
       col: [...rawData["!ref"].matchAll(/[a-zA-Z]+/g)].map((r) => r[0]),
     };
+    // No data range found
+    if (range.row.length < 2 || range.col.length < 2) {
+      showNotification({
+        title: "No data range found",
+        message: "Cannot load data range in file",
+        color: "red",
+      });
+      return;
+    }
+
     let refinedData = [];
     for (let i = range.row[0] + 1; i <= range.row[1]; i++) refinedData.push({});
 
@@ -361,9 +400,13 @@ export default function Import() {
   return (
     <Grid m={0} p="sm">
       <Grid.Col sm={8} p="sm">
-        <Text weight="500" size={14} mb={1}>
-          (1) Import Data
-        </Text>
+        <Group spacing={0}>
+          <IconSquareNumber1 />
+          <Title order={6} mr="sm">
+            Import Data
+          </Title>
+          <IconTrash />
+        </Group>
         <Paper shadow="xs" p="md" withBorder>
           {data.length ? (
             <ScrollArea style={{ height: 760 }}>
