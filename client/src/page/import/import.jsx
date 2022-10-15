@@ -149,12 +149,32 @@ function FormatMultiSelect() {
 
   return (
     <>
-      <Group spacing={0}>
+      <Group
+        spacing={0}
+        sx={(theme) => ({
+          color:
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[0]
+              : theme.colors.gray[8],
+        })}
+      >
         <IconSquareNumber2 />
         <Title order={6} mr="sm">
           QR Code Content Format
         </Title>
-        <IconForms />
+
+        <ActionIcon
+          variant="subtle"
+          onClick={() =>
+            showNotification({
+              title: "Sorry",
+              message: "This function is developing now...",
+              color: "yellow",
+            })
+          }
+        >
+          <IconForms />
+        </ActionIcon>
       </Group>
       <MultiSelect
         placeholder="Select items or create customization with an input"
@@ -242,12 +262,32 @@ function QRCodePaper() {
 
   return (
     <>
-      <Group spacing={0}>
+      <Group
+        spacing={0}
+        sx={(theme) => ({
+          color:
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[0]
+              : theme.colors.gray[8],
+        })}
+      >
         <IconSquareNumber3 />
         <Title order={6} mr="sm">
           QR Code Result
         </Title>
-        <IconDeviceFloppy />
+
+        <ActionIcon
+          variant="subtle"
+          onClick={() =>
+            showNotification({
+              title: "Sorry",
+              message: "This function is developing now...",
+              color: "yellow",
+            })
+          }
+        >
+          <IconDeviceFloppy />
+        </ActionIcon>
       </Group>
       <Paper shadow="xs" p="md" withBorder>
         <Stack align="center" spacing={0}>
@@ -400,12 +440,32 @@ export default function Import() {
   return (
     <Grid m={0} p="sm">
       <Grid.Col sm={8} p="sm">
-        <Group spacing={0}>
+        <Group
+          spacing={0}
+          sx={(theme) => ({
+            color:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[0]
+                : theme.colors.gray[8],
+          })}
+        >
           <IconSquareNumber1 />
           <Title order={6} mr="sm">
             Import Data
           </Title>
-          <IconTrash />
+
+          <ActionIcon
+            variant="subtle"
+            onClick={() =>
+              showNotification({
+                title: "Sorry",
+                message: "This function is developing now...",
+                color: "yellow",
+              })
+            }
+          >
+            <IconTrash />
+          </ActionIcon>
         </Group>
         <Paper shadow="xs" p="md" withBorder>
           {data.length ? (
