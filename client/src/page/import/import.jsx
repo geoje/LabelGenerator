@@ -18,6 +18,7 @@ import {
   Popover,
   TextInput,
 } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import {
   IconUpload,
@@ -91,6 +92,14 @@ function FormatMultiSelect() {
 
   const GRP_DATA = "Data Header";
   const GRP_CUST = "Custom Created";
+
+  const formImportFormat = useForm({
+    initialValues: { text: "" },
+
+    validate: {
+      text: (value) => {},
+    },
+  });
 
   const valueComponent = ({
     value,
@@ -180,21 +189,28 @@ function FormatMultiSelect() {
                   : theme.white,
             })}
           >
-            <TextInput
-              label="Import format from text"
-              placeholder="Enter the variable text"
-              size="xs"
-            />
-            <Button mt="xs">Submit</Button>
+            <formImportFormat onSubmit={formImportFormat.onSubmit(console.log)}>
+              <TextInput
+                label="Import format from text"
+                placeholder="Enter the variable text"
+                size="xs"
+                {...formImportFormat.getInputProps("text")}
+              />
+              <Button type="submit" mt="xs" size="xs">
+                Submit
+              </Button>
+            </formImportFormat>
           </Popover.Dropdown>
         </Popover>
 
         <ActionIcon
           variant="subtle"
           onClick={() => {
+            const jsonText = JSON.stringify(format);
+            navigator.clipboard.writeText(jsonText);
             showNotification({
               title: "Copied",
-              message: "BlaBla",
+              message: jsonText,
               color: "green",
             });
           }}
