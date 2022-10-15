@@ -8,11 +8,12 @@ import {
   ActionIcon,
   Select,
   Divider,
+  Button,
 } from "@mantine/core";
 import { fabric } from "fabric";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -22,134 +23,185 @@ import {
   IconTypography,
   IconVariable,
 } from "@tabler/icons";
+import { setSize } from "./drawSlice";
 
-function FabricJSCanvas(props) {
-  console.log(props);
-  const [, setCanvas] = useState("");
+const unitList = ["inch", "cm", "px"];
+const convertSize = {
+  inch: (size) => {
+    if (size.unit === "cm")
+      return { w: size.w / 2.54, h: size.h / 2.54, unit: "inch" };
+    else if (size.unit === "px")
+      return {
+        w: size.w / 96,
+        h: size.h / 96,
+        unit: "inch",
+      };
+    else return size;
+  },
+  cm: (size) => {
+    if (size.unit === "inch")
+      return { w: size.w * 2.54, h: size.h * 2.54, unit: "cm" };
+    else if (size.unit === "px")
+      return {
+        w: (size.w / 96) * 2.54,
+        h: (size.h / 96) * 2.54,
+        unit: "cm",
+      };
+    else return size;
+  },
+  px: (size) => {
+    if (size.unit === "inch")
+      return {
+        w: Math.round(size.w * 96),
+        h: Math.round(size.h * 96),
+        unit: "px",
+      };
+    else if (size.unit === "cm")
+      return {
+        w: Math.round((size.w / 2.54) * 96),
+        h: Math.round((size.h / 2.54) * 96),
+        unit: "px",
+      };
+    else return size;
+  },
+};
+
+function FabricJSCanvas() {
+  // Provider
+  // const dispatch = useDispatch();
+  const size = useSelector((state) => state.draw.size);
+  const pxSize = convertSize.px(size);
+
+  const [canvas, setCavnas] = useState(null);
 
   useEffect(() => {
-    setCanvas(initCanvas());
+    if (document.querySelector("div.canvas-container")) return;
+
+    setCavnas(
+      new fabric.Canvas("canvas", {
+        width: 359,
+        height: 76,
+        backgroundColor: "white",
+      })
+    );
   }, []);
-  const initCanvas = () =>
-    new fabric.Canvas("canvas", {
-      width: 359,
-      height: 76,
-      backgroundColor: "white",
-    });
+
+  if (
+    canvas &&
+    (pxSize.w !== canvas.getWidth() || pxSize.h !== canvas.getHeight())
+  ) {
+    canvas.setWidth(pxSize.w);
+    canvas.setHeight(pxSize.h);
+  }
   return <canvas id="canvas" />;
 }
 
 export default function Design() {
   // Provider
+  const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
-  // const format = useSelector((state) => state.qr.format);
+  const format = useSelector((state) => state.qr.format);
+  const size = useSelector((state) => state.draw.size);
 
-  const [size, setSize] = useState({ w: 3.74, h: 0.79, unit: "inch" });
-  const [tool, setTool] = useState("square");
   const [index, setIndex] = useState(1);
   const handlers = useRef();
+  const wInput = useRef();
+  const hInput = useRef();
 
   return (
     <Grid m={0} p="sm">
       <Grid.Col md={2} p="sm">
-        <Text weight="500" align="center" size={14} mb={1}>
-          Detail
-        </Text>
-        <Divider my="sm" />
+        <Stack spacing={0}>
+          <Text weight="500" size={14} align="center" mb={1}>
+            Layout Size
+          </Text>
+          <Divider my="sm" />
+          <Grid mb={0}>
+            <Grid.Col xs={6}>
+              <NumberInput
+                ref={wInput}
+                value={size.w}
+                precision={2}
+                step={0.01}
+              />
+            </Grid.Col>
+            <Grid.Col xs={6}>
+              <NumberInput
+                ref={hInput}
+                value={size.h}
+                precision={2}
+                step={0.01}
+              />
+            </Grid.Col>
+          </Grid>
+
+          <Grid>
+            <Grid.Col xs={6}>
+              <Select
+                placeholder="Unit"
+                data={unitList.map((s) => {
+                  return { value: s, label: s };
+                })}
+                value={size.unit}
+                onChange={(value) => {
+                  if (value === size.unit) return;
+                  dispatch(convertSize[value](size));
+                }}
+              />
+            </Grid.Col>
+            <Grid.Col xs={6}>
+              <Button
+                sx={{ width: "100%" }}
+                onClick={() => {
+                  dispatch(
+                    setSize({
+                      ...size,
+                      w: Number(wInput.current.value),
+                      h: Number(hInput.current.value),
+                    })
+                  );
+                }}
+              >
+                Apply
+              </Button>
+            </Grid.Col>
+          </Grid>
+        </Stack>
+        <Stack spacing={0} mt={48}>
+          <Text weight="500" align="center" size={14} mb={1}>
+            Detail
+          </Text>
+          <Divider my="sm" />
+        </Stack>
       </Grid.Col>
       <Grid.Col md={8} p="sm">
         <Stack>
-          <Group position="center">
-            <Text weight="500" size={14}>
-              Size
-            </Text>
-            <NumberInput
-              sx={{ width: 80 }}
-              value={size.w}
-              precision={2}
-              step={0.01}
-              onChange={(val) => setSize({ ...size, w: val })}
-            />
-            <NumberInput
-              sx={{ width: 80 }}
-              value={size.h}
-              precision={2}
-              step={0.01}
-              onChange={(val) => setSize({ ...size, h: val })}
-            />
-            <Select
-              sx={{ width: 80 }}
-              placeholder="Unit"
-              data={[
-                { value: "inch", label: "inch" },
-                { value: "cm", label: "cm" },
-              ]}
-              value={size.unit}
-              onChange={(value) => {
-                if (value === size.unit) return;
-
-                setSize(
-                  value === "inch"
-                    ? { w: size.w / 2.54, h: size.h / 2.54, unit: value }
-                    : value === "cm"
-                    ? { w: size.w * 2.54, h: size.h * 2.54, unit: value }
-                    : size
-                );
-              }}
-            />
-          </Group>
-
           <Stack align="center" spacing="xs">
             <Group position="center" spacing="xs">
-              <ActionIcon
-                variant={tool === "square" ? "" : "subtle"}
-                onClick={() => setTool("square")}
-              >
+              <ActionIcon variant="subtle" onClick={() => {}}>
                 <IconSquare />
               </ActionIcon>
-              <ActionIcon
-                variant={tool === "circle" ? "" : "subtle"}
-                onClick={() => setTool("circle")}
-              >
+              <ActionIcon variant="subtle" onClick={() => {}}>
                 <IconCircle />
               </ActionIcon>
-              <ActionIcon
-                variant={tool === "typography" ? "" : "subtle"}
-                onClick={() => setTool("typography")}
-              >
+              <ActionIcon variant="subtle" onClick={() => {}}>
                 <IconTypography />
               </ActionIcon>
               <ActionIcon
-                variant={tool === "qrcode" ? "" : "subtle"}
-                onClick={() => setTool("qrcode")}
+                variant="subtle"
+                onClick={() => {
+                  console.log(format);
+                }}
                 ml="md"
               >
                 <IconQrcode />
               </ActionIcon>
-              <ActionIcon
-                variant={tool === "variable" ? "" : "subtle"}
-                onClick={() => setTool("variable")}
-              >
+              <ActionIcon variant="subtle" onClick={() => {}}>
                 <IconVariable />
               </ActionIcon>
             </Group>
             <Paper radius={0} shadow="xs" withBorder>
-              <FabricJSCanvas
-                w={Math.round(
-                  size.unit === "inch"
-                    ? size.w * 96
-                    : size.unit === "cm"
-                    ? (size.w * 96) / 2.54
-                    : size.w
-                )}
-                h={Math.round(
-                  size.unit === "inch"
-                    ? size.h * 96
-                    : size.unit === "cm"
-                    ? (size.h * 96) / 2.54
-                    : size.h
-                )}
-              />
+              <FabricJSCanvas />
             </Paper>
           </Stack>
           <Group spacing={5} position="center">
@@ -193,10 +245,18 @@ export default function Design() {
         </Stack>
       </Grid.Col>
       <Grid.Col md={2} p="sm">
-        <Text align="center" weight="500" size={14} mb={1}>
-          Layer
-        </Text>
-        <Divider my="sm" />
+        <Stack spacing={0}>
+          <Text weight="500" align="center" size={14} mb={1}>
+            Layer
+          </Text>
+          <Divider my="sm" />
+        </Stack>
+        <Stack spacing={0} mt={48}>
+          <Text weight="500" align="center" size={14} mb={1}>
+            Variable
+          </Text>
+          <Divider my="sm" />
+        </Stack>
       </Grid.Col>
     </Grid>
   );

@@ -232,7 +232,17 @@ function QRCodePaper() {
       </Text>
       <Paper shadow="xs" p="md" withBorder>
         <Stack align="center" spacing={0}>
-          <QRCodeSVG value={content} size={160} includeMargin />
+          <Paper
+            p="xs"
+            style={{
+              height: "100px",
+              boxSizing: "content-box",
+              backgroundColor: "#fff",
+            }}
+          >
+            <QRCodeSVG value={content} size={100} />
+          </Paper>
+
           <Text size="xs" align="center">
             {content}
           </Text>
