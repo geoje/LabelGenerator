@@ -10,7 +10,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *   { value: "0.23456789012", label: ",", group: GRP_CUST },
   ]
 
-  seletec: [ 'Item Code', '0.04011438054991201', 'GTIN', '0.5414428830363092', 'Item Name' ]
+  selected: [ 'Item Code', '0.04011438054991201', 'GTIN', '0.5414428830363092', 'Item Name' ]
  */
 // const GRP_DATA = "Data Header";
 const GRP_CUST = "Custom Created";

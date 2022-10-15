@@ -30,10 +30,8 @@ function App() {
         withNormalizeCSS
       >
         <NotificationsProvider>
-          <React.StrictMode>
-            <Nav />
-            {step === 0 ? <Import /> : step === 1 ? <Design /> : <Print />}
-          </React.StrictMode>
+          <Nav />
+          {step === 0 ? <Import /> : step === 1 ? <Design /> : <Print />}
         </NotificationsProvider>
       </MantineProvider>
     </ColorSchemeProvider>
@@ -41,7 +39,9 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Provider store={store}>
-    <App />
-  </Provider>
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>
 );

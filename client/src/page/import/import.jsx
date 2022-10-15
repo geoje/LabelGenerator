@@ -16,9 +16,9 @@ import {
   ActionIcon,
   Title,
   Popover,
-  TextInput,
+  JsonInput,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import {
   IconUpload,
@@ -91,16 +91,15 @@ function FormatMultiSelect() {
   const selected = useSelector((state) => state.qr.selected);
   const format = useSelector((state) => state.qr.format);
 
+  const importHook = useDisclosure(false);
+  const openedImportFormat = importHook[0],
+    closeImportFormat = importHook[1].close,
+    toggleImportFormat = importHook[1].toggle;
+  const [textImportFormat, setTextImportFormat] = useState("");
+  const [errorImportFormat, setErrorImportFormat] = useState("");
+
   const GRP_DATA = "Data Header";
   const GRP_CUST = "Custom Created";
-
-  const formImportFormat = useForm({
-    initialValues: { text: "" },
-
-    validate: {
-      text: (value) => {},
-    },
-  });
 
   const valueComponent = ({
     value,
@@ -159,6 +158,69 @@ function FormatMultiSelect() {
       </div>
     );
   };
+  const importFormat = (text) => {
+    try {
+      let keys = [];
+      if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
+      setCustom([]);
+      setSelected([]);
+
+      let errorValue = "";
+      let tempCustom = [];
+      let tempSelected = [];
+
+      // set custom and selected from imported format text
+      const formatJson = JSON.parse(text);
+      formatJson.forEach((e) => {
+        if (e.literal) {
+          const mathValue = Math.random().toString();
+          tempCustom.push({
+            value: mathValue,
+            label: e.value,
+            group: GRP_CUST,
+          });
+          tempSelected.push(mathValue);
+        } else {
+          if (!keys.includes(e.value)) {
+            errorValue = e.value;
+            return;
+          }
+          tempSelected.push(e.value);
+        }
+      });
+      if (errorValue.length) {
+        setErrorImportFormat(`No value '${errorValue} in data'`);
+        return;
+      }
+
+      // Add selectable unique custom
+      tempCustom
+        .filter((v, i, s) => s.findIndex((e) => e.label === v.label) === i)
+        .map((e) => {
+          return { ...e, value: Math.random().toString() };
+        })
+        .forEach((e) => tempCustom.push(e));
+
+      // Apply custom and selected
+      dispatch(setCustom(tempCustom));
+      dispatch(setSelected(tempSelected));
+
+      // Set format
+      dispatch(setFormat(formatJson));
+
+      closeImportFormat();
+      showNotification({
+        title: "Imported Successfully",
+        message: `${formatJson.length} item${
+          formatJson.length === 1 ? "" : "s"
+        } imported`,
+        color: "green",
+      });
+    } catch (err) {
+      setErrorImportFormat("Import Error");
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -176,9 +238,21 @@ function FormatMultiSelect() {
           QR Code Content Format
         </Title>
 
-        <Popover width={300} trapFocus position="bottom" withArrow shadow="md">
+        <Popover
+          width={300}
+          trapFocus
+          position="bottom"
+          withArrow
+          shadow="md"
+          opened={openedImportFormat}
+        >
           <Popover.Target>
-            <ActionIcon variant="subtle">
+            <ActionIcon
+              variant="subtle"
+              onClick={() => {
+                toggleImportFormat();
+              }}
+            >
               <IconForms />
             </ActionIcon>
           </Popover.Target>
@@ -190,28 +264,38 @@ function FormatMultiSelect() {
                   : theme.white,
             })}
           >
-            <formImportFormat onSubmit={formImportFormat.onSubmit(console.log)}>
-              <TextInput
-                label="Import format from text"
-                placeholder="Enter the variable text"
-                size="xs"
-                {...formImportFormat.getInputProps("text")}
-              />
-              <Button type="submit" mt="xs" size="xs">
-                Submit
-              </Button>
-            </formImportFormat>
+            <JsonInput
+              label="Import format from text"
+              placeholder="Enter the variable text"
+              validationError="Invalid json"
+              error={errorImportFormat}
+              size="xs"
+              minRows={4}
+              onChange={(value) => {
+                setErrorImportFormat(null);
+                setTextImportFormat(value);
+              }}
+            />
+            <Button
+              mt="xs"
+              size="xs"
+              onClick={() => importFormat(textImportFormat)}
+            >
+              Submit
+            </Button>
           </Popover.Dropdown>
         </Popover>
 
         <ActionIcon
           variant="subtle"
           onClick={() => {
-            const jsonText = JSON.stringify(selected);
+            const jsonText = JSON.stringify(format);
             navigator.clipboard.writeText(jsonText);
             showNotification({
-              title: "Copied",
-              message: jsonText,
+              title: "Copied Successfully",
+              message: `${format.length} item${
+                format.length === 1 ? "" : "s"
+              } copied`,
               color: "green",
             });
           }}
@@ -233,7 +317,7 @@ function FormatMultiSelect() {
             return { value: v, label: v, group: GRP_DATA };
           })
           .concat(custom)}
-        defaultValue={selected}
+        value={selected}
         valueComponent={valueComponent}
         getCreateLabel={(query) => `+ Create ${query}`}
         onCreate={(query) => {
@@ -286,6 +370,12 @@ function FormatMultiSelect() {
             .concat(newCustom);
 
           dispatch(setCustom(newCustom));
+        }}
+        onPaste={(event) => {
+          importFormat(
+            (event.clipboardData || window.clipboardData).getData("text")
+          );
+          event.preventDefault();
         }}
       />
     </>
