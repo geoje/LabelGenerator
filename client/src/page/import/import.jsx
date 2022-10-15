@@ -89,6 +89,7 @@ function FormatMultiSelect() {
   const data = useSelector((state) => state.data.value);
   let custom = useSelector((state) => state.qr.custom);
   const selected = useSelector((state) => state.qr.selected);
+  const format = useSelector((state) => state.qr.format);
 
   const GRP_DATA = "Data Header";
   const GRP_CUST = "Custom Created";
@@ -206,7 +207,7 @@ function FormatMultiSelect() {
         <ActionIcon
           variant="subtle"
           onClick={() => {
-            const jsonText = JSON.stringify(format);
+            const jsonText = JSON.stringify(selected);
             navigator.clipboard.writeText(jsonText);
             showNotification({
               title: "Copied",
