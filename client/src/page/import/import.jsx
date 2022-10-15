@@ -15,6 +15,8 @@ import {
   NumberInput,
   ActionIcon,
   Title,
+  Popover,
+  TextInput,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import {
@@ -29,6 +31,7 @@ import {
   IconSquareNumber2,
   IconSquareNumber1,
   IconTrash,
+  IconClipboard,
 } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { useState, useRef } from "react";
@@ -163,17 +166,40 @@ function FormatMultiSelect() {
           QR Code Content Format
         </Title>
 
+        <Popover width={300} trapFocus position="bottom" withArrow shadow="md">
+          <Popover.Target>
+            <ActionIcon variant="subtle">
+              <IconForms />
+            </ActionIcon>
+          </Popover.Target>
+          <Popover.Dropdown
+            sx={(theme) => ({
+              background:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[7]
+                  : theme.white,
+            })}
+          >
+            <TextInput
+              label="Import format from text"
+              placeholder="Enter the variable text"
+              size="xs"
+            />
+            <Button mt="xs">Submit</Button>
+          </Popover.Dropdown>
+        </Popover>
+
         <ActionIcon
           variant="subtle"
-          onClick={() =>
+          onClick={() => {
             showNotification({
-              title: "Sorry",
-              message: "This function is developing now...",
-              color: "yellow",
-            })
-          }
+              title: "Copied",
+              message: "BlaBla",
+              color: "green",
+            });
+          }}
         >
-          <IconForms />
+          <IconClipboard />
         </ActionIcon>
       </Group>
       <MultiSelect
@@ -456,13 +482,26 @@ export default function Import() {
 
           <ActionIcon
             variant="subtle"
-            onClick={() =>
-              showNotification({
-                title: "Sorry",
-                message: "This function is developing now...",
-                color: "yellow",
-              })
-            }
+            onClick={() => {
+              if (data.length) {
+                dispatch(setData([]));
+                setWorkbook(null);
+
+                showNotification({
+                  title: "Deleted",
+                  message: "Data deleted successfully",
+                  color: "green",
+                });
+              } else if (workbook) {
+                setWorkbook(null);
+
+                showNotification({
+                  title: "Deleted",
+                  message: "Workbook deleted successfully",
+                  color: "green",
+                });
+              }
+            }}
           >
             <IconTrash />
           </ActionIcon>

@@ -4,7 +4,6 @@ import {
   NumberInput,
   Paper,
   Stack,
-  Text,
   ActionIcon,
   Select,
   Divider,
