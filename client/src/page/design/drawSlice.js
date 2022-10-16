@@ -14,7 +14,20 @@ const slice = createSlice({
       unit: "inch",
       ratio: 1,
     },
-    layer: [],
+    layer: [
+      {
+        name: "MyRect",
+        type: "rect",
+      },
+      {
+        name: "YourCircle",
+        type: "circle",
+      },
+      {
+        name: "OurTypo",
+        type: "typo",
+      },
+    ],
   },
   reducers: {
     setSize: (state, action) => {

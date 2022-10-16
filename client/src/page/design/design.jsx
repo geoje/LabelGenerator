@@ -12,7 +12,6 @@ import {
   createStyles,
   Text,
 } from "@mantine/core";
-import { useListState } from "@mantine/hooks";
 import React, { useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,8 +28,9 @@ import {
   IconVariable,
   IconGripVertical,
   IconX,
+  IconQuestionMark,
 } from "@tabler/icons";
-import { setSize, setSizeRatio } from "./drawSlice";
+import { setSize, setSizeRatio, setLayer } from "./drawSlice";
 
 const UNITS = ["inch", "cm", "px"];
 const convertSize = {
@@ -85,6 +85,21 @@ const convertSize = {
       };
     else return size;
   },
+};
+const typeToIcon = (type) => {
+  return type === "rect" ? (
+    <IconSquare />
+  ) : type === "circle" ? (
+    <IconCircle />
+  ) : type === "typo" ? (
+    <IconTypography />
+  ) : type === "qr" ? (
+    <IconQrcode />
+  ) : type === "var" ? (
+    <IconVariable />
+  ) : (
+    <IconQuestionMark />
+  );
 };
 
 /** Left
@@ -281,6 +296,10 @@ function Pagenation() {
  * @returns
  */
 function Layer() {
+  // Provider
+  const dispatch = useDispatch();
+  const layer = useSelector((state) => state.draw.layer);
+
   const { classes, cx } = createStyles((theme) => ({
     item: {
       marginBottom: 2,
@@ -313,22 +332,7 @@ function Layer() {
           : theme.colors.gray[6],
     },
   }))();
-  const [state, handlers] = useListState([
-    {
-      name: "string",
-      mass: 123,
-    },
-    {
-      name: "tset",
-      mass: 456,
-    },
-    {
-      name: "test",
-      mass: 789,
-    },
-  ]);
-
-  const items = state.map((item, index) => (
+  const items = layer.map((item, index) => (
     <Draggable key={item.name} draggableId={item.name} index={index}>
       {(provided, snapshot) => (
         <Group
@@ -343,11 +347,25 @@ function Layer() {
             <IconGripVertical size={16} />
           </div>
           <Text size="xs">{item.name}</Text>
-          <Text color="dimmed" size="xs" sx={{ marginLeft: "auto" }}>
-            {item.mass}
-          </Text>
+          <Group
+            size="xs"
+            sx={(theme) => {
+              return {
+                width: 18,
+                height: 18,
+                marginLeft: "auto",
+                alignContent: "center",
+                color:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.gray[7]
+                    : theme.colors.gray[4],
+              };
+            }}
+          >
+            {typeToIcon(item.type)}
+          </Group>
           <ActionIcon size="xs">
-            <IconX size={16} />
+            <IconX />
           </ActionIcon>
         </Group>
       )}
@@ -356,9 +374,17 @@ function Layer() {
 
   return (
     <DragDropContext
-      onDragEnd={({ destination, source }) =>
-        handlers.reorder({ from: source.index, to: destination?.index || 0 })
-      }
+      onDragEnd={({ destination, source }) => {
+        if (!destination) return;
+        let tempLayer = [...layer];
+
+        tempLayer.splice(
+          destination?.index || 0,
+          0,
+          tempLayer.splice(source.index, 1)[0]
+        );
+        dispatch(setLayer(tempLayer));
+      }}
     >
       <Droppable droppableId="layer" direction="vertical">
         {(provided) => (

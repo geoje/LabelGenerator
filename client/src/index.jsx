@@ -39,7 +39,7 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
+  // <React.StrictMode> If it available, DragDropContext on design doesn't work
   <Provider store={store}>
     <App />
   </Provider>
