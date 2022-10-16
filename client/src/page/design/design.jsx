@@ -281,21 +281,7 @@ function Pagenation() {
  * @returns
  */
 function Layer() {
-  const data = [
-    {
-      name: "string",
-      mass: 123,
-    },
-    {
-      name: "tset",
-      mass: 456,
-    },
-    {
-      name: "test",
-      mass: 789,
-    },
-  ];
-  const useStyles = createStyles((theme) => ({
+  const { classes, cx } = createStyles((theme) => ({
     item: {
       marginBottom: 2,
       fontSize: 12,
@@ -326,9 +312,21 @@ function Layer() {
           ? theme.colors.dark[1]
           : theme.colors.gray[6],
     },
-  }));
-  const { classes, cx } = useStyles();
-  const [state, handlers] = useListState(data);
+  }))();
+  const [state, handlers] = useListState([
+    {
+      name: "string",
+      mass: 123,
+    },
+    {
+      name: "tset",
+      mass: 456,
+    },
+    {
+      name: "test",
+      mass: 789,
+    },
+  ]);
 
   const items = state.map((item, index) => (
     <Draggable key={item.name} draggableId={item.name} index={index}>
@@ -362,7 +360,7 @@ function Layer() {
         handlers.reorder({ from: source.index, to: destination?.index || 0 })
       }
     >
-      <Droppable droppableId="dnd-list" direction="vertical">
+      <Droppable droppableId="layer" direction="vertical">
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
             {items}
