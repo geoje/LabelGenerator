@@ -68,6 +68,54 @@ const convertSize = {
   },
 };
 
+/** Middle
+ *
+ * @returns
+ */
+function Tool() {
+  // Provider
+  const format = useSelector((state) => state.qr.format);
+
+  return (
+    <Group position="center" spacing="xs">
+      <ActionIcon variant="subtle" onClick={() => {}}>
+        <IconFolder />
+      </ActionIcon>
+      <ActionIcon variant="subtle" onClick={() => {}}>
+        <IconDeviceFloppy />
+      </ActionIcon>
+
+      <Divider orientation="vertical" />
+      <ActionIcon
+        variant="subtle"
+        onClick={() => {
+          fabric.Rect();
+        }}
+      >
+        <IconSquare />
+      </ActionIcon>
+      <ActionIcon variant="subtle" onClick={() => {}}>
+        <IconCircle />
+      </ActionIcon>
+      <ActionIcon variant="subtle" onClick={() => {}}>
+        <IconTypography />
+      </ActionIcon>
+
+      <Divider orientation="vertical" />
+      <ActionIcon
+        variant="subtle"
+        onClick={() => {
+          console.log(format);
+        }}
+      >
+        <IconQrcode />
+      </ActionIcon>
+      <ActionIcon variant="subtle" onClick={() => {}}>
+        <IconVariable />
+      </ActionIcon>
+    </Group>
+  );
+}
 function FabricJSCanvas() {
   // Provider
   // const dispatch = useDispatch();
@@ -95,21 +143,126 @@ function FabricJSCanvas() {
     canvas.setWidth(pxSize.w);
     canvas.setHeight(pxSize.h);
   }
-  return <canvas id="canvas" />;
+  return (
+    <Paper radius={0} shadow="xs" withBorder>
+      <canvas id="canvas" />
+    </Paper>
+  );
 }
-
-export default function Design() {
+function Pagenation() {
   // Provider
-  const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
-  const format = useSelector((state) => state.qr.format);
-  const size = useSelector((state) => state.draw.size);
 
   const [index, setIndex] = useState(1);
   const handlers = useRef();
+
+  return (
+    <Group spacing={5} position="center">
+      <ActionIcon
+        size={36}
+        variant="filled"
+        disabled={!data.length}
+        onClick={() => handlers.current.decrement()}
+      >
+        <IconChevronLeft />
+      </ActionIcon>
+
+      <NumberInput
+        hideControls
+        value={index}
+        onChange={(val) =>
+          setIndex(
+            Math.min(Math.max(Number.isNaN(val) ? 1 : val, 1), data.length)
+          )
+        }
+        handlersRef={handlers}
+        step={1}
+        min={1}
+        max={100}
+        disabled={!data.length}
+        styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
+      />
+
+      <ActionIcon
+        size={36}
+        variant="filled"
+        disabled={!data.length}
+        onClick={() => handlers.current.increment()}
+      >
+        <IconChevronRight />
+      </ActionIcon>
+    </Group>
+  );
+}
+
+/** Left
+ *
+ * @returns
+ */
+function LayoutSize() {
+  // Provider
+  const dispatch = useDispatch();
+  const size = useSelector((state) => state.draw.size);
+
   const wInput = useRef();
   const hInput = useRef();
 
+  return (
+    <Grid mb={0}>
+      <Grid.Col span={6} xs={3} md={6}>
+        <NumberInput ref={wInput} value={size.w} precision={2} step={0.01} />
+      </Grid.Col>
+      <Grid.Col span={6} xs={3} md={6}>
+        <NumberInput ref={hInput} value={size.h} precision={2} step={0.01} />
+      </Grid.Col>
+      <Grid.Col span={6} xs={3} md={6}>
+        <Select
+          placeholder="Unit"
+          data={unitList.map((s) => {
+            return { value: s, label: s };
+          })}
+          value={size.unit}
+          onChange={(value) => {
+            if (value === size.unit) return;
+            dispatch(convertSize[value](size));
+          }}
+        />
+      </Grid.Col>
+      <Grid.Col span={6} xs={3} md={6}>
+        <Button
+          sx={{ width: "100%" }}
+          onClick={() => {
+            dispatch(
+              setSize({
+                ...size,
+                w: Number(wInput.current.value),
+                h: Number(hInput.current.value),
+              })
+            );
+          }}
+        >
+          Apply
+        </Button>
+      </Grid.Col>
+    </Grid>
+  );
+}
+function Detail() {
+  return <></>;
+}
+
+/** Right
+ *
+ * @returns
+ */
+function Layer() {
+  return <></>;
+}
+function Variable() {
+  return <></>;
+}
+
+export default function Design() {
   return (
     <Grid m={0} p="sm">
       <Grid.Col md={2} p="sm">
@@ -118,138 +271,21 @@ export default function Design() {
             Layout Size
           </Title>
           <Divider my="sm" />
-          <Grid mb={0}>
-            <Grid.Col span={6} xs={3} md={6}>
-              <NumberInput
-                ref={wInput}
-                value={size.w}
-                precision={2}
-                step={0.01}
-              />
-            </Grid.Col>
-            <Grid.Col span={6} xs={3} md={6}>
-              <NumberInput
-                ref={hInput}
-                value={size.h}
-                precision={2}
-                step={0.01}
-              />
-            </Grid.Col>
-            <Grid.Col span={6} xs={3} md={6}>
-              <Select
-                placeholder="Unit"
-                data={unitList.map((s) => {
-                  return { value: s, label: s };
-                })}
-                value={size.unit}
-                onChange={(value) => {
-                  if (value === size.unit) return;
-                  dispatch(convertSize[value](size));
-                }}
-              />
-            </Grid.Col>
-            <Grid.Col span={6} xs={3} md={6}>
-              <Button
-                sx={{ width: "100%" }}
-                onClick={() => {
-                  dispatch(
-                    setSize({
-                      ...size,
-                      w: Number(wInput.current.value),
-                      h: Number(hInput.current.value),
-                    })
-                  );
-                }}
-              >
-                Apply
-              </Button>
-            </Grid.Col>
-          </Grid>
+          <LayoutSize />
         </Stack>
         <Stack spacing={0} mt={48}>
           <Title order={6} align="center">
             Detail
           </Title>
           <Divider my="sm" />
+          <Detail />
         </Stack>
       </Grid.Col>
       <Grid.Col md={8} p="sm">
-        <Stack>
-          <Stack align="center" spacing="xs">
-            <Group position="center" spacing="xs">
-              <ActionIcon variant="subtle" onClick={() => {}}>
-                <IconFolder />
-              </ActionIcon>
-              <ActionIcon variant="subtle" onClick={() => {}}>
-                <IconDeviceFloppy />
-              </ActionIcon>
-
-              <Divider orientation="vertical" />
-              <ActionIcon variant="subtle" onClick={() => {}}>
-                <IconSquare />
-              </ActionIcon>
-              <ActionIcon variant="subtle" onClick={() => {}}>
-                <IconCircle />
-              </ActionIcon>
-              <ActionIcon variant="subtle" onClick={() => {}}>
-                <IconTypography />
-              </ActionIcon>
-
-              <Divider orientation="vertical" />
-              <ActionIcon
-                variant="subtle"
-                onClick={() => {
-                  console.log(format);
-                }}
-              >
-                <IconQrcode />
-              </ActionIcon>
-              <ActionIcon variant="subtle" onClick={() => {}}>
-                <IconVariable />
-              </ActionIcon>
-            </Group>
-            <Paper radius={0} shadow="xs" withBorder>
-              <FabricJSCanvas />
-            </Paper>
-          </Stack>
-          <Group spacing={5} position="center">
-            <ActionIcon
-              size={36}
-              variant="filled"
-              disabled={!data.length}
-              onClick={() => handlers.current.decrement()}
-            >
-              <IconChevronLeft />
-            </ActionIcon>
-
-            <NumberInput
-              hideControls
-              value={index}
-              onChange={(val) =>
-                setIndex(
-                  Math.min(
-                    Math.max(Number.isNaN(val) ? 1 : val, 1),
-                    data.length
-                  )
-                )
-              }
-              handlersRef={handlers}
-              step={1}
-              min={1}
-              max={100}
-              disabled={!data.length}
-              styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
-            />
-
-            <ActionIcon
-              size={36}
-              variant="filled"
-              disabled={!data.length}
-              onClick={() => handlers.current.increment()}
-            >
-              <IconChevronRight />
-            </ActionIcon>
-          </Group>
+        <Stack align="center" spacing="xs">
+          <Tool />
+          <FabricJSCanvas />
+          <Pagenation />
         </Stack>
       </Grid.Col>
       <Grid.Col md={2} p="sm">
@@ -258,12 +294,14 @@ export default function Design() {
             Layer
           </Title>
           <Divider my="sm" />
+          <Layer />
         </Stack>
         <Stack spacing={0} mt={48}>
           <Title order={6} align="center">
             Variable
           </Title>
           <Divider my="sm" />
+          <Variable />
         </Stack>
       </Grid.Col>
     </Grid>
