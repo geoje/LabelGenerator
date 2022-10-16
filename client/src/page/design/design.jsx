@@ -25,7 +25,7 @@ import {
   IconTypography,
   IconVariable,
 } from "@tabler/icons";
-import { setSize } from "./drawSlice";
+import { setSize, addShape } from "./drawSlice";
 
 const unitList = ["inch", "cm", "px"];
 const convertSize = {
@@ -74,6 +74,7 @@ const convertSize = {
  */
 function Tool() {
   // Provider
+  const dispatch = useDispatch();
   const format = useSelector((state) => state.qr.format);
 
   return (
@@ -89,7 +90,19 @@ function Tool() {
       <ActionIcon
         variant="subtle"
         onClick={() => {
-          fabric.Rect();
+          dispatch(
+            addShape(
+              new fabric.Rect({
+                top: 10,
+                left: 10,
+                width: 100,
+                height: 100,
+                fill: "",
+                stroke: "#000",
+                strokeWidth: 2,
+              })
+            )
+          );
         }}
       >
         <IconSquare />
@@ -121,6 +134,7 @@ function FabricJSCanvas() {
   // const dispatch = useDispatch();
   const size = useSelector((state) => state.draw.size);
   const pxSize = convertSize.px(size);
+  const shape = useSelector((state) => state.draw.shape);
 
   const [canvas, setCavnas] = useState(null);
 
@@ -136,13 +150,27 @@ function FabricJSCanvas() {
     );
   }, []);
 
-  if (
-    canvas &&
-    (pxSize.w !== canvas.getWidth() || pxSize.h !== canvas.getHeight())
-  ) {
+  if (!canvas)
+    return (
+      <Paper radius={0} shadow="xs" withBorder>
+        <canvas id="canvas" />
+      </Paper>
+    );
+
+  // Adjust layout size
+  if (pxSize.w !== canvas.getWidth() || pxSize.h !== canvas.getHeight()) {
     canvas.setWidth(pxSize.w);
     canvas.setHeight(pxSize.h);
   }
+
+  // Add shape
+  if (shape.length) {
+    canvas.add(shape.shift());
+  }
+
+  // Test
+  if (canvas.getActiveObject()) console.log(canvas.getActiveObject().id);
+
   return (
     <Paper radius={0} shadow="xs" withBorder>
       <canvas id="canvas" />

@@ -13,13 +13,17 @@ const slice = createSlice({
       h: 0.79,
       unit: "inch",
     },
+    shape: [],
   },
   reducers: {
     setSize: (state, action) => {
       state.size = action.payload;
     },
+    addShape: (state, action) => {
+      state.shape.push(action.payload);
+    },
   },
 });
 
-export const { setSize } = slice.actions;
+export const { setSize, addShape } = slice.actions;
 export default slice.reducer;
