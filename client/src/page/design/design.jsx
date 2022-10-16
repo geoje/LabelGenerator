@@ -9,10 +9,14 @@ import {
   Divider,
   Title,
   Slider,
+  createStyles,
+  Text,
 } from "@mantine/core";
+import { useListState } from "@mantine/hooks";
 import React, { useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -23,6 +27,8 @@ import {
   IconSquare,
   IconTypography,
   IconVariable,
+  IconGripVertical,
+  IconX,
 } from "@tabler/icons";
 import { setSize, setSizeRatio } from "./drawSlice";
 
@@ -91,7 +97,7 @@ function LayoutSize() {
   const size = useSelector((state) => state.draw.size);
 
   return (
-    <Grid mb={0}>
+    <Grid>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
           value={size.w}
@@ -275,7 +281,97 @@ function Pagenation() {
  * @returns
  */
 function Layer() {
-  return <></>;
+  const data = [
+    {
+      name: "string",
+      mass: 123,
+    },
+    {
+      name: "tset",
+      mass: 456,
+    },
+    {
+      name: "test",
+      mass: 789,
+    },
+  ];
+  const useStyles = createStyles((theme) => ({
+    item: {
+      marginBottom: 2,
+      fontSize: 12,
+      borderRadius: theme.radius.sm,
+      border: `1px solid ${
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[4]
+          : theme.colors.gray[4]
+      }`,
+      padding: 2,
+      backgroundColor:
+        theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.white,
+    },
+
+    itemDragging: {
+      boxShadow: theme.shadows.sm,
+    },
+
+    dragHandle: {
+      ...theme.fn.focusStyles(),
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingRight: 4,
+      cursor: "grab",
+      color:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[1]
+          : theme.colors.gray[6],
+    },
+  }));
+  const { classes, cx } = useStyles();
+  const [state, handlers] = useListState(data);
+
+  const items = state.map((item, index) => (
+    <Draggable key={item.name} draggableId={item.name} index={index}>
+      {(provided, snapshot) => (
+        <Group
+          spacing={4}
+          className={cx(classes.item, {
+            [classes.itemDragging]: snapshot.isDragging,
+          })}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+        >
+          <div {...provided.dragHandleProps} className={classes.dragHandle}>
+            <IconGripVertical size={16} />
+          </div>
+          <Text size="xs">{item.name}</Text>
+          <Text color="dimmed" size="xs" sx={{ marginLeft: "auto" }}>
+            {item.mass}
+          </Text>
+          <ActionIcon size="xs">
+            <IconX size={16} />
+          </ActionIcon>
+        </Group>
+      )}
+    </Draggable>
+  ));
+
+  return (
+    <DragDropContext
+      onDragEnd={({ destination, source }) =>
+        handlers.reorder({ from: source.index, to: destination?.index || 0 })
+      }
+    >
+      <Droppable droppableId="dnd-list" direction="vertical">
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            {items}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
 }
 function Variable() {
   return <></>;

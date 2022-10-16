@@ -14,6 +14,7 @@ const slice = createSlice({
       unit: "inch",
       ratio: 1,
     },
+    layer: [],
   },
   reducers: {
     setSize: (state, action) => {
@@ -22,8 +23,11 @@ const slice = createSlice({
     setSizeRatio: (state, action) => {
       state.size.ratio = action.payload;
     },
+    setLayer: (state, action) => {
+      state.layer = action.payload;
+    },
   },
 });
 
-export const { setSize, setSizeRatio } = slice.actions;
+export const { setSize, setSizeRatio, setLayer } = slice.actions;
 export default slice.reducer;
