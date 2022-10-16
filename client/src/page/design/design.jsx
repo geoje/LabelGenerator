@@ -25,7 +25,7 @@ import {
   IconTypography,
   IconVariable,
 } from "@tabler/icons";
-import { setSize, addShape } from "./drawSlice";
+import { setSize, setShape } from "./drawSlice";
 
 const unitList = ["inch", "cm", "px"];
 const convertSize = {
@@ -91,17 +91,16 @@ function Tool() {
         variant="subtle"
         onClick={() => {
           dispatch(
-            addShape(
-              new fabric.Rect({
-                top: 10,
-                left: 10,
-                width: 100,
-                height: 100,
-                fill: "",
-                stroke: "#000",
-                strokeWidth: 2,
-              })
-            )
+            setShape({
+              type: "Rect",
+              top: 10,
+              left: 10,
+              width: 10,
+              height: 10,
+              fill: "",
+              stroke: "#000",
+              strokeWidth: 2,
+            })
           );
         }}
       >
@@ -131,7 +130,7 @@ function Tool() {
 }
 function FabricJSCanvas() {
   // Provider
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const size = useSelector((state) => state.draw.size);
   const pxSize = convertSize.px(size);
   const shape = useSelector((state) => state.draw.shape);
@@ -164,8 +163,15 @@ function FabricJSCanvas() {
   }
 
   // Add shape
-  if (shape.length) {
-    canvas.add(shape.shift());
+  if (shape) {
+    setShape(null);
+    switch (shape.type) {
+      case "Rect":
+        canvas.add(new fabric.Rect(shape));
+        break;
+      default:
+        break;
+    }
   }
 
   // Test
