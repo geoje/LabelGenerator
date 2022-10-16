@@ -7,11 +7,10 @@ import {
   ActionIcon,
   Select,
   Divider,
-  Button,
   Title,
+  Slider,
 } from "@mantine/core";
-import { fabric } from "fabric";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -25,29 +24,41 @@ import {
   IconTypography,
   IconVariable,
 } from "@tabler/icons";
-import { setSize, setShape } from "./drawSlice";
+import { setSize, setSizeRatio } from "./drawSlice";
 
-const unitList = ["inch", "cm", "px"];
+const UNITS = ["inch", "cm", "px"];
 const convertSize = {
   inch: (size) => {
     if (size.unit === "cm")
-      return { w: size.w / 2.54, h: size.h / 2.54, unit: "inch" };
+      return {
+        w: size.w / 2.54,
+        h: size.h / 2.54,
+        unit: "inch",
+        ratio: size.ratio,
+      };
     else if (size.unit === "px")
       return {
         w: size.w / 96,
         h: size.h / 96,
         unit: "inch",
+        ratio: size.ratio,
       };
     else return size;
   },
   cm: (size) => {
     if (size.unit === "inch")
-      return { w: size.w * 2.54, h: size.h * 2.54, unit: "cm" };
+      return {
+        w: size.w * 2.54,
+        h: size.h * 2.54,
+        unit: "cm",
+        ratio: size.ratio,
+      };
     else if (size.unit === "px")
       return {
         w: (size.w / 96) * 2.54,
         h: (size.h / 96) * 2.54,
         unit: "cm",
+        ratio: size.ratio,
       };
     else return size;
   },
@@ -57,16 +68,103 @@ const convertSize = {
         w: Math.round(size.w * 96),
         h: Math.round(size.h * 96),
         unit: "px",
+        ratio: size.ratio,
       };
     else if (size.unit === "cm")
       return {
         w: Math.round((size.w / 2.54) * 96),
         h: Math.round((size.h / 2.54) * 96),
         unit: "px",
+        ratio: size.ratio,
       };
     else return size;
   },
 };
+
+/** Left
+ *
+ * @returns
+ */
+function LayoutSize() {
+  // Provider
+  const dispatch = useDispatch();
+  const size = useSelector((state) => state.draw.size);
+
+  return (
+    <Grid mb={0}>
+      <Grid.Col span={4} md={6} xl={4}>
+        <NumberInput
+          value={size.w}
+          size="xs"
+          precision={size.unit === "px" ? 0 : 2}
+          step={size.unit === "px" ? 1 : 0.1}
+          onChange={(value) =>
+            dispatch(
+              setSize({
+                ...size,
+                w: value,
+              })
+            )
+          }
+        />
+      </Grid.Col>
+      <Grid.Col span={4} md={6} xl={4}>
+        <NumberInput
+          value={size.h}
+          size="xs"
+          precision={size.unit === "px" ? 0 : 2}
+          step={size.unit === "px" ? 1 : 0.1}
+          onChange={(value) =>
+            dispatch(
+              setSize({
+                ...size,
+                h: value,
+              })
+            )
+          }
+        />
+      </Grid.Col>
+      <Grid.Col span={4} md={12} xl={4}>
+        <Select
+          placeholder="Unit"
+          size="xs"
+          data={UNITS.map((s) => {
+            return { value: s, label: s };
+          })}
+          value={size.unit}
+          onChange={(value) => {
+            if (value === size.unit) return;
+            dispatch(setSize(convertSize[value](size)));
+          }}
+        />
+      </Grid.Col>
+      <Grid.Col>
+        <Slider
+          label={(val) => val * 100 + "%"}
+          defaultValue={size.ratio}
+          min={0.5}
+          max={3}
+          step={0.5}
+          marks={[
+            { value: 0.5 },
+            { value: 1 },
+            { value: 1.5 },
+            { value: 2 },
+            { value: 2.5 },
+            { value: 3 },
+          ]}
+          styles={{ markLabel: { display: "none" } }}
+          onChange={(value) => {
+            dispatch(setSizeRatio(value));
+          }}
+        />
+      </Grid.Col>
+    </Grid>
+  );
+}
+function Detail() {
+  return <></>;
+}
 
 /** Middle
  *
@@ -74,7 +172,7 @@ const convertSize = {
  */
 function Tool() {
   // Provider
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const format = useSelector((state) => state.qr.format);
 
   return (
@@ -87,23 +185,7 @@ function Tool() {
       </ActionIcon>
 
       <Divider orientation="vertical" />
-      <ActionIcon
-        variant="subtle"
-        onClick={() => {
-          dispatch(
-            setShape({
-              type: "Rect",
-              top: 10,
-              left: 10,
-              width: 10,
-              height: 10,
-              fill: "",
-              stroke: "#000",
-              strokeWidth: 2,
-            })
-          );
-        }}
-      >
+      <ActionIcon variant="subtle" onClick={() => {}}>
         <IconSquare />
       </ActionIcon>
       <ActionIcon variant="subtle" onClick={() => {}}>
@@ -130,57 +212,16 @@ function Tool() {
 }
 function FabricJSCanvas() {
   // Provider
-  const dispatch = useDispatch();
-  const size = useSelector((state) => state.draw.size);
-  const pxSize = convertSize.px(size);
-  const shape = useSelector((state) => state.draw.shape);
-
-  const [canvas, setCavnas] = useState(null);
-
-  useEffect(() => {
-    if (document.querySelector("div.canvas-container")) return;
-
-    setCavnas(
-      new fabric.Canvas("canvas", {
-        width: 359,
-        height: 76,
-        backgroundColor: "white",
-      })
-    );
-  }, []);
-
-  if (!canvas)
-    return (
-      <Paper radius={0} shadow="xs" withBorder>
-        <canvas id="canvas" />
-      </Paper>
-    );
-
-  // Adjust layout size
-  if (pxSize.w !== canvas.getWidth() || pxSize.h !== canvas.getHeight()) {
-    canvas.setWidth(pxSize.w);
-    canvas.setHeight(pxSize.h);
-  }
-
-  // Add shape
-  if (shape) {
-    setShape(null);
-    switch (shape.type) {
-      case "Rect":
-        canvas.add(new fabric.Rect(shape));
-        break;
-      default:
-        break;
-    }
-  }
-
-  // Test
-  if (canvas.getActiveObject()) console.log(canvas.getActiveObject().id);
+  // const dispatch = useDispatch();
+  const size = convertSize.px(useSelector((state) => state.draw.size));
 
   return (
-    <Paper radius={0} shadow="xs" withBorder>
-      <canvas id="canvas" />
-    </Paper>
+    <Paper
+      sx={{ width: size.w * size.ratio, height: size.h * size.ratio }}
+      radius={0}
+      shadow="xs"
+      withBorder
+    ></Paper>
   );
 }
 function Pagenation() {
@@ -227,62 +268,6 @@ function Pagenation() {
       </ActionIcon>
     </Group>
   );
-}
-
-/** Left
- *
- * @returns
- */
-function LayoutSize() {
-  // Provider
-  const dispatch = useDispatch();
-  const size = useSelector((state) => state.draw.size);
-
-  const wInput = useRef();
-  const hInput = useRef();
-
-  return (
-    <Grid mb={0}>
-      <Grid.Col span={6} xs={3} md={6}>
-        <NumberInput ref={wInput} value={size.w} precision={2} step={0.01} />
-      </Grid.Col>
-      <Grid.Col span={6} xs={3} md={6}>
-        <NumberInput ref={hInput} value={size.h} precision={2} step={0.01} />
-      </Grid.Col>
-      <Grid.Col span={6} xs={3} md={6}>
-        <Select
-          placeholder="Unit"
-          data={unitList.map((s) => {
-            return { value: s, label: s };
-          })}
-          value={size.unit}
-          onChange={(value) => {
-            if (value === size.unit) return;
-            dispatch(convertSize[value](size));
-          }}
-        />
-      </Grid.Col>
-      <Grid.Col span={6} xs={3} md={6}>
-        <Button
-          sx={{ width: "100%" }}
-          onClick={() => {
-            dispatch(
-              setSize({
-                ...size,
-                w: Number(wInput.current.value),
-                h: Number(hInput.current.value),
-              })
-            );
-          }}
-        >
-          Apply
-        </Button>
-      </Grid.Col>
-    </Grid>
-  );
-}
-function Detail() {
-  return <></>;
 }
 
 /** Right
