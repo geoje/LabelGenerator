@@ -407,7 +407,6 @@ function Canvas() {
 
               backgroundColor: item.backgroundColor,
             }}
-            onmousedo
           ></div>
         );
       case TYPE.text:
