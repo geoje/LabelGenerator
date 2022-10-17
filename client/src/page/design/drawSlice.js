@@ -49,11 +49,7 @@ const slice = createSlice({
           w: 20,
           h: 20,
         },
-        border: {
-          style: "solid",
-          width: 1,
-          color: "#ff0000",
-        },
+        backgroundColor: "#ff0000",
       },
       {
         name: "OurText",
@@ -78,8 +74,11 @@ const slice = createSlice({
     setLayer: (state, action) => {
       state.layer = action.payload;
     },
+    setLayerSize: (state, action) => {
+      state.layer[action.payload.index].size = action.payload.size;
+    },
   },
 });
 
-export const { setSize, setSizeRatio, setLayer } = slice.actions;
+export const { setSize, setSizeRatio, setLayer, setLayerSize } = slice.actions;
 export default slice.reducer;
