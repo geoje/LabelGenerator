@@ -326,8 +326,8 @@ function Canvas() {
       ...layer[move.index].size,
     };
     if (textElement) {
-      layerSize.w = textElement.offsetWidth;
-      layerSize.h = textElement.offsetHeight;
+      layerSize.w = Math.ceil(textElement.offsetWidth / sizePx.ratio);
+      layerSize.h = Math.ceil(textElement.offsetHeight / sizePx.ratio);
     }
 
     dispatch(
@@ -376,7 +376,9 @@ function Canvas() {
     setMove({ index: -1, ox: 0, oy: 0 });
   };
 
-  const items = layer.map((item, index) => {
+  const items = layer.map((_, i) => {
+    const index = layer.length - 1 - i;
+    const item = layer[index];
     switch (item.type) {
       case TYPE.rect:
       case TYPE.circle:
