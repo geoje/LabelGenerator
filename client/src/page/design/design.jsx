@@ -11,6 +11,7 @@ import {
   Slider,
   createStyles,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import React, { useRef } from "react";
 import { useState } from "react";
@@ -25,14 +26,22 @@ import {
   IconQrcode,
   IconSquare,
   IconTypography,
-  IconVariable,
   IconGripVertical,
   IconX,
   IconQuestionMark,
+  IconPhoto,
 } from "@tabler/icons";
 import { setSize, setSizeRatio, setLayer } from "./drawSlice";
 
-const UNITS = ["inch", "cm", "px"];
+const UNIT = { inch: "inch", cm: "cm", px: "px" };
+const TYPE = {
+  rect: "rect",
+  circle: "circle",
+  text: "text",
+  image: "image",
+  qr: "qr",
+};
+
 const convertSize = {
   inch: (size) => {
     if (size.unit === "cm")
@@ -87,16 +96,16 @@ const convertSize = {
   },
 };
 const typeToIcon = (type) => {
-  return type === "rect" ? (
+  return type === TYPE.rect ? (
     <IconSquare />
-  ) : type === "circle" ? (
+  ) : type === TYPE.circle ? (
     <IconCircle />
-  ) : type === "typo" ? (
+  ) : type === TYPE.text ? (
     <IconTypography />
-  ) : type === "qr" ? (
+  ) : type === TYPE.image ? (
+    <IconPhoto />
+  ) : type === TYPE.qr ? (
     <IconQrcode />
-  ) : type === "var" ? (
-    <IconVariable />
   ) : (
     <IconQuestionMark />
   );
@@ -149,7 +158,7 @@ function LayoutSize() {
         <Select
           placeholder="Unit"
           size="xs"
-          data={UNITS.map((s) => {
+          data={Object.keys(UNIT).map((s) => {
             return { value: s, label: s };
           })}
           value={size.unit}
@@ -183,7 +192,7 @@ function LayoutSize() {
     </Grid>
   );
 }
-function Detail() {
+function Variable() {
   return <></>;
 }
 
@@ -198,51 +207,132 @@ function Tool() {
 
   return (
     <Group position="center" spacing="xs">
-      <ActionIcon variant="subtle" onClick={() => {}}>
-        <IconFolder />
-      </ActionIcon>
-      <ActionIcon variant="subtle" onClick={() => {}}>
-        <IconDeviceFloppy />
-      </ActionIcon>
+      <Tooltip label="Load">
+        <ActionIcon variant="subtle" onClick={() => {}}>
+          <IconFolder />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Save">
+        <ActionIcon variant="subtle" onClick={() => {}}>
+          <IconDeviceFloppy />
+        </ActionIcon>
+      </Tooltip>
 
       <Divider orientation="vertical" />
-      <ActionIcon variant="subtle" onClick={() => {}}>
-        <IconSquare />
-      </ActionIcon>
-      <ActionIcon variant="subtle" onClick={() => {}}>
-        <IconCircle />
-      </ActionIcon>
-      <ActionIcon variant="subtle" onClick={() => {}}>
-        <IconTypography />
-      </ActionIcon>
+      <Tooltip label="Rectangle">
+        <ActionIcon variant="subtle" onClick={() => {}}>
+          <IconSquare />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Circle">
+        <ActionIcon variant="subtle" onClick={() => {}}>
+          <IconCircle />
+        </ActionIcon>
+      </Tooltip>
 
       <Divider orientation="vertical" />
-      <ActionIcon
-        variant="subtle"
-        onClick={() => {
-          console.log(format);
-        }}
-      >
-        <IconQrcode />
-      </ActionIcon>
-      <ActionIcon variant="subtle" onClick={() => {}}>
-        <IconVariable />
-      </ActionIcon>
+      <Tooltip label="Text">
+        <ActionIcon variant="subtle" onClick={() => {}}>
+          <IconTypography />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Image">
+        <ActionIcon variant="subtle" onClick={() => {}}>
+          <IconPhoto />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="QR Code">
+        <ActionIcon
+          variant="subtle"
+          onClick={() => {
+            console.log(format);
+          }}
+        >
+          <IconQrcode />
+        </ActionIcon>
+      </Tooltip>
     </Group>
   );
 }
-function FabricJSCanvas() {
+function Canvas() {
   // Provider
   // const dispatch = useDispatch();
   const size = convertSize.px(useSelector((state) => state.draw.size));
+  const layer = useSelector((state) => state.draw.layer);
+
+  const items = layer.map((item) => {
+    switch (item.type) {
+      case TYPE.rect:
+      case TYPE.circle:
+        return (
+          <div
+            key={`canvas-${item.name}`}
+            style={{
+              position: "absolute",
+
+              left: item.size.x * size.ratio,
+              top: item.size.y * size.ratio,
+              width: item.size.w * size.ratio,
+              height: item.size.h * size.ratio,
+
+              fontFamily: item.font?.family,
+              fontSize: item.font ? item.font.size * size.ratio : null,
+              color: item.font?.color,
+
+              borderStyle: item.border?.style,
+              borderWidth: item.border ? item.border.width * size.ratio : null,
+              borderColor: item.border?.color,
+              borderRadius: item.type === TYPE.circle ? "50%" : 0,
+
+              backgroundColor: item.backgroundColor,
+            }}
+          ></div>
+        );
+      case TYPE.text:
+        return (
+          <Text
+            key={`canvas-${item.name}`}
+            style={{
+              position: "absolute",
+
+              left: item.size.x * size.ratio,
+              top: item.size.y * size.ratio,
+              width: item.size.w ? item.size.w * size.ratio : null,
+              height: item.size.h ? item.size.h * size.ratio : null,
+
+              fontFamily: item.font?.family,
+              fontSize: item.font ? item.font.size * size.ratio : null,
+              color: item.font?.color,
+
+              borderStyle: item.border?.style,
+              borderWidth: item.border ? item.border.width * size.ratio : null,
+              borderColor: item.border?.color,
+              borderRadius: item.type === TYPE.circle ? "50%" : 0,
+
+              backgroundColor: item.backgroundColor,
+            }}
+          >
+            {item.var.default}
+          </Text>
+        );
+      default:
+        return null;
+    }
+  });
 
   return (
     <Paper
-      sx={{ width: size.w * size.ratio, height: size.h * size.ratio }}
+      sx={{
+        position: "relative",
+        width: size.w * size.ratio,
+        height: size.h * size.ratio,
+      }}
       radius={0}
       shadow="xs"
       withBorder
-    ></Paper>
+    >
+      {items}
+    </Paper>
   );
 }
 function Pagenation() {
@@ -333,7 +423,7 @@ function Layer() {
     },
   }))();
   const items = layer.map((item, index) => (
-    <Draggable key={item.name} draggableId={item.name} index={index}>
+    <Draggable key={`layer-${item.name}`} draggableId={item.name} index={index}>
       {(provided, snapshot) => (
         <Group
           spacing={4}
@@ -397,7 +487,7 @@ function Layer() {
     </DragDropContext>
   );
 }
-function Variable() {
+function Detail() {
   return <></>;
 }
 
@@ -414,16 +504,16 @@ export default function Design() {
         </Stack>
         <Stack spacing={0} mt={48}>
           <Title order={6} align="center">
-            Detail
+            Variable
           </Title>
           <Divider my="sm" />
-          <Detail />
+          <Variable />
         </Stack>
       </Grid.Col>
       <Grid.Col md={8} p="sm">
         <Stack align="center" spacing="xs">
           <Tool />
-          <FabricJSCanvas />
+          <Canvas />
           <Pagenation />
         </Stack>
       </Grid.Col>
@@ -437,10 +527,10 @@ export default function Design() {
         </Stack>
         <Stack spacing={0} mt={48}>
           <Title order={6} align="center">
-            Variable
+            Detail
           </Title>
           <Divider my="sm" />
-          <Variable />
+          <Detail />
         </Stack>
       </Grid.Col>
     </Grid>
