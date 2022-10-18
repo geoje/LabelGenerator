@@ -617,13 +617,16 @@ function Layer() {
           className={cx(classes.item, {
             [classes.itemDragging]: snapshot.isDragging,
           })}
+          onClick={() => dispatch(setSelected({ ...selected, index }))}
           ref={provided.innerRef}
           {...provided.draggableProps}
         >
           <div {...provided.dragHandleProps} className={classes.dragHandle}>
             <IconGripVertical size={16} />
           </div>
-          <Text size="xs">{item.name}</Text>
+          <Text size="xs" style={{ cursor: "default" }}>
+            {item.name}
+          </Text>
           <Group
             size="xs"
             sx={(theme) => {
