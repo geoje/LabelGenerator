@@ -11,6 +11,16 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Label Generator</title>
+    <style>
+      @keyframes borderAnimation {
+        from {
+          background-position: 0 0, -8px 0, 100% -8px, 0 100%;
+        }
+        to {
+          background-position: 0 -8px, 0 0, 100% 0, -8px 100%;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

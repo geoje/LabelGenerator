@@ -31,7 +31,13 @@ import {
   IconQuestionMark,
   IconPhoto,
 } from "@tabler/icons";
-import { setSize, setSizeRatio, setLayer, setLayerSize } from "./drawSlice";
+import {
+  setSize,
+  setSizeRatio,
+  setLayer,
+  setLayerSize,
+  setSelected,
+} from "./drawSlice";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
 const TYPE = {
@@ -311,19 +317,35 @@ function Canvas() {
   const dispatch = useDispatch();
   const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
+  let selected = useSelector((state) => state.draw.selected);
 
   const refCanvas = useRef();
-  let [move, setMove] = useState({ index: -1, ox: 0, oy: 0 });
+
+  // If text element, set width and height for selectedDiv
+  if (selected.hold) {
+    const textElement =
+      layer[selected.index].type === TYPE.text
+        ? document.getElementById(`canvas-${layer[selected.index].name}`)
+        : null;
+    const layerSize = {
+      ...layer[selected.index].size,
+    };
+    if (textElement) {
+      layerSize.w = Math.ceil(textElement.offsetWidth / sizePx.ratio);
+      layerSize.h = Math.ceil(textElement.offsetHeight / sizePx.ratio);
+    }
+  }
 
   const onMouseMove = (event) => {
     event.preventDefault();
 
+    // If text element, set width and height
     const textElement =
-      layer[move.index].type === TYPE.text
-        ? document.getElementById(`canvas-${layer[move.index].name}`)
+      layer[selected.index].type === TYPE.text
+        ? document.getElementById(`canvas-${layer[selected.index].name}`)
         : null;
     const layerSize = {
-      ...layer[move.index].size,
+      ...layer[selected.index].size,
     };
     if (textElement) {
       layerSize.w = Math.ceil(textElement.offsetWidth / sizePx.ratio);
@@ -332,7 +354,7 @@ function Canvas() {
 
     dispatch(
       setLayerSize({
-        index: move.index,
+        index: selected.index,
         size: {
           ...layerSize,
           x:
@@ -340,7 +362,7 @@ function Canvas() {
               0,
               Math.min(
                 (sizePx.w - layerSize.w) * sizePx.ratio - 2,
-                event.pageX - refCanvas.current.offsetLeft - move.ox
+                event.pageX - refCanvas.current.offsetLeft - selected.ox
               )
             ) / sizePx.ratio,
           y:
@@ -348,7 +370,7 @@ function Canvas() {
               0,
               Math.min(
                 (sizePx.h - layerSize.h) * sizePx.ratio - 2,
-                event.pageY - refCanvas.current.offsetTop - move.oy
+                event.pageY - refCanvas.current.offsetTop - selected.oy
               )
             ) / sizePx.ratio,
         },
@@ -357,13 +379,17 @@ function Canvas() {
   };
   const onMouseDown = (event, index) => {
     event.preventDefault();
+    event.stopPropagation();
 
-    setMove(
-      (move = {
-        index,
-        ox: event.nativeEvent.offsetX + 1,
-        oy: event.nativeEvent.offsetY + 1,
-      })
+    dispatch(
+      setSelected(
+        (selected = {
+          down: true,
+          index,
+          ox: event.nativeEvent.offsetX + 1,
+          oy: event.nativeEvent.offsetY + 1,
+        })
+      )
     );
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
@@ -373,7 +399,7 @@ function Canvas() {
 
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
-    setMove({ index: -1, ox: 0, oy: 0 });
+    dispatch(setSelected({ move: false, index: selected.index, ox: 0, oy: 0 }));
   };
 
   const items = layer.map((_, i) => {
@@ -459,8 +485,34 @@ function Canvas() {
       radius={0}
       shadow="xs"
       withBorder
+      onMouseDown={() => dispatch(setSelected({ ...selected, index: -1 }))}
     >
       {items}
+      {selected.index !== -1 && (
+        <div
+          style={{
+            position: "absolute",
+            pointerEvents: "none",
+
+            left: layer[selected.index].size.x * sizePx.ratio - 1,
+            top: layer[selected.index].size.y * sizePx.ratio - 1,
+            width: layer[selected.index].size.w
+              ? layer[selected.index].size.w * sizePx.ratio + 2
+              : 0,
+            height: layer[selected.index].size.w
+              ? layer[selected.index].size.h * sizePx.ratio + 2
+              : 0,
+
+            backgroundImage:
+              "repeating-linear-gradient(0deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(90deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(180deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(270deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px)",
+            backgroundSize:
+              "1px calc(100% + 8px), calc(100% + 8px) 1px, 1px calc(100% + 8px) , calc(100% + 8px) 1px",
+            backgroundPosition: " 0 0, 0 0, 100% 0, 0 100%",
+            backgroundRepeat: "no-repeat",
+            animation: "borderAnimation 0.4s infinite linear",
+          }}
+        ></div>
+      )}
     </Paper>
   );
 }
@@ -518,6 +570,7 @@ function Layer() {
   // Provider
   const dispatch = useDispatch();
   const layer = useSelector((state) => state.draw.layer);
+  const selected = useSelector((state) => state.draw.selected);
 
   const { classes, cx } = createStyles((theme) => ({
     item: {
@@ -534,8 +587,8 @@ function Layer() {
         theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.white,
     },
 
-    itemDragging: {
-      boxShadow: theme.shadows.sm,
+    isSelected: {
+      borderColor: theme.colors.blue[6],
     },
 
     dragHandle: {
@@ -556,6 +609,11 @@ function Layer() {
       {(provided, snapshot) => (
         <Group
           spacing={4}
+          sx={(theme) => {
+            return {
+              borderColor: index === selected.index ? theme.colors.blue[6] : "",
+            };
+          }}
           className={cx(classes.item, {
             [classes.itemDragging]: snapshot.isDragging,
           })}
@@ -610,6 +668,21 @@ function Layer() {
           tempLayer.splice(source.index, 1)[0]
         );
         dispatch(setLayer(tempLayer));
+
+        // Change selected index when selected element move
+        if (selected.index === source.index)
+          dispatch(setSelected({ ...selected, index: destination.index }));
+        // Change selected index when other move
+        else if (
+          source.index < selected.index &&
+          destination.index >= selected.index
+        )
+          dispatch(setSelected({ ...selected, index: selected.index - 1 }));
+        else if (
+          source.index > selected.index &&
+          destination.index <= selected.index
+        )
+          dispatch(setSelected({ ...selected, index: selected.index + 1 }));
       }}
     >
       <Droppable droppableId="layer" direction="vertical">
