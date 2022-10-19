@@ -37,7 +37,7 @@ import {
   setSize,
   setSizeRatio,
   addLayer,
-  moveLayer,
+  changeLayerIndex,
   removeLayerByIndex,
   setLayerSize,
   setSelected,
@@ -332,9 +332,9 @@ function Canvas() {
 
     const l = layer[selected];
     const w =
-      l.type === TYPE.text ? refLayer.current[selected].offsetWidth : l.size.w;
+      l.type === TYPE.text ? Math.ceil(refLayer.current[selected].offsetWidth / sizePx.ratio) : l.size.w;
     const h =
-      l.type === TYPE.text ? refLayer.current[selected].offsetHeight : l.size.h;
+      l.type === TYPE.text ? Math.ceil(refLayer.current[selected].offsetHeight / sizePx.ratio) : l.size.h;
     setMove(
       (move = {
         ...move,
@@ -361,19 +361,7 @@ function Canvas() {
     event.preventDefault();
     event.stopPropagation();
 
-    // Update Text element size to layer provider
-    if (layer[index].type === TYPE.text)
-      dispatch(
-        setLayerSize({
-          index,
-          size: {
-            ...layer[index].size,
-            w: Math.ceil(refLayer.current[index].offsetWidth / sizePx.ratio),
-            h: Math.ceil(refLayer.current[index].offsetHeight / sizePx.ratio),
-          },
-        })
-      );
-
+    dispatch(setSelected((selected = index)));
     setMove(
       (move = {
         x: layer[index].size.x,
@@ -382,7 +370,6 @@ function Canvas() {
         oy: event.nativeEvent.offsetY + 1,
       })
     );
-    dispatch(setSelected((selected = index)));
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
@@ -392,17 +379,29 @@ function Canvas() {
 
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
-    setMove({ x: -1, y: -1, ox: 0, oy: 0 });
+
+    const l = layer[selected];
+    const w =
+      l.type === TYPE.text
+        ? Math.ceil(refLayer.current[selected].offsetWidth / sizePx.ratio)
+        : l.size.w;
+    const h =
+      l.type === TYPE.text
+        ? Math.ceil(refLayer.current[selected].offsetHeight / sizePx.ratio)
+        : l.size.h;
     dispatch(
       setLayerSize({
         index: selected,
         size: {
-          ...layer[selected].size,
+          ...l.size,
           x: move.x,
           y: move.y,
+          w,
+          h,
         },
       })
     );
+    setMove({ x: -1, y: -1, ox: 0, oy: 0 });
   };
 
   const items = layer.map((_, i) => {
@@ -669,7 +668,9 @@ function Layer() {
     <DragDropContext
       onDragEnd={({ destination, source }) => {
         if (!destination) return;
-        dispatch(moveLayer({ from: source.index, to: destination.index }));
+        dispatch(
+          changeLayerIndex({ from: source.index, to: destination.index })
+        );
 
         // Change selected index when selected element move
         if (selected === source.index) dispatch(setSelected(destination.index));

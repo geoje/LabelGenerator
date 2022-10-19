@@ -76,7 +76,7 @@ const slice = createSlice({
     addLayer: (state, action) => {
       state.layer.push(action.payload);
     },
-    moveLayer: (state, action) => {
+    changeLayerIndex: (state, action) => {
       state.layer.splice(
         action.payload.to,
         0,
@@ -102,8 +102,8 @@ const slice = createSlice({
         const l = state.layer[state.selected];
         if (l.type === "text" && !(l.size.w || l.size.h)) {
           const textElement = document.getElementById(`canvas-${l.name}`);
-          l.size.w = textElement.offsetWidth;
-          l.size.h = textElement.offsetHeight;
+          l.size.w = Math.ceil(textElement.offsetWidth / state.size.ratio);
+          l.size.h = Math.ceil(textElement.offsetHeight / state.size.ratio);
         }
       }
     },
@@ -114,7 +114,7 @@ export const {
   setSize,
   setSizeRatio,
   addLayer,
-  moveLayer,
+  changeLayerIndex,
   removeLayerByIndex,
   setLayerSize,
   setSelected,
