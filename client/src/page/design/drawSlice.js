@@ -76,6 +76,11 @@ const slice = createSlice({
     setLayer: (state, action) => {
       state.layer = action.payload;
     },
+    /**
+     *
+     * @param {*} state
+     * @param {payload: {index, size:{x, y, w, h}}} action
+     */
     setLayerSize: (state, action) => {
       state.layer[action.payload.index].size = action.payload.size;
     },

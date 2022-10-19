@@ -12,6 +12,7 @@ import {
   createStyles,
   Text,
   Tooltip,
+  Input,
 } from "@mantine/core";
 import React, { useRef } from "react";
 import { useState } from "react";
@@ -30,6 +31,7 @@ import {
   IconX,
   IconQuestionMark,
   IconPhoto,
+  IconCheck,
 } from "@tabler/icons";
 import {
   setSize,
@@ -700,7 +702,84 @@ function Layer() {
   );
 }
 function Detail() {
-  return <></>;
+  // Provider
+  const dispatch = useDispatch();
+  const selected = useSelector((state) => state.draw.selected);
+  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
+  const layer = useSelector((state) => state.draw.layer);
+
+  // If not selected, exit function
+  if (selected.index === -1) return null;
+  const l = layer[selected.index];
+
+  // If text element selected, set width and height
+  const textElement =
+    l.type === TYPE.text ? document.getElementById(`canvas-${l.name}`) : null;
+  if (textElement)
+    dispatch(
+      setLayerSize({
+        index: selected.index,
+        size: {
+          ...l.size,
+          w: Math.ceil(textElement.offsetWidth / sizePx.ratio),
+          h: Math.ceil(textElement.offsetHeight / sizePx.ratio),
+        },
+      })
+    );
+
+  return (
+    selected.index !== -1 && (
+      <Grid>
+        <Grid.Col>
+          <Group noWrap spacing="xs">
+            <Input
+              placeholder="Layer Name"
+              size="xs"
+              value={l.name}
+              onChange={() => {}}
+            />
+            <ActionIcon variant="filled" size="md" color="blue">
+              <IconCheck size={18} />
+            </ActionIcon>
+          </Group>
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <NumberInput
+            size="xs"
+            value={l.size.x}
+            onChange={(value) =>
+              dispatch(
+                setLayerSize({
+                  index: selected.index,
+                  size: {
+                    ...l.size,
+                    x: value,
+                  },
+                })
+              )
+            }
+          />
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <NumberInput
+            size="xs"
+            value={l.size.y}
+            onChange={(value) =>
+              dispatch(
+                setLayerSize({
+                  index: selected.index,
+                  size: {
+                    ...l.size,
+                    y: value,
+                  },
+                })
+              )
+            }
+          />
+        </Grid.Col>
+      </Grid>
+    )
+  );
 }
 
 export default function Design() {
