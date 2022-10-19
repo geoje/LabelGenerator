@@ -15,7 +15,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    var: { default: "", ... }
  * }, ...]
  *
- * selected: { hold: false, index: -1, ox: 0, oy: 0 }
+ * selected: -1
  */
 const slice = createSlice({
   name: "draw",
@@ -64,7 +64,7 @@ const slice = createSlice({
         var: { default: "Sample Text" },
       },
     ],
-    selected: { hold: false, index: -1, ox: 0, oy: 0 },
+    selected: -1,
   },
   reducers: {
     setSize: (state, action) => {
@@ -73,8 +73,18 @@ const slice = createSlice({
     setSizeRatio: (state, action) => {
       state.size.ratio = action.payload;
     },
-    setLayer: (state, action) => {
-      state.layer = action.payload;
+    addLayer: (state, action) => {
+      state.layer.push(action.payload);
+    },
+    moveLayer: (state, action) => {
+      state.layer.splice(
+        action.payload.to,
+        0,
+        state.layer.splice(action.payload.from, 1)[0]
+      );
+    },
+    removeLayerByIndex: (state, action) => {
+      state.layer.splice(action.payload, 1);
     },
     /**
      *
@@ -90,6 +100,13 @@ const slice = createSlice({
   },
 });
 
-export const { setSize, setSizeRatio, setLayer, setLayerSize, setSelected } =
-  slice.actions;
+export const {
+  setSize,
+  setSizeRatio,
+  addLayer,
+  moveLayer,
+  removeLayerByIndex,
+  setLayerSize,
+  setSelected,
+} = slice.actions;
 export default slice.reducer;

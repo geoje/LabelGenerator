@@ -36,7 +36,9 @@ import {
 import {
   setSize,
   setSizeRatio,
-  setLayer,
+  addLayer,
+  moveLayer,
+  removeLayerByIndex,
   setLayerSize,
   setSelected,
 } from "./drawSlice";
@@ -240,25 +242,25 @@ function Tool() {
       <Tooltip label="Rectangle">
         <ActionIcon
           variant="subtle"
-          onClick={() => {
-            let tempLayer = [...layer];
-            tempLayer.push({
-              name: getLayerName(),
-              type: TYPE.rect,
-              size: {
-                x: sizePx.w / 2 - 10,
-                y: sizePx.h / 2 - 10,
-                w: 20,
-                h: 20,
-              },
-              border: {
-                style: "solid",
-                width: 1,
-                color: "#000",
-              },
-            });
-            dispatch(setLayer(tempLayer));
-          }}
+          onClick={() =>
+            dispatch(
+              addLayer({
+                name: getLayerName(),
+                type: TYPE.rect,
+                size: {
+                  x: sizePx.w / 2 - 10,
+                  y: sizePx.h / 2 - 10,
+                  w: 20,
+                  h: 20,
+                },
+                border: {
+                  style: "solid",
+                  width: 1,
+                  color: "#000",
+                },
+              })
+            )
+          }
         >
           <IconSquare />
         </ActionIcon>
@@ -266,25 +268,25 @@ function Tool() {
       <Tooltip label="Circle">
         <ActionIcon
           variant="subtle"
-          onClick={() => {
-            let tempLayer = [...layer];
-            tempLayer.push({
-              name: getLayerName(),
-              type: TYPE.circle,
-              size: {
-                x: sizePx.w / 2 - 10,
-                y: sizePx.h / 2 - 10,
-                w: 20,
-                h: 20,
-              },
-              border: {
-                style: "solid",
-                width: 1,
-                color: "#000",
-              },
-            });
-            dispatch(setLayer(tempLayer));
-          }}
+          onClick={() =>
+            dispatch(
+              addLayer({
+                name: getLayerName(),
+                type: TYPE.circle,
+                size: {
+                  x: sizePx.w / 2 - 10,
+                  y: sizePx.h / 2 - 10,
+                  w: 20,
+                  h: 20,
+                },
+                border: {
+                  style: "solid",
+                  width: 1,
+                  color: "#000",
+                },
+              })
+            )
+          }
         >
           <IconCircle />
         </ActionIcon>
@@ -322,60 +324,36 @@ function Canvas() {
   let selected = useSelector((state) => state.draw.selected);
 
   const refCanvas = useRef();
-
-  // If text element, set width and height for selectedDiv
-  if (selected.hold) {
-    const textElement =
-      layer[selected.index].type === TYPE.text
-        ? document.getElementById(`canvas-${layer[selected.index].name}`)
-        : null;
-    const layerSize = {
-      ...layer[selected.index].size,
-    };
-    if (textElement) {
-      layerSize.w = Math.ceil(textElement.offsetWidth / sizePx.ratio);
-      layerSize.h = Math.ceil(textElement.offsetHeight / sizePx.ratio);
-    }
-  }
+  const refLayer = useRef([]);
+  let [move, setMove] = useState({ x: -1, y: -1, ox: 0, oy: 0 });
 
   const onMouseMove = (event) => {
     event.preventDefault();
 
-    // If text element, set width and height
-    const textElement =
-      layer[selected.index].type === TYPE.text
-        ? document.getElementById(`canvas-${layer[selected.index].name}`)
-        : null;
-    const layerSize = {
-      ...layer[selected.index].size,
-    };
-    if (textElement) {
-      layerSize.w = Math.ceil(textElement.offsetWidth / sizePx.ratio);
-      layerSize.h = Math.ceil(textElement.offsetHeight / sizePx.ratio);
-    }
-
-    dispatch(
-      setLayerSize({
-        index: selected.index,
-        size: {
-          ...layerSize,
-          x:
-            Math.max(
-              0,
-              Math.min(
-                (sizePx.w - layerSize.w) * sizePx.ratio - 2,
-                event.pageX - refCanvas.current.offsetLeft - selected.ox
-              )
-            ) / sizePx.ratio,
-          y:
-            Math.max(
-              0,
-              Math.min(
-                (sizePx.h - layerSize.h) * sizePx.ratio - 2,
-                event.pageY - refCanvas.current.offsetTop - selected.oy
-              )
-            ) / sizePx.ratio,
-        },
+    const l = layer[selected];
+    const w =
+      l.type === TYPE.text ? refLayer.current[selected].offsetWidth : l.size.w;
+    const h =
+      l.type === TYPE.text ? refLayer.current[selected].offsetHeight : l.size.h;
+    setMove(
+      (move = {
+        ...move,
+        x:
+          Math.max(
+            0,
+            Math.min(
+              (sizePx.w - w) * sizePx.ratio - 2,
+              event.pageX - refCanvas.current.offsetLeft - move.ox
+            )
+          ) / sizePx.ratio,
+        y:
+          Math.max(
+            0,
+            Math.min(
+              (sizePx.h - h) * sizePx.ratio - 2,
+              event.pageY - refCanvas.current.offsetTop - move.oy
+            )
+          ) / sizePx.ratio,
       })
     );
   };
@@ -383,16 +361,29 @@ function Canvas() {
     event.preventDefault();
     event.stopPropagation();
 
-    dispatch(
-      setSelected(
-        (selected = {
-          down: true,
+    // Update Text element size to layer provider
+    if (layer[index].type === TYPE.text)
+      dispatch(
+        setLayerSize({
           index,
-          ox: event.nativeEvent.offsetX + 1,
-          oy: event.nativeEvent.offsetY + 1,
+          size: {
+            ...layer[index].size,
+            w: Math.ceil(refLayer.current[index].offsetWidth / sizePx.ratio),
+            h: Math.ceil(refLayer.current[index].offsetHeight / sizePx.ratio),
+          },
         })
-      )
+      );
+
+    setMove(
+      (move = {
+        x: layer[index].size.x,
+        y: layer[index].size.y,
+        ox: event.nativeEvent.offsetX + 1,
+        oy: event.nativeEvent.offsetY + 1,
+      })
     );
+    dispatch(setSelected((selected = index)));
+
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
   };
@@ -401,30 +392,49 @@ function Canvas() {
 
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
-    dispatch(setSelected({ move: false, index: selected.index, ox: 0, oy: 0 }));
+    setMove({ x: -1, y: -1, ox: 0, oy: 0 });
+    dispatch(
+      setLayerSize({
+        index: selected,
+        size: {
+          ...layer[selected].size,
+          x: move.x,
+          y: move.y,
+        },
+      })
+    );
   };
 
   const items = layer.map((_, i) => {
     const index = layer.length - 1 - i;
     const item = layer[index];
+
+    let defaultStyle = {
+      position: "absolute",
+      left: item.size.x * sizePx.ratio,
+      top: item.size.y * sizePx.ratio,
+    };
+    // If item is moving, set location to mouse postion
+    if (move.x !== -1 && index === selected)
+      defaultStyle = {
+        ...defaultStyle,
+        left: move.x * sizePx.ratio,
+        top: move.y * sizePx.ratio,
+      };
+
     switch (item.type) {
       case TYPE.rect:
       case TYPE.circle:
         return (
           <div
             key={`canvas-${item.name}`}
+            ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
             style={{
-              position: "absolute",
+              ...defaultStyle,
 
-              left: item.size.x * sizePx.ratio,
-              top: item.size.y * sizePx.ratio,
               width: item.size.w * sizePx.ratio,
               height: item.size.h * sizePx.ratio,
-
-              fontFamily: item.font?.family,
-              fontSize: item.font ? item.font.size * sizePx.ratio : null,
-              color: item.font?.color,
 
               borderStyle: item.border?.style,
               borderWidth: item.border
@@ -442,28 +452,18 @@ function Canvas() {
           <Text
             id={`canvas-${item.name}`}
             key={`canvas-${item.name}`}
+            ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
             style={{
-              position: "absolute",
+              ...defaultStyle,
+
               WebkitUserSelect: "none" /* Safari */,
               msUserSelect: "none" /* IE 10 and IE 11 */,
               userSelect: "none" /* Standard syntax */,
 
-              left: item.size.x * sizePx.ratio,
-              top: item.size.y * sizePx.ratio,
-              width: item.size.w ? item.size.w * sizePx.ratio : null,
-              height: item.size.h ? item.size.h * sizePx.ratio : null,
-
               fontFamily: item.font?.family,
               fontSize: item.font ? item.font.size * sizePx.ratio : null,
               color: item.font?.color,
-
-              borderStyle: item.border?.style,
-              borderWidth: item.border
-                ? item.border.width * sizePx.ratio
-                : null,
-              borderColor: item.border?.color,
-              borderRadius: item.type === TYPE.circle ? "50%" : 0,
 
               backgroundColor: item.backgroundColor,
             }}
@@ -487,22 +487,28 @@ function Canvas() {
       radius={0}
       shadow="xs"
       withBorder
-      onMouseDown={() => dispatch(setSelected({ ...selected, index: -1 }))}
+      onMouseDown={() => dispatch(setSelected(-1))}
     >
       {items}
-      {selected.index !== -1 && (
+      {selected !== -1 && (
         <div
           style={{
             position: "absolute",
             pointerEvents: "none",
 
-            left: layer[selected.index].size.x * sizePx.ratio - 1,
-            top: layer[selected.index].size.y * sizePx.ratio - 1,
-            width: layer[selected.index].size.w
-              ? layer[selected.index].size.w * sizePx.ratio + 2
+            left:
+              move.x === -1
+                ? layer[selected].size.x * sizePx.ratio - 1
+                : move.x * sizePx.ratio - 1,
+            top:
+              move.y === -1
+                ? layer[selected].size.y * sizePx.ratio - 1
+                : move.y * sizePx.ratio - 1,
+            width: layer[selected].size.w
+              ? layer[selected].size.w * sizePx.ratio + 2
               : 0,
-            height: layer[selected.index].size.w
-              ? layer[selected.index].size.h * sizePx.ratio + 2
+            height: layer[selected].size.w
+              ? layer[selected].size.h * sizePx.ratio + 2
               : 0,
 
             backgroundImage:
@@ -613,13 +619,13 @@ function Layer() {
           spacing={4}
           sx={(theme) => {
             return {
-              borderColor: index === selected.index ? theme.colors.blue[6] : "",
+              borderColor: index === selected ? theme.colors.blue[6] : "",
             };
           }}
           className={cx(classes.item, {
             [classes.itemDragging]: snapshot.isDragging,
           })}
-          onClick={() => dispatch(setSelected({ ...selected, index }))}
+          onClick={() => dispatch(setSelected(index))}
           ref={provided.innerRef}
           {...provided.draggableProps}
         >
@@ -649,9 +655,7 @@ function Layer() {
           <ActionIcon
             size="xs"
             onClick={() => {
-              let tempLayer = [...layer];
-              tempLayer.splice(index, 1);
-              dispatch(setLayer(tempLayer));
+              dispatch(removeLayerByIndex(index));
             }}
           >
             <IconX />
@@ -665,29 +669,15 @@ function Layer() {
     <DragDropContext
       onDragEnd={({ destination, source }) => {
         if (!destination) return;
-        let tempLayer = [...layer];
-
-        tempLayer.splice(
-          destination?.index || 0,
-          0,
-          tempLayer.splice(source.index, 1)[0]
-        );
-        dispatch(setLayer(tempLayer));
+        dispatch(moveLayer({ from: source.index, to: destination.index }));
 
         // Change selected index when selected element move
-        if (selected.index === source.index)
-          dispatch(setSelected({ ...selected, index: destination.index }));
+        if (selected === source.index) dispatch(setSelected(destination.index));
         // Change selected index when other move
-        else if (
-          source.index < selected.index &&
-          destination.index >= selected.index
-        )
-          dispatch(setSelected({ ...selected, index: selected.index - 1 }));
-        else if (
-          source.index > selected.index &&
-          destination.index <= selected.index
-        )
-          dispatch(setSelected({ ...selected, index: selected.index + 1 }));
+        else if (source.index < selected && destination.index >= selected)
+          dispatch(setSelected(selected - 1));
+        else if (source.index > selected && destination.index <= selected)
+          dispatch(setSelected(selected + 1));
       }}
     >
       <Droppable droppableId="layer" direction="vertical">
@@ -705,37 +695,17 @@ function Detail() {
   // Provider
   const dispatch = useDispatch();
   const selected = useSelector((state) => state.draw.selected);
-  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
 
-  // If not selected, exit function
-  if (selected.index === -1) return null;
-  const l = layer[selected.index];
-
-  // If text element selected, set width and height
-  const textElement =
-    l.type === TYPE.text ? document.getElementById(`canvas-${l.name}`) : null;
-  if (textElement)
-    dispatch(
-      setLayerSize({
-        index: selected.index,
-        size: {
-          ...l.size,
-          w: Math.ceil(textElement.offsetWidth / sizePx.ratio),
-          h: Math.ceil(textElement.offsetHeight / sizePx.ratio),
-        },
-      })
-    );
-
   return (
-    selected.index !== -1 && (
+    selected !== -1 && (
       <Grid>
         <Grid.Col>
           <Group noWrap spacing="xs">
             <Input
               placeholder="Layer Name"
               size="xs"
-              value={l.name}
+              value={layer[selected].name}
               onChange={() => {}}
             />
             <ActionIcon variant="filled" size="md" color="blue">
@@ -746,13 +716,13 @@ function Detail() {
         <Grid.Col span={6}>
           <NumberInput
             size="xs"
-            value={l.size.x}
+            value={layer[selected].size.x}
             onChange={(value) =>
               dispatch(
                 setLayerSize({
-                  index: selected.index,
+                  index: selected,
                   size: {
-                    ...l.size,
+                    ...layer[selected].size,
                     x: value,
                   },
                 })
@@ -763,13 +733,13 @@ function Detail() {
         <Grid.Col span={6}>
           <NumberInput
             size="xs"
-            value={l.size.y}
+            value={layer[selected].size.y}
             onChange={(value) =>
               dispatch(
                 setLayerSize({
-                  index: selected.index,
+                  index: selected,
                   size: {
-                    ...l.size,
+                    ...layer[selected].size,
                     y: value,
                   },
                 })
