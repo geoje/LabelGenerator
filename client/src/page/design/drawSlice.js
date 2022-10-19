@@ -96,6 +96,16 @@ const slice = createSlice({
     },
     setSelected: (state, action) => {
       state.selected = action.payload;
+
+      // If text selected and no width, set width from element
+      if (state.selected !== -1) {
+        const l = state.layer[state.selected];
+        if (l.type === "text" && !(l.size.w || l.size.h)) {
+          const textElement = document.getElementById(`canvas-${l.name}`);
+          l.size.w = textElement.offsetWidth;
+          l.size.h = textElement.offsetHeight;
+        }
+      }
     },
   },
 });
