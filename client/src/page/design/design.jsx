@@ -32,6 +32,11 @@ import {
   IconQuestionMark,
   IconPhoto,
   IconCheck,
+  IconLetterX,
+  IconLetterY,
+  IconLetterW,
+  IconLetterH,
+  IconHash,
 } from "@tabler/icons";
 import {
   setSize,
@@ -332,9 +337,13 @@ function Canvas() {
 
     const l = layer[selected];
     const w =
-      l.type === TYPE.text ? Math.ceil(refLayer.current[selected].offsetWidth / sizePx.ratio) : l.size.w;
+      l.type === TYPE.text
+        ? Math.ceil(refLayer.current[selected].offsetWidth / sizePx.ratio)
+        : l.size.w;
     const h =
-      l.type === TYPE.text ? Math.ceil(refLayer.current[selected].offsetHeight / sizePx.ratio) : l.size.h;
+      l.type === TYPE.text
+        ? Math.ceil(refLayer.current[selected].offsetHeight / sizePx.ratio)
+        : l.size.h;
     setMove(
       (move = {
         ...move,
@@ -698,6 +707,8 @@ function Detail() {
   const selected = useSelector((state) => state.draw.selected);
   const layer = useSelector((state) => state.draw.layer);
 
+  const DETAIL_ICON_SIZE = 14;
+
   return (
     selected !== -1 && (
       <Grid>
@@ -706,10 +717,11 @@ function Detail() {
             <Input
               placeholder="Layer Name"
               size="xs"
+              icon={<IconHash size={DETAIL_ICON_SIZE} />}
               value={layer[selected].name}
               onChange={() => {}}
             />
-            <ActionIcon variant="filled" size="md" color="blue">
+            <ActionIcon variant="" size="md">
               <IconCheck size={18} />
             </ActionIcon>
           </Group>
@@ -717,6 +729,7 @@ function Detail() {
         <Grid.Col span={6}>
           <NumberInput
             size="xs"
+            icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
             value={layer[selected].size.x}
             onChange={(value) =>
               dispatch(
@@ -734,6 +747,7 @@ function Detail() {
         <Grid.Col span={6}>
           <NumberInput
             size="xs"
+            icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
             value={layer[selected].size.y}
             onChange={(value) =>
               dispatch(
@@ -742,6 +756,44 @@ function Detail() {
                   size: {
                     ...layer[selected].size,
                     y: value,
+                  },
+                })
+              )
+            }
+          />
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <NumberInput
+            size="xs"
+            icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+            value={layer[selected].size.w}
+            disabled={layer[selected].type === TYPE.text}
+            onChange={(value) =>
+              dispatch(
+                setLayerSize({
+                  index: selected,
+                  size: {
+                    ...layer[selected].size,
+                    w: value,
+                  },
+                })
+              )
+            }
+          />
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <NumberInput
+            size="xs"
+            icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
+            value={layer[selected].size.h}
+            disabled={layer[selected].type === TYPE.text}
+            onChange={(value) =>
+              dispatch(
+                setLayerSize({
+                  index: selected,
+                  size: {
+                    ...layer[selected].size,
+                    h: value,
                   },
                 })
               )
