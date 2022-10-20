@@ -23,14 +23,10 @@ jobs:
           cache: "npm"
 
       - name: Build client
-      - run: cd client && npm install --force
-      - run: cd client && npm run build --if-present
-      - run: cd client && npm test
+        run: cd client && npm install --force && npm run build --if-present && npm test
 
       - name: Build server
-      - run: npm install --force
-      - run: npm run build --if-present
-      - run: npm test
+        run: npm install --force && npm run build --if-present && npm test
 
       - name: Generate deployment package
         run: zip -r deploy.zip . -x "*.git* **node_modules**"
