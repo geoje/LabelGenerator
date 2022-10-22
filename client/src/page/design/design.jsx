@@ -662,7 +662,8 @@ function Layer() {
           </Group>
           <ActionIcon
             size="xs"
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation();
               dispatch(removeLayerByIndex(index));
             }}
           >

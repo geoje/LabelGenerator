@@ -84,7 +84,22 @@ const slice = createSlice({
       );
     },
     removeLayerByIndex: (state, action) => {
+      // If the last layer selected and removing
+      if (state.selected === state.layer.length - 1) state.selected--;
+
+      // Reduce layer
       state.layer.splice(action.payload, 1);
+
+      // If text selected and no width, set width from element
+      // Same code at setSelected
+      if (state.selected !== -1) {
+        const l = state.layer[state.selected];
+        if (l.type === "text" && !(l.size.w || l.size.h)) {
+          const textElement = document.getElementById(`canvas-${l.name}`);
+          l.size.w = Math.ceil(textElement.offsetWidth / state.size.ratio);
+          l.size.h = Math.ceil(textElement.offsetHeight / state.size.ratio);
+        }
+      }
     },
     /**
      *
