@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
-    "start": "nodemon server/app.js",
+    "start": "node server/app.js",
     "build": "npm run build --prefix client",
     "test": "node server/test.js"
   },
