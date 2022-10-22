@@ -23,13 +23,13 @@ jobs:
           cache: "npm"
 
       - name: Install client modules
-        run: cd client && npm i
+        run: cd client && npm i --omit=dev
 
       - name: Build client
         run: cd client && npm run build
 
       - name: Install server modules
-        run: npm i
+        run: npm i --omit=dev
 
       - name: Generate deployment package
         run: zip -r deploy.zip . -x "*.git*" "*client/node_modules**"
