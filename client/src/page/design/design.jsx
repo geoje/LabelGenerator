@@ -13,6 +13,7 @@ import {
   Text,
   Tooltip,
   Input,
+  TextInput,
 } from "@mantine/core";
 import React, { useRef } from "react";
 import { useState } from "react";
@@ -37,6 +38,7 @@ import {
   IconLetterW,
   IconLetterH,
   IconHash,
+  IconAlphabetLatin,
 } from "@tabler/icons";
 import {
   setSize,
@@ -46,6 +48,7 @@ import {
   removeLayerByIndex,
   setLayerSize,
   setSelected,
+  setVar,
 } from "./drawSlice";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
@@ -56,6 +59,7 @@ const TYPE = {
   image: "image",
   qr: "qr",
 };
+const DETAIL_ICON_SIZE = 14;
 
 const convertSize = {
   inch: (size) => {
@@ -125,6 +129,14 @@ const typeToIcon = (type) => {
     <IconQuestionMark />
   );
 };
+
+function getElementSize(layerName, ratio) {
+  const textElement = document.getElementById(`canvas-${layerName}`);
+  return {
+    w: Math.ceil(textElement.offsetWidth / ratio),
+    h: Math.ceil(textElement.offsetHeight / ratio),
+  };
+}
 
 /** Left
  *
@@ -208,7 +220,44 @@ function LayoutSize() {
   );
 }
 function Variable() {
-  return <></>;
+  // Provider
+  const dispatch = useDispatch();
+  const size = useSelector((state) => state.draw.size);
+  const selected = useSelector((state) => state.draw.selected);
+  const layer = useSelector((state) => state.draw.layer);
+
+  if (selected === -1) return <></>;
+
+  switch (layer[selected].type) {
+    case TYPE.text:
+      return (
+        <Grid>
+          <Grid.Col>
+            <TextInput
+              placeholder="Default Value"
+              size="xs"
+              icon={<IconAlphabetLatin size={DETAIL_ICON_SIZE} />}
+              value={layer[selected].var.default}
+              onChange={(event) => {
+                dispatch(
+                  setVar({
+                    index: selected,
+                    var: {
+                      ...layer[selected].var,
+                      default: event.currentTarget.value,
+                    },
+                  })
+                );
+              }}
+            />
+          </Grid.Col>
+        </Grid>
+      );
+    case TYPE.image:
+      return <></>;
+    default:
+      return <></>;
+  }
 }
 
 /** Middle
@@ -299,7 +348,22 @@ function Tool() {
 
       <Divider orientation="vertical" />
       <Tooltip label="Text">
-        <ActionIcon variant="subtle" onClick={() => {}}>
+        <ActionIcon
+          variant="subtle"
+          onClick={() => {
+            dispatch(
+              addLayer({
+                name: getLayerName(),
+                type: TYPE.text,
+                size: {
+                  x: sizePx.w / 2 - 10,
+                  y: sizePx.h / 2 - 10,
+                },
+                var: { default: "New Text" },
+              })
+            );
+          }}
+        >
           <IconTypography />
         </ActionIcon>
       </Tooltip>
@@ -708,8 +772,6 @@ function Detail() {
   const selected = useSelector((state) => state.draw.selected);
   const layer = useSelector((state) => state.draw.layer);
 
-  const DETAIL_ICON_SIZE = 14;
-
   return (
     selected !== -1 && (
       <Grid>
@@ -717,6 +779,7 @@ function Detail() {
           <Group noWrap spacing="xs">
             <Input
               placeholder="Layer Name"
+              sx={{ flex: 1 }}
               size="xs"
               icon={<IconHash size={DETAIL_ICON_SIZE} />}
               value={layer[selected].name}
