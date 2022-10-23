@@ -189,22 +189,21 @@ function LayoutSize() {
       </Grid.Col>
       <Grid.Col>
         <Slider
-          label={(val) => val * 100 + "%"}
-          defaultValue={size.ratio}
-          min={0.5}
-          max={3}
+          label={(val) => (1 + val) * 100 + "%"}
+          defaultValue={0}
+          min={0}
+          max={2}
           step={0.5}
           marks={[
+            { value: 0 },
             { value: 0.5 },
             { value: 1 },
             { value: 1.5 },
             { value: 2 },
-            { value: 2.5 },
-            { value: 3 },
           ]}
           styles={{ markLabel: { display: "none" } }}
           onChange={(value) => {
-            dispatch(setSizeRatio(value));
+            dispatch(setSizeRatio(1 + value));
           }}
         />
       </Grid.Col>
@@ -389,9 +388,10 @@ function Canvas() {
 
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
-      var textElement = document.getElementById(
+      const textElement = document.getElementById(
         `canvas-${layer[selected].name}`
       );
+      console.log(textElement.offsetWidth, sizePx.ratio);
       return {
         ...layer[selected].size,
         w: textElement ? Math.ceil(textElement.offsetWidth / sizePx.ratio) : 0,
