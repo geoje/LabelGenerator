@@ -384,15 +384,14 @@ function Canvas() {
   let selected = useSelector((state) => state.draw.selected);
 
   const refCanvas = useRef();
-  const refLayer = useRef([]);
+  const refLayer = useRef({ current: [] });
   let [move, setMove] = useState({ x: -1, y: -1, ox: 0, oy: 0 });
 
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
-      const textElement = document.getElementById(
+      var textElement = document.getElementById(
         `canvas-${layer[selected].name}`
       );
-      console.log(Math.ceil(textElement.offsetWidth / sizePx.ratio));
       return {
         ...layer[selected].size,
         w: textElement ? Math.ceil(textElement.offsetWidth / sizePx.ratio) : 0,

@@ -111,7 +111,6 @@ const slice = createSlice({
         `canvas-${state.layer[action.payload.index].name}`
       );
       e.innerText = state.layer[action.payload.index].var = action.payload.var;
-      console.log(e);
     },
   },
 });
