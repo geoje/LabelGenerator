@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import {
-  MantineProvider,
-  ColorSchemeProvider,
-  ColorScheme,
-} from "@mantine/core";
+import { MantineProvider, ColorSchemeProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import { useColorScheme } from "@mantine/hooks";
 import { Provider, useSelector } from "react-redux";
