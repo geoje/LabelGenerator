@@ -1,13 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-function getElementSize(layerName, ratio) {
-  const textElement = document.getElementById(`canvas-${layerName}`);
-  return {
-    w: Math.ceil(textElement.offsetWidth / ratio),
-    h: Math.ceil(textElement.offsetHeight / ratio),
-  };
-}
-
 /**
  * size: {w, h, unit, ratio}
  * 1 inch = 2.54 cm
@@ -97,17 +89,6 @@ const slice = createSlice({
 
       // Reduce layer
       state.layer.splice(action.payload, 1);
-
-      // If text selected and no width, set width from element
-      // Same code at setSelected
-      if (state.selected !== -1) {
-        const l = state.layer[state.selected];
-        if (l.type === "text" && !(l.size.w || l.size.h))
-          l.size = {
-            ...l.size,
-            ...getElementSize(l.name, state.size.ratio),
-          };
-      }
     },
     /**
      *
@@ -119,17 +100,6 @@ const slice = createSlice({
     },
     setSelected: (state, action) => {
       state.selected = action.payload;
-
-      // If text selected and no width, set width from element
-      // Same code at setSelected
-      if (state.selected !== -1) {
-        const l = state.layer[state.selected];
-        if (l.type === "text" && !(l.size.w || l.size.h))
-          l.size = {
-            ...l.size,
-            ...getElementSize(l.name, state.size.ratio),
-          };
-      }
     },
     /**
      *
@@ -137,17 +107,6 @@ const slice = createSlice({
      * @param {payload: {index, size:{x, y, w, h}}} action
      */
     setVar: (state, action) => {
-      // If text selected and no width, set width from element
-      // Same code at setSelected
-      if (state.selected !== -1) {
-        const l = state.layer[state.selected];
-        if (l.type === "text")
-          l.size = {
-            ...l.size,
-            ...getElementSize(l.name, state.size.ratio),
-          };
-      }
-
       state.layer[action.payload.index].var = action.payload.var;
     },
   },

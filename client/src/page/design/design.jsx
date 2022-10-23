@@ -130,14 +130,6 @@ const typeToIcon = (type) => {
   );
 };
 
-function getElementSize(layerName, ratio) {
-  const textElement = document.getElementById(`canvas-${layerName}`);
-  return {
-    w: Math.ceil(textElement.offsetWidth / ratio),
-    h: Math.ceil(textElement.offsetHeight / ratio),
-  };
-}
-
 /** Left
  *
  * @returns
@@ -222,7 +214,6 @@ function LayoutSize() {
 function Variable() {
   // Provider
   const dispatch = useDispatch();
-  const size = useSelector((state) => state.draw.size);
   const selected = useSelector((state) => state.draw.selected);
   const layer = useSelector((state) => state.draw.layer);
 
@@ -396,37 +387,52 @@ function Canvas() {
   const refLayer = useRef([]);
   let [move, setMove] = useState({ x: -1, y: -1, ox: 0, oy: 0 });
 
+  const selectedLayerSize = () => {
+    if (layer[selected].type === TYPE.text) {
+      const textElement = document.getElementById(
+        `canvas-${layer[selected].name}`
+      );
+      return {
+        ...layer[selected].size,
+        w: textElement ? textElement.offsetWidth : 0,
+        h: textElement ? textElement.offsetHeight : 0,
+      };
+    } else return layer[selected].size;
+  };
+
   const onMouseMove = (event) => {
     event.preventDefault();
 
     const l = layer[selected];
     const w =
       l.type === TYPE.text
-        ? Math.ceil(refLayer.current[selected].offsetWidth / sizePx.ratio)
-        : l.size.w;
+        ? selectedLayerSize().w
+        : Math.ceil(refLayer.current[selected].offsetWidth / sizePx.ratio);
     const h =
       l.type === TYPE.text
-        ? Math.ceil(refLayer.current[selected].offsetHeight / sizePx.ratio)
-        : l.size.h;
+        ? selectedLayerSize().h
+        : Math.ceil(refLayer.current[selected].offsetHeight / sizePx.ratio);
     setMove(
       (move = {
         ...move,
-        x:
+        x: Math.round(
           Math.max(
             0,
             Math.min(
               (sizePx.w - w) * sizePx.ratio - 2,
               event.pageX - refCanvas.current.offsetLeft - move.ox
             )
-          ) / sizePx.ratio,
-        y:
+          ) / sizePx.ratio
+        ),
+        y: Math.round(
           Math.max(
             0,
             Math.min(
               (sizePx.h - h) * sizePx.ratio - 2,
               event.pageY - refCanvas.current.offsetTop - move.oy
             )
-          ) / sizePx.ratio,
+          ) / sizePx.ratio
+        ),
       })
     );
   };
@@ -453,24 +459,13 @@ function Canvas() {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
 
-    const l = layer[selected];
-    const w =
-      l.type === TYPE.text
-        ? Math.ceil(refLayer.current[selected].offsetWidth / sizePx.ratio)
-        : l.size.w;
-    const h =
-      l.type === TYPE.text
-        ? Math.ceil(refLayer.current[selected].offsetHeight / sizePx.ratio)
-        : l.size.h;
     dispatch(
       setLayerSize({
         index: selected,
         size: {
-          ...l.size,
+          ...layer[selected].size,
           x: move.x,
           y: move.y,
-          w,
-          h,
         },
       })
     );
@@ -576,12 +571,14 @@ function Canvas() {
               move.y === -1
                 ? layer[selected].size.y * sizePx.ratio - 1
                 : move.y * sizePx.ratio - 1,
-            width: layer[selected].size.w
-              ? layer[selected].size.w * sizePx.ratio + 2
-              : 0,
-            height: layer[selected].size.w
-              ? layer[selected].size.h * sizePx.ratio + 2
-              : 0,
+            width:
+              layer[selected] === TYPE.text
+                ? selectedLayerSize().w + 2
+                : layer[selected].size.w * sizePx.ratio + 2,
+            height:
+              layer[selected] === TYPE.text
+                ? selectedLayerSize().h + 2
+                : layer[selected].size.h * sizePx.ratio + 2,
 
             backgroundImage:
               "repeating-linear-gradient(0deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(90deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(180deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(270deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px)",
@@ -772,6 +769,19 @@ function Detail() {
   const selected = useSelector((state) => state.draw.selected);
   const layer = useSelector((state) => state.draw.layer);
 
+  const selectedLayerSize = () => {
+    if (layer[selected].type === TYPE.text) {
+      const textElement = document.getElementById(
+        `canvas-${layer[selected].name}`
+      );
+      return {
+        ...layer[selected].size,
+        w: textElement ? textElement.offsetWidth : 0,
+        h: textElement ? textElement.offsetHeight : 0,
+      };
+    } else return layer[selected].size;
+  };
+
   return (
     selected !== -1 && (
       <Grid>
@@ -830,7 +840,7 @@ function Detail() {
           <NumberInput
             size="xs"
             icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
-            value={layer[selected].size.w}
+            value={selectedLayerSize().w}
             disabled={layer[selected].type === TYPE.text}
             onChange={(value) =>
               dispatch(
@@ -849,7 +859,7 @@ function Detail() {
           <NumberInput
             size="xs"
             icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
-            value={layer[selected].size.h}
+            value={selectedLayerSize().h}
             disabled={layer[selected].type === TYPE.text}
             onChange={(value) =>
               dispatch(
