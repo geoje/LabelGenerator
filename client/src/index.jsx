@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
+import {
+  MantineProvider,
+  ColorSchemeProvider,
+  ColorScheme,
+} from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
+import { useColorScheme } from "@mantine/hooks";
 import { Provider, useSelector } from "react-redux";
 import { store } from "./store";
 
@@ -12,7 +17,8 @@ import Print from "./page/print/print";
 
 function App() {
   const step = useSelector((state) => state.step.value);
-  const [colorScheme, setColorScheme] = useState("light");
+  const preferredColorScheme = useColorScheme();
+  const [colorScheme, setColorScheme] = useState(preferredColorScheme);
   const toggleColorScheme = (value) =>
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
 
