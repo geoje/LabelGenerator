@@ -107,7 +107,11 @@ const slice = createSlice({
      * @param {payload: {index, size:{x, y, w, h}}} action
      */
     setVar: (state, action) => {
-      state.layer[action.payload.index].var = action.payload.var;
+      const e = document.getElementById(
+        `canvas-${state.layer[action.payload.index].name}`
+      );
+      e.innerText = state.layer[action.payload.index].var = action.payload.var;
+      console.log(e);
     },
   },
 });
