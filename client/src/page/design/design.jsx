@@ -15,7 +15,7 @@ import {
   Input,
   TextInput,
 } from "@mantine/core";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -391,7 +391,6 @@ function Canvas() {
       const textElement = document.getElementById(
         `canvas-${layer[selected].name}`
       );
-      console.log(textElement.offsetWidth, sizePx.ratio);
       return {
         ...layer[selected].size,
         w: textElement ? Math.ceil(textElement.offsetWidth / sizePx.ratio) : 0,
@@ -462,6 +461,36 @@ function Canvas() {
     );
     setMove({ x: -1, y: -1, ox: 0, oy: 0 });
   };
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (selected === -1) return;
+      event.preventDefault();
+
+      const l = layer[selected];
+      let d = {
+        x: (event.key === "ArrowRight") - (event.key === "ArrowLeft"),
+        y: (event.key === "ArrowDown") - (event.key === "ArrowUp"),
+      };
+      if (d.x === 0 && d.y === 0) return;
+
+      dispatch(
+        setLayerSize({
+          index: selected,
+          size: {
+            ...l.size,
+            x: Math.max(0, Math.min(sizePx.w - l.size.w - 1, l.size.x + d.x)),
+            y: Math.max(0, Math.min(sizePx.h - l.size.h - 1, l.size.y + d.y)),
+          },
+        })
+      );
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [dispatch, layer, selected, sizePx]);
 
   const items = layer.map((_, i) => {
     const index = layer.length - 1 - i;
