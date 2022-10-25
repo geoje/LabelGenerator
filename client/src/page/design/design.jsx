@@ -14,6 +14,7 @@ import {
   Tooltip,
   Input,
   TextInput,
+  SegmentedControl,
 } from "@mantine/core";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
@@ -39,6 +40,8 @@ import {
   IconLetterH,
   IconHash,
   IconAlphabetLatin,
+  IconRuler3,
+  IconVariable,
 } from "@tabler/icons";
 import {
   setSize,
@@ -49,6 +52,7 @@ import {
   setLayerSize,
   setSelected,
   setVar,
+  setPage,
 } from "./drawSlice";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
@@ -176,6 +180,7 @@ function LayoutSize() {
       <Grid.Col span={4} md={12} xl={4}>
         <Select
           placeholder="Unit"
+          icon={<IconRuler3 size={DETAIL_ICON_SIZE} />}
           size="xs"
           data={Object.keys(UNIT).map((s) => {
             return { value: s, label: s };
@@ -213,8 +218,9 @@ function LayoutSize() {
 function Variable() {
   // Provider
   const dispatch = useDispatch();
-  const selected = useSelector((state) => state.draw.selected);
+  const data = useSelector((state) => state.data.value);
   const layer = useSelector((state) => state.draw.layer);
+  const selected = useSelector((state) => state.draw.selected);
 
   if (selected === -1) return <></>;
 
@@ -223,23 +229,68 @@ function Variable() {
       return (
         <Grid>
           <Grid.Col>
-            <TextInput
-              placeholder="Default Value"
+            <SegmentedControl
+              fullWidth
+              color="blue"
               size="xs"
-              icon={<IconAlphabetLatin size={DETAIL_ICON_SIZE} />}
-              value={layer[selected].var.default}
-              onChange={(event) => {
+              data={[
+                { value: "static", label: "Static" },
+                { value: "format", label: "Format" },
+              ]}
+              value={layer[selected].var.type}
+              onChange={(value) =>
                 dispatch(
                   setVar({
                     index: selected,
-                    var: {
-                      ...layer[selected].var,
-                      default: event.currentTarget.value,
-                    },
+                    var: { ...layer[selected].var, type: value },
                   })
-                );
-              }}
+                )
+              }
             />
+          </Grid.Col>
+          <Grid.Col>
+            {layer[selected].var.type === "static" && (
+              <TextInput
+                placeholder="Static Text"
+                size="xs"
+                icon={<IconAlphabetLatin size={DETAIL_ICON_SIZE} />}
+                value={layer[selected].var.static}
+                onChange={(event) => {
+                  dispatch(
+                    setVar({
+                      index: selected,
+                      var: {
+                        ...layer[selected].var,
+                        static: event.currentTarget.value,
+                      },
+                    })
+                  );
+                }}
+              />
+            )}
+            {layer[selected].var.type === "format" && (
+              <Select
+                placeholder="Data Column"
+                size="xs"
+                icon={<IconVariable size={DETAIL_ICON_SIZE} />}
+                data={Object.keys(data.length ? data[0] : []).map((s) => {
+                  return { value: s, label: s };
+                })}
+                value={layer[selected].var.format}
+                onChange={(value) => {
+                  if (value === layer[selected].var.format) return;
+                  dispatch(
+                    setVar({
+                      index: selected,
+                      var: {
+                        ...layer[selected].var,
+                        format: value,
+                      },
+                    })
+                  );
+                }}
+              />
+            )}
           </Grid.Col>
         </Grid>
       );
@@ -378,9 +429,11 @@ function Tool() {
 function Canvas() {
   // Provider
   const dispatch = useDispatch();
+  const data = useSelector((state) => state.data.value);
   const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
   let selected = useSelector((state) => state.draw.selected);
+  const page = useSelector((state) => state.draw.page);
 
   const refCanvas = useRef();
   const refLayer = useRef({ current: [] });
@@ -465,7 +518,6 @@ function Canvas() {
   useEffect(() => {
     const onKeyDown = (event) => {
       if (selected === -1) return;
-      event.preventDefault();
 
       const l = layer[selected];
       let d = {
@@ -555,7 +607,11 @@ function Canvas() {
               backgroundColor: item.backgroundColor,
             }}
           >
-            {item.var.default}
+            {item.var.type === "format"
+              ? data.length && Object.keys(data[0]).includes(item.var.format)
+                ? data[page][item.var.format]
+                : ""
+              : item.var.static}
           </Text>
         );
       default:
@@ -609,9 +665,10 @@ function Canvas() {
 }
 function Pagenation() {
   // Provider
+  const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
+  const page = useSelector((state) => state.draw.page);
 
-  const [index, setIndex] = useState(1);
   const handlers = useRef();
 
   return (
@@ -627,10 +684,12 @@ function Pagenation() {
 
       <NumberInput
         hideControls
-        value={index}
+        value={page}
         onChange={(val) =>
-          setIndex(
-            Math.min(Math.max(Number.isNaN(val) ? 1 : val, 1), data.length)
+          dispatch(
+            setPage(
+              Math.min(Math.max(Number.isNaN(val) ? 1 : val, 1), data.length)
+            )
           )
         }
         handlersRef={handlers}

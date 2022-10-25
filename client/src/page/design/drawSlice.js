@@ -12,10 +12,12 @@ import { createSlice } from "@reduxjs/toolkit";
  *    font: { family:"", size:0, color:"" }
  *    border: { style: "", width: 0, color: "" }
  *    backgroundColor: "",
- *    var: { default: "", ... }
+ *    text: { type: "", static: "", format: { ... } }
  * }, ...]
  *
  * selected: -1
+ *
+ * page: 1
  */
 const slice = createSlice({
   name: "draw",
@@ -61,10 +63,11 @@ const slice = createSlice({
           y: 10,
         },
         font: { size: 10, color: "#0000ff" },
-        var: { default: "Sample Text" },
+        var: { type: "static", static: "Sample Text" },
       },
     ],
     selected: -1,
+    page: 1,
   },
   reducers: {
     setSize: (state, action) => {
@@ -101,16 +104,16 @@ const slice = createSlice({
     setSelected: (state, action) => {
       state.selected = action.payload;
     },
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
     /**
      *
      * @param {*} state
-     * @param {payload: {index, size:{x, y, w, h}}} action
+     * @param {payload: {index, var:{type, static|format}}}} action
      */
     setVar: (state, action) => {
-      const e = document.getElementById(
-        `canvas-${state.layer[action.payload.index].name}`
-      );
-      e.innerText = state.layer[action.payload.index].var = action.payload.var;
+      state.layer[action.payload.index].var = action.payload.var;
     },
   },
 });
@@ -123,6 +126,7 @@ export const {
   removeLayerByIndex,
   setLayerSize,
   setSelected,
+  setPage,
   setVar,
 } = slice.actions;
 export default slice.reducer;

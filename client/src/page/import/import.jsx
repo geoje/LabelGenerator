@@ -396,13 +396,13 @@ function QRCodePaper() {
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.qr.format);
 
-  const [index, setIndex] = useState(1);
+  const [page, setPage] = useState(1);
   const handlers = useRef();
 
   const keys = data.length ? Object.keys(data[0]) : [];
   const content = format
     .filter((o) => o.literal || keys.includes(o.value))
-    .map((o) => (o.literal ? o.value : data[index - 1][o.value]))
+    .map((o) => (o.literal ? o.value : data[page - 1][o.value]))
     .join("");
 
   return (
@@ -464,9 +464,9 @@ function QRCodePaper() {
 
           <NumberInput
             hideControls
-            value={index}
+            value={page}
             onChange={(val) =>
-              setIndex(
+              setPage(
                 Math.min(Math.max(Number.isNaN(val) ? 1 : val, 1), data.length)
               )
             }
