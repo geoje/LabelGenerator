@@ -12,10 +12,10 @@ import {
   createStyles,
   Text,
   Tooltip,
-  Input,
   TextInput,
   SegmentedControl,
 } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,6 +53,8 @@ import {
   setSelected,
   setVar,
   setPage,
+  setRename,
+  renameLayer,
 } from "./drawSlice";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
@@ -134,10 +136,7 @@ const typeToIcon = (type) => {
   );
 };
 
-/** Left
- *
- * @returns
- */
+// Left
 function LayoutSize() {
   // Provider
   const dispatch = useDispatch();
@@ -301,10 +300,7 @@ function Variable() {
   }
 }
 
-/** Middle
- *
- * @returns
- */
+// Middle
 function Tool() {
   // Provider
   const dispatch = useDispatch();
@@ -712,10 +708,7 @@ function Pagenation() {
   );
 }
 
-/** Right
- *
- * @returns
- */
+// Right
 function Layer() {
   // Provider
   const dispatch = useDispatch();
@@ -840,8 +833,9 @@ function Detail() {
   // Provider
   const dispatch = useDispatch();
   const sizePx = convertSize.px(useSelector((state) => state.draw.size));
-  const selected = useSelector((state) => state.draw.selected);
   const layer = useSelector((state) => state.draw.layer);
+  const selected = useSelector((state) => state.draw.selected);
+  const rename = useSelector((state) => state.draw.rename);
 
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
@@ -860,16 +854,49 @@ function Detail() {
     selected !== -1 && (
       <Grid>
         <Grid.Col>
-          <Group noWrap spacing="xs">
-            <Input
+          <Group noWrap spacing="xs" align="flex-start">
+            <TextInput
               placeholder="Layer Name"
               sx={{ flex: 1 }}
               size="xs"
               icon={<IconHash size={DETAIL_ICON_SIZE} />}
-              value={layer[selected].name}
-              onChange={() => {}}
+              value={rename.value}
+              error={rename.error.length ? rename.error : false}
+              onClick={(event) =>
+                dispatch(
+                  setRename({ value: event.currentTarget.value, error: "" })
+                )
+              }
+              onChange={(event) =>
+                dispatch(
+                  setRename({ value: event.currentTarget.value, error: "" })
+                )
+              }
             />
-            <ActionIcon variant="" size="md">
+            <ActionIcon
+              variant=""
+              size="md"
+              onClick={(event) => {
+                if (
+                  layer.some(
+                    (o, i) => o.name === rename.value && i !== selected
+                  )
+                ) {
+                  dispatch(
+                    setRename({ value: rename.value, error: "Duplicated" })
+                  );
+                } else {
+                  showNotification({
+                    title: "Layer Name Changed",
+                    message: `${layer[selected].name} to ${rename.value}`,
+                    color: "green",
+                  });
+                  dispatch(
+                    renameLayer({ index: selected, name: rename.value })
+                  );
+                }
+              }}
+            >
               <IconCheck size={18} />
             </ActionIcon>
           </Group>
