@@ -18,6 +18,8 @@ import { createSlice } from "@reduxjs/toolkit";
  * selected: -1
  *
  * page: 1
+ *
+ * rename: ""
  */
 const slice = createSlice({
   name: "draw",
@@ -69,6 +71,7 @@ const slice = createSlice({
     ],
     selected: -1,
     page: 1,
+    rename: { value: "", error: "" },
   },
   reducers: {
     setSize: (state, action) => {
@@ -122,6 +125,23 @@ const slice = createSlice({
     setVar: (state, action) => {
       state.layer[action.payload.index].var = action.payload.var;
     },
+    renameLayer: (state, action) => {
+      state.layer[action.payload.index].name = action.payload.name;
+    },
+
+    setSelected: (state, action) => {
+      state.selected = action.payload;
+      state.rename = {
+        value: state.selected === -1 ? "" : state.layer[action.payload].name,
+        error: "",
+      };
+    },
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
+    setRename: (state, action) => {
+      state.rename = action.payload;
+    },
   },
 });
 
@@ -132,10 +152,8 @@ export const {
   changeLayerIndex,
   removeLayerByIndex,
   setLayerSize,
-  setLayerBorder,
-  setLayerBackground,
   setSelected,
   setPage,
-  setVar,
+  setRename,
 } = slice.actions;
 export default slice.reducer;
