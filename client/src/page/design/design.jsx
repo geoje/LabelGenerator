@@ -15,6 +15,7 @@ import {
   Input,
   TextInput,
   SegmentedControl,
+  ColorInput,
 } from "@mantine/core";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
@@ -42,6 +43,11 @@ import {
   IconAlphabetLatin,
   IconRuler3,
   IconVariable,
+  IconBrush,
+  IconBucketDroplet,
+  IconCircleLetterR,
+  IconCircleLetterH,
+  IconCircleLetterX,
 } from "@tabler/icons";
 import {
   setSize,
@@ -582,7 +588,7 @@ function Canvas() {
               borderColor: item.border?.color,
               borderRadius: item.type === TYPE.circle ? "50%" : 0,
 
-              backgroundColor: item.backgroundColor,
+              background: item.background,
             }}
           ></div>
         );
@@ -604,7 +610,7 @@ function Canvas() {
               fontSize: item.font ? item.font.size * sizePx.ratio : null,
               color: item.font?.color,
 
-              backgroundColor: item.backgroundColor,
+              background: item.background,
             }}
           >
             {item.var.type === "format"
@@ -843,6 +849,21 @@ function Detail() {
   const selected = useSelector((state) => state.draw.selected);
   const layer = useSelector((state) => state.draw.layer);
 
+  let color =
+    selected === -1
+      ? ""
+      : layer[selected].type === TYPE.text
+      ? layer[selected].font?.color
+        ? layer[selected].font.color
+        : ""
+      : layer[selected].border?.color
+      ? layer[selected].border.color
+      : "";
+  let background =
+    selected !== -1 && layer[selected].background
+      ? layer[selected].background
+      : "";
+
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
       const textElement = document.getElementById(
@@ -945,6 +966,78 @@ function Detail() {
                   },
                 })
               )
+            }
+          />
+        </Grid.Col>
+        <Grid.Col>
+          <ColorInput
+            size="xs"
+            defaultValue={color}
+            rightSection={
+              <>
+                <Group
+                  size="xs"
+                  sx={(theme) => {
+                    return {
+                      width: 18,
+                      height: 18,
+                      marginLeft: "auto",
+                      alignContent: "center",
+                      color:
+                        theme.colorScheme === "dark"
+                          ? theme.colors.gray[7]
+                          : theme.colors.gray[4],
+                    };
+                  }}
+                >
+                  <IconBrush size={DETAIL_ICON_SIZE} />
+                </Group>
+                <ActionIcon mr="xs" variant="transparent">
+                  {color.startsWith("rgba") === "rgba" ? (
+                    <IconCircleLetterR size={DETAIL_ICON_SIZE + 2} />
+                  ) : color.startsWith("hsla") ? (
+                    <IconCircleLetterH size={DETAIL_ICON_SIZE + 2} />
+                  ) : (
+                    <IconCircleLetterX size={DETAIL_ICON_SIZE + 2} />
+                  )}
+                </ActionIcon>
+              </>
+            }
+          />
+        </Grid.Col>
+        <Grid.Col>
+          <ColorInput
+            size="xs"
+            defaultValue={background}
+            rightSection={
+              <>
+                <Group
+                  size="xs"
+                  sx={(theme) => {
+                    return {
+                      width: 18,
+                      height: 18,
+                      marginLeft: "auto",
+                      alignContent: "center",
+                      color:
+                        theme.colorScheme === "dark"
+                          ? theme.colors.gray[7]
+                          : theme.colors.gray[4],
+                    };
+                  }}
+                >
+                  <IconBucketDroplet size={DETAIL_ICON_SIZE} />
+                </Group>
+                <ActionIcon mr="xs" variant="transparent">
+                  {color.startsWith("rgba") === "rgba" ? (
+                    <IconCircleLetterR size={DETAIL_ICON_SIZE + 2} />
+                  ) : color.startsWith("hsla") ? (
+                    <IconCircleLetterH size={DETAIL_ICON_SIZE + 2} />
+                  ) : (
+                    <IconCircleLetterX size={DETAIL_ICON_SIZE + 2} />
+                  )}
+                </ActionIcon>
+              </>
             }
           />
         </Grid.Col>

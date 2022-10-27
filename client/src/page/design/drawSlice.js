@@ -11,7 +11,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    size: { x: 0, y: 0, w: 0, h: 0 },
  *    font: { family:"", size:0, color:"" }
  *    border: { style: "", width: 0, color: "" }
- *    backgroundColor: "",
+ *    background: "",
  *    text: { type: "", static: "", format: { ... } }
  * }, ...]
  *
@@ -41,7 +41,7 @@ const slice = createSlice({
         border: {
           style: "solid",
           width: 1,
-          color: "#00ff00",
+          color: "#ff0000",
         },
       },
       {
@@ -53,7 +53,7 @@ const slice = createSlice({
           w: 20,
           h: 20,
         },
-        backgroundColor: "#ff0000",
+        background: "hsla(241, 79%, 46%, 0.6)",
       },
       {
         name: "OurText",
@@ -64,6 +64,7 @@ const slice = createSlice({
         },
         font: { size: 10, color: "#0000ff" },
         var: { type: "static", static: "Sample Text" },
+        background: "rgba(0, 0, 0, 0.1)",
       },
     ],
     selected: -1,
@@ -101,6 +102,12 @@ const slice = createSlice({
     setLayerSize: (state, action) => {
       state.layer[action.payload.index].size = action.payload.size;
     },
+    setLayerBorder: (state, action) => {
+      state.layer[action.payload.index].border = action.payload.border;
+    },
+    setLayerBackground: (state, action) => {
+      state.layer[action.payload.index].background = action.payload.background;
+    },
     setSelected: (state, action) => {
       state.selected = action.payload;
     },
@@ -125,6 +132,8 @@ export const {
   changeLayerIndex,
   removeLayerByIndex,
   setLayerSize,
+  setLayerBorder,
+  setLayerBackground,
   setSelected,
   setPage,
   setVar,
