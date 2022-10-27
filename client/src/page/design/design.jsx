@@ -61,9 +61,7 @@ import {
   setPage,
   setRename,
   renameLayer,
-  setLayerFont,
   setLayerBackground,
-  setLayerBorder,
   setLayerColor,
 } from "./drawSlice";
 
