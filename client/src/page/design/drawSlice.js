@@ -43,7 +43,7 @@ const slice = createSlice({
         border: {
           style: "solid",
           width: 1,
-          color: "#ff0000",
+          color: { type: "hex", value: "#ff0000" },
         },
       },
       {
@@ -55,7 +55,7 @@ const slice = createSlice({
           w: 20,
           h: 20,
         },
-        background: "hsla(241, 79%, 46%, 0.6)",
+        background: { format: "hsla", value: "hsla(241, 79%, 46%, 0.6)" },
       },
       {
         name: "OurText",
@@ -64,9 +64,9 @@ const slice = createSlice({
           x: 80,
           y: 10,
         },
-        font: { size: 10, color: "#0000ff" },
+        font: { size: 10, color: { format: "hex", value: "#0000ff" } },
         var: { type: "static", static: "Sample Text" },
-        background: "rgba(0, 0, 0, 0.1)",
+        background: { format: "rgba", value: "rgba(0, 0, 0, 0.1)" },
       },
     ],
     selected: -1,
@@ -97,6 +97,7 @@ const slice = createSlice({
       // Reduce layer
       state.layer.splice(action.payload, 1);
     },
+
     /**
      *
      * @param {*} state
@@ -105,30 +106,28 @@ const slice = createSlice({
     setLayerSize: (state, action) => {
       state.layer[action.payload.index].size = action.payload.size;
     },
+    setLayerFont: (state, action) => {
+      state.layer[action.payload.index].font = action.payload.font;
+    },
     setLayerBorder: (state, action) => {
       state.layer[action.payload.index].border = action.payload.border;
+    },
+    setLayerColor: (state, action) => {
+      if (state.layer[action.payload.index].type === "text")
+        state.layer[action.payload.index].font.color = action.payload.color;
+      else
+        state.layer[action.payload.index].border.color = action.payload.color;
     },
     setLayerBackground: (state, action) => {
       state.layer[action.payload.index].background = action.payload.background;
     },
-    setSelected: (state, action) => {
-      state.selected = action.payload;
-    },
-    setPage: (state, action) => {
-      state.page = action.payload;
-    },
-    /**
-     *
-     * @param {*} state
-     * @param {payload: {index, var:{type, static|format}}}} action
-     */
-    setVar: (state, action) => {
+    setLayerVar: (state, action) => {
       state.layer[action.payload.index].var = action.payload.var;
     },
+
     renameLayer: (state, action) => {
       state.layer[action.payload.index].name = action.payload.name;
     },
-
     setSelected: (state, action) => {
       state.selected = action.payload;
       state.rename = {
@@ -152,6 +151,12 @@ export const {
   changeLayerIndex,
   removeLayerByIndex,
   setLayerSize,
+  setLayerFont,
+  setLayerBorder,
+  setLayerColor,
+  setLayerBackground,
+  setLayerVar,
+  renameLayer,
   setSelected,
   setPage,
   setRename,

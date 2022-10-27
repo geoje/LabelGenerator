@@ -45,9 +45,9 @@ import {
   IconVariable,
   IconBrush,
   IconBucketDroplet,
-  IconCircleLetterR,
-  IconCircleLetterH,
-  IconCircleLetterX,
+  IconHexagonLetterH,
+  IconHexagonLetterR,
+  IconHexagonLetterX,
 } from "@tabler/icons";
 import {
   setSize,
@@ -57,10 +57,14 @@ import {
   removeLayerByIndex,
   setLayerSize,
   setSelected,
-  setVar,
+  setLayerVar,
   setPage,
   setRename,
   renameLayer,
+  setLayerFont,
+  setLayerBackground,
+  setLayerBorder,
+  setLayerColor,
 } from "./drawSlice";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
@@ -232,72 +236,78 @@ function Variable() {
   switch (layer[selected].type) {
     case TYPE.text:
       return (
-        <Grid>
-          <Grid.Col>
-            <SegmentedControl
-              fullWidth
-              color="blue"
-              size="xs"
-              data={[
-                { value: "static", label: "Static" },
-                { value: "format", label: "Format" },
-              ]}
-              value={layer[selected].var.type}
-              onChange={(value) =>
-                dispatch(
-                  setVar({
-                    index: selected,
-                    var: { ...layer[selected].var, type: value },
-                  })
-                )
-              }
-            />
-          </Grid.Col>
-          <Grid.Col>
-            {layer[selected].var.type === "static" && (
-              <TextInput
-                placeholder="Static Text"
+        <>
+          <Title order={6} align="center">
+            Variable
+          </Title>
+          <Divider my="sm" />
+          <Grid>
+            <Grid.Col>
+              <SegmentedControl
+                fullWidth
+                color="blue"
                 size="xs"
-                icon={<IconAlphabetLatin size={DETAIL_ICON_SIZE} />}
-                value={layer[selected].var.static}
-                onChange={(event) => {
+                data={[
+                  { value: "static", label: "Static" },
+                  { value: "format", label: "Format" },
+                ]}
+                value={layer[selected].var.type}
+                onChange={(value) =>
                   dispatch(
-                    setVar({
+                    setLayerVar({
                       index: selected,
-                      var: {
-                        ...layer[selected].var,
-                        static: event.currentTarget.value,
-                      },
+                      var: { ...layer[selected].var, type: value },
                     })
-                  );
-                }}
+                  )
+                }
               />
-            )}
-            {layer[selected].var.type === "format" && (
-              <Select
-                placeholder="Data Column"
-                size="xs"
-                icon={<IconVariable size={DETAIL_ICON_SIZE} />}
-                data={Object.keys(data.length ? data[0] : []).map((s) => {
-                  return { value: s, label: s };
-                })}
-                value={layer[selected].var.format}
-                onChange={(value) => {
-                  if (value === layer[selected].var.format) return;
-                  dispatch(
-                    setVar({
-                      index: selected,
-                      var: {
-                        ...layer[selected].var,
-                        format: value,
-                      },
-                    })
-                  );
-                }}
-              />
-            )}
-          </Grid.Col>
-        </Grid>
+            </Grid.Col>
+            <Grid.Col>
+              {layer[selected].var.type === "static" && (
+                <TextInput
+                  placeholder="Static Text"
+                  size="xs"
+                  icon={<IconAlphabetLatin size={DETAIL_ICON_SIZE} />}
+                  value={layer[selected].var.static}
+                  onChange={(event) => {
+                    dispatch(
+                      setLayerVar({
+                        index: selected,
+                        var: {
+                          ...layer[selected].var,
+                          static: event.currentTarget.value,
+                        },
+                      })
+                    );
+                  }}
+                />
+              )}
+              {layer[selected].var.type === "format" && (
+                <Select
+                  placeholder="Data Column"
+                  size="xs"
+                  icon={<IconVariable size={DETAIL_ICON_SIZE} />}
+                  data={Object.keys(data.length ? data[0] : []).map((s) => {
+                    return { value: s, label: s };
+                  })}
+                  value={layer[selected].var.format}
+                  onChange={(value) => {
+                    if (value === layer[selected].var.format) return;
+                    dispatch(
+                      setLayerVar({
+                        index: selected,
+                        var: {
+                          ...layer[selected].var,
+                          format: value,
+                        },
+                      })
+                    );
+                  }}
+                />
+              )}
+            </Grid.Col>
+          </Grid>
+        </>
       );
     case TYPE.image:
       return <></>;
@@ -581,10 +591,10 @@ function Canvas() {
               borderWidth: item.border
                 ? item.border.width * sizePx.ratio
                 : null,
-              borderColor: item.border?.color,
+              borderColor: item.border?.color?.value,
               borderRadius: item.type === TYPE.circle ? "50%" : 0,
 
-              background: item.background,
+              background: item.background?.value,
             }}
           ></div>
         );
@@ -604,9 +614,9 @@ function Canvas() {
 
               fontFamily: item.font?.family,
               fontSize: item.font ? item.font.size * sizePx.ratio : null,
-              color: item.font?.color,
+              color: item.font?.color?.value,
 
-              background: item.background,
+              background: item.background?.value,
             }}
           >
             {item.var.type === "format"
@@ -845,18 +855,18 @@ function Detail() {
 
   let color =
     selected === -1
-      ? ""
+      ? {}
       : layer[selected].type === TYPE.text
       ? layer[selected].font?.color
         ? layer[selected].font.color
-        : ""
+        : {}
       : layer[selected].border?.color
       ? layer[selected].border.color
-      : "";
+      : {};
   let background =
     selected !== -1 && layer[selected].background
       ? layer[selected].background
-      : "";
+      : {};
 
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
@@ -870,205 +880,263 @@ function Detail() {
       };
     } else return layer[selected].size;
   };
+  const nextColorFormat = (color) => {
+    if (color.format === "rgba") return "hsla";
+    else if (color.format === "hsla" && !color.value.includes("0."))
+      return "hex";
+    else return "rgba";
+  };
 
   return (
     selected !== -1 && (
-      <Grid>
-        <Grid.Col>
-          <Group noWrap spacing="xs" align="flex-start">
-            <TextInput
-              placeholder="Layer Name"
-              sx={{ flex: 1 }}
+      <>
+        <Title order={6} align="center">
+          Detail
+        </Title>
+        <Divider my="sm" />
+        <Grid>
+          <Grid.Col>
+            <Group noWrap spacing="xs" align="flex-start">
+              <TextInput
+                placeholder="Layer Name"
+                sx={{ flex: 1 }}
+                size="xs"
+                icon={<IconHash size={DETAIL_ICON_SIZE} />}
+                value={rename.value}
+                error={rename.error.length ? rename.error : false}
+                onClick={(event) =>
+                  dispatch(
+                    setRename({ value: event.currentTarget.value, error: "" })
+                  )
+                }
+                onChange={(event) =>
+                  dispatch(
+                    setRename({ value: event.currentTarget.value, error: "" })
+                  )
+                }
+              />
+              <ActionIcon
+                variant=""
+                size="md"
+                onClick={(event) => {
+                  if (
+                    layer.some(
+                      (o, i) => o.name === rename.value && i !== selected
+                    )
+                  ) {
+                    dispatch(
+                      setRename({ value: rename.value, error: "Duplicated" })
+                    );
+                  } else {
+                    showNotification({
+                      title: "Layer Name Changed",
+                      message: `${layer[selected].name} to ${rename.value}`,
+                      color: "green",
+                    });
+                    dispatch(
+                      renameLayer({ index: selected, name: rename.value })
+                    );
+                  }
+                }}
+              >
+                <IconCheck size={18} />
+              </ActionIcon>
+            </Group>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <NumberInput
               size="xs"
-              icon={<IconHash size={DETAIL_ICON_SIZE} />}
-              value={rename.value}
-              error={rename.error.length ? rename.error : false}
-              onClick={(event) =>
+              icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
+              value={layer[selected].size.x}
+              onChange={(value) =>
                 dispatch(
-                  setRename({ value: event.currentTarget.value, error: "" })
-                )
-              }
-              onChange={(event) =>
-                dispatch(
-                  setRename({ value: event.currentTarget.value, error: "" })
+                  setLayerSize({
+                    index: selected,
+                    size: {
+                      ...layer[selected].size,
+                      x: value,
+                    },
+                  })
                 )
               }
             />
-            <ActionIcon
-              variant=""
-              size="md"
-              onClick={(event) => {
-                if (
-                  layer.some(
-                    (o, i) => o.name === rename.value && i !== selected
-                  )
-                ) {
-                  dispatch(
-                    setRename({ value: rename.value, error: "Duplicated" })
-                  );
-                } else {
-                  showNotification({
-                    title: "Layer Name Changed",
-                    message: `${layer[selected].name} to ${rename.value}`,
-                    color: "green",
-                  });
-                  dispatch(
-                    renameLayer({ index: selected, name: rename.value })
-                  );
-                }
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <NumberInput
+              size="xs"
+              icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
+              value={layer[selected].size.y}
+              onChange={(value) =>
+                dispatch(
+                  setLayerSize({
+                    index: selected,
+                    size: {
+                      ...layer[selected].size,
+                      y: value,
+                    },
+                  })
+                )
+              }
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <NumberInput
+              size="xs"
+              icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+              value={selectedLayerSize().w}
+              disabled={layer[selected].type === TYPE.text}
+              onChange={(value) =>
+                dispatch(
+                  setLayerSize({
+                    index: selected,
+                    size: {
+                      ...layer[selected].size,
+                      w: value,
+                    },
+                  })
+                )
+              }
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <NumberInput
+              size="xs"
+              icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
+              value={selectedLayerSize().h}
+              disabled={layer[selected].type === TYPE.text}
+              onChange={(value) =>
+                dispatch(
+                  setLayerSize({
+                    index: selected,
+                    size: {
+                      ...layer[selected].size,
+                      h: value,
+                    },
+                  })
+                )
+              }
+            />
+          </Grid.Col>
+          <Grid.Col>
+            <ColorInput
+              size="xs"
+              value={color.value}
+              format={color.format}
+              onChange={(value) => {
+                dispatch(
+                  setLayerColor({
+                    index: selected,
+                    color: { ...color, value },
+                  })
+                );
               }}
-            >
-              <IconCheck size={18} />
-            </ActionIcon>
-          </Group>
-        </Grid.Col>
-        <Grid.Col span={6}>
-          <NumberInput
-            size="xs"
-            icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
-            value={layer[selected].size.x}
-            onChange={(value) =>
-              dispatch(
-                setLayerSize({
-                  index: selected,
-                  size: {
-                    ...layer[selected].size,
-                    x: value,
-                  },
-                })
-              )
-            }
-          />
-        </Grid.Col>
-        <Grid.Col span={6}>
-          <NumberInput
-            size="xs"
-            icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
-            value={layer[selected].size.y}
-            onChange={(value) =>
-              dispatch(
-                setLayerSize({
-                  index: selected,
-                  size: {
-                    ...layer[selected].size,
-                    y: value,
-                  },
-                })
-              )
-            }
-          />
-        </Grid.Col>
-        <Grid.Col span={6}>
-          <NumberInput
-            size="xs"
-            icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
-            value={selectedLayerSize().w}
-            disabled={layer[selected].type === TYPE.text}
-            onChange={(value) =>
-              dispatch(
-                setLayerSize({
-                  index: selected,
-                  size: {
-                    ...layer[selected].size,
-                    w: value,
-                  },
-                })
-              )
-            }
-          />
-        </Grid.Col>
-        <Grid.Col span={6}>
-          <NumberInput
-            size="xs"
-            icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
-            value={selectedLayerSize().h}
-            disabled={layer[selected].type === TYPE.text}
-            onChange={(value) =>
-              dispatch(
-                setLayerSize({
-                  index: selected,
-                  size: {
-                    ...layer[selected].size,
-                    h: value,
-                  },
-                })
-              )
-            }
-          />
-        </Grid.Col>
-        <Grid.Col>
-          <ColorInput
-            size="xs"
-            defaultValue={color}
-            rightSection={
-              <>
-                <Group
-                  size="xs"
-                  sx={(theme) => {
-                    return {
-                      width: 18,
-                      height: 18,
-                      marginLeft: "auto",
-                      alignContent: "center",
-                      color:
-                        theme.colorScheme === "dark"
-                          ? theme.colors.gray[7]
-                          : theme.colors.gray[4],
-                    };
-                  }}
-                >
-                  <IconBrush size={DETAIL_ICON_SIZE} />
-                </Group>
-                <ActionIcon mr="xs" variant="transparent">
-                  {color.startsWith("rgba") === "rgba" ? (
-                    <IconCircleLetterR size={DETAIL_ICON_SIZE + 2} />
-                  ) : color.startsWith("hsla") ? (
-                    <IconCircleLetterH size={DETAIL_ICON_SIZE + 2} />
-                  ) : (
-                    <IconCircleLetterX size={DETAIL_ICON_SIZE + 2} />
-                  )}
-                </ActionIcon>
-              </>
-            }
-          />
-        </Grid.Col>
-        <Grid.Col>
-          <ColorInput
-            size="xs"
-            defaultValue={background}
-            rightSection={
-              <>
-                <Group
-                  size="xs"
-                  sx={(theme) => {
-                    return {
-                      width: 18,
-                      height: 18,
-                      marginLeft: "auto",
-                      alignContent: "center",
-                      color:
-                        theme.colorScheme === "dark"
-                          ? theme.colors.gray[7]
-                          : theme.colors.gray[4],
-                    };
-                  }}
-                >
-                  <IconBucketDroplet size={DETAIL_ICON_SIZE} />
-                </Group>
-                <ActionIcon mr="xs" variant="transparent">
-                  {color.startsWith("rgba") === "rgba" ? (
-                    <IconCircleLetterR size={DETAIL_ICON_SIZE + 2} />
-                  ) : color.startsWith("hsla") ? (
-                    <IconCircleLetterH size={DETAIL_ICON_SIZE + 2} />
-                  ) : (
-                    <IconCircleLetterX size={DETAIL_ICON_SIZE + 2} />
-                  )}
-                </ActionIcon>
-              </>
-            }
-          />
-        </Grid.Col>
-      </Grid>
+              rightSection={
+                <>
+                  <Group
+                    size="xs"
+                    sx={(theme) => {
+                      return {
+                        width: 18,
+                        height: 18,
+                        marginLeft: "auto",
+                        alignContent: "center",
+                        color:
+                          theme.colorScheme === "dark"
+                            ? theme.colors.gray[7]
+                            : theme.colors.gray[4],
+                      };
+                    }}
+                  >
+                    <IconBrush size={DETAIL_ICON_SIZE} />
+                  </Group>
+                  <ActionIcon
+                    mr="xs"
+                    variant="transparent"
+                    onClick={() =>
+                      dispatch(
+                        setLayerColor({
+                          index: selected,
+                          color: {
+                            ...color,
+                            format: nextColorFormat(color),
+                          },
+                        })
+                      )
+                    }
+                  >
+                    {color.format === "rgba" ? (
+                      <IconHexagonLetterR size={DETAIL_ICON_SIZE + 2} />
+                    ) : color.format === "hsla" ? (
+                      <IconHexagonLetterH size={DETAIL_ICON_SIZE + 2} />
+                    ) : (
+                      <IconHexagonLetterX size={DETAIL_ICON_SIZE + 2} />
+                    )}
+                  </ActionIcon>
+                </>
+              }
+            />
+          </Grid.Col>
+          <Grid.Col>
+            <ColorInput
+              size="xs"
+              value={background.value}
+              format={background.format}
+              onChange={(value) =>
+                dispatch(
+                  setLayerBackground({
+                    index: selected,
+                    background: { ...background, value },
+                  })
+                )
+              }
+              rightSection={
+                <>
+                  <Group
+                    size="xs"
+                    sx={(theme) => {
+                      return {
+                        width: 18,
+                        height: 18,
+                        marginLeft: "auto",
+                        alignContent: "center",
+                        color:
+                          theme.colorScheme === "dark"
+                            ? theme.colors.gray[7]
+                            : theme.colors.gray[4],
+                      };
+                    }}
+                  >
+                    <IconBucketDroplet size={DETAIL_ICON_SIZE} />
+                  </Group>
+                  <ActionIcon
+                    mr="xs"
+                    variant="transparent"
+                    onClick={() =>
+                      dispatch(
+                        setLayerBackground({
+                          index: selected,
+                          background: {
+                            ...background,
+                            format: nextColorFormat(background),
+                          },
+                        })
+                      )
+                    }
+                  >
+                    {background.format === "rgba" ? (
+                      <IconHexagonLetterR size={DETAIL_ICON_SIZE + 2} />
+                    ) : background.format === "hsla" ? (
+                      <IconHexagonLetterH size={DETAIL_ICON_SIZE + 2} />
+                    ) : (
+                      <IconHexagonLetterX size={DETAIL_ICON_SIZE + 2} />
+                    )}
+                  </ActionIcon>
+                </>
+              }
+            />
+          </Grid.Col>
+        </Grid>
+      </>
     )
   );
 }
@@ -1085,10 +1153,6 @@ export default function Design() {
           <LayoutSize />
         </Stack>
         <Stack spacing={0} mt={48}>
-          <Title order={6} align="center">
-            Variable
-          </Title>
-          <Divider my="sm" />
           <Variable />
         </Stack>
       </Grid.Col>
@@ -1108,10 +1172,6 @@ export default function Design() {
           <Layer />
         </Stack>
         <Stack spacing={0} mt={48}>
-          <Title order={6} align="center">
-            Detail
-          </Title>
-          <Divider my="sm" />
           <Detail />
         </Stack>
       </Grid.Col>
