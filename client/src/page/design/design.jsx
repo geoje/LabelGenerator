@@ -66,6 +66,7 @@ import {
   setLayerBorderColor,
   setLayerBackColor,
   setLayerFontColor,
+  setLayerBorder,
 } from "./drawSlice";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
@@ -197,6 +198,9 @@ function LayoutSize() {
           placeholder="Unit"
           icon={<IconRuler3 size={DETAIL_ICON_SIZE} />}
           size="xs"
+          transitionDuration={100}
+          transition="pop-top-left"
+          transitionTimingFunction="ease"
           data={Object.keys(UNIT).map((s) => {
             return { value: s, label: s };
           })}
@@ -292,6 +296,9 @@ function Variable() {
                 <Select
                   placeholder="Data Column"
                   size="xs"
+                  transitionDuration={100}
+                  transition="pop-top-left"
+                  transitionTimingFunction="ease"
                   icon={<IconVariable size={DETAIL_ICON_SIZE} />}
                   data={Object.keys(data.length ? data[0] : []).map((s) => {
                     return { value: s, label: s };
@@ -850,13 +857,17 @@ function Layer() {
     </DragDropContext>
   );
 }
-function CustomColorInput({ selected, color, action, icon }) {
+function CustomColorInput({ placeholder, selected, color, action, icon }) {
   // Provider
   const dispatch = useDispatch();
 
   return (
     <ColorInput
+      placeholder={placeholder}
       size="xs"
+      transitionDuration={100}
+      transition="pop-top-left"
+      transitionTimingFunction="ease"
       value={color.value}
       format={color.format}
       onChange={(value) =>
@@ -1082,7 +1093,11 @@ function Detail() {
             <Select
               placeholder="Border Style"
               size="xs"
+              transitionDuration={100}
+              transition="pop-top-left"
+              transitionTimingFunction="ease"
               icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
+              clearable
               data={[
                 { value: "solid", label: "solid" },
                 { value: "dashed", label: "dashed" },
@@ -1093,6 +1108,23 @@ function Detail() {
                 { value: "inset", label: "inset" },
                 { value: "outset", label: "outset" },
               ]}
+              value={layer[selected].border?.style}
+              onChange={(value) =>
+                dispatch(
+                  setLayerBorder({
+                    index: selected,
+                    border: value
+                      ? {
+                          style: value,
+                          width: layer[selected].border?.width
+                            ? layer[selected].border?.width
+                            : 1,
+                          color: layer[selected].border?.color,
+                        }
+                      : {},
+                  })
+                )
+              }
             />
           </Grid.Col>
           <Grid.Col py={1}>
@@ -1100,12 +1132,24 @@ function Detail() {
               placeholder="Border Width"
               size="xs"
               icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
-              value={1}
-              onChange={(value) => {}}
+              min={1}
+              max={
+                Math.min(selectedLayerSize().w, selectedLayerSize().h) / 2 - 1
+              }
+              value={layer[selected].border?.width}
+              onChange={(value) =>
+                dispatch(
+                  setLayerBorder({
+                    index: selected,
+                    border: { ...layer[selected].border, width: value },
+                  })
+                )
+              }
             />
           </Grid.Col>
           <Grid.Col pt={1}>
             <CustomColorInput
+              placeholder="Border Color"
               selected={selected}
               color={borderColor}
               action={setLayerBorderColor}
@@ -1114,6 +1158,7 @@ function Detail() {
           </Grid.Col>
           <Grid.Col>
             <CustomColorInput
+              placeholder="Background Color"
               selected={selected}
               color={backColor}
               action={setLayerBackColor}
@@ -1123,6 +1168,7 @@ function Detail() {
           {layer[selected].type === TYPE.text && (
             <Grid.Col>
               <CustomColorInput
+                placeholder="Font Color"
                 selected={selected}
                 color={fontColor}
                 action={setLayerFontColor}
