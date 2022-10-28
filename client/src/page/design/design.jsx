@@ -63,8 +63,9 @@ import {
   setPage,
   setRename,
   renameLayer,
-  setLayerBackground,
-  setLayerColor,
+  setLayerBorderColor,
+  setLayerBackColor,
+  setLayerFontColor,
 } from "./drawSlice";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
@@ -144,6 +145,11 @@ const typeToIcon = (type) => {
   ) : (
     <IconQuestionMark />
   );
+};
+const nextColorFormat = (color) => {
+  if (color.format === "rgba") return "hsla";
+  else if (color.format === "hsla" && !color.value.includes("0.")) return "hex";
+  else return "rgba";
 };
 
 // Left
@@ -564,6 +570,14 @@ function Canvas() {
       position: "absolute",
       left: item.size.x * sizePx.ratio,
       top: item.size.y * sizePx.ratio,
+
+      borderStyle: item.border?.style,
+      borderWidth: item.border?.width
+        ? item.border?.width * sizePx.ratio
+        : null,
+      borderColor: item.border?.color?.value,
+
+      background: item.background?.color?.value,
     };
     // If item is moving, set location to mouse postion
     if (move.x !== -1 && index === selected)
@@ -587,14 +601,7 @@ function Canvas() {
               width: item.size.w * sizePx.ratio,
               height: item.size.h * sizePx.ratio,
 
-              borderStyle: item.border?.style,
-              borderWidth: item.border
-                ? item.border.width * sizePx.ratio
-                : null,
-              borderColor: item.border?.color?.value,
               borderRadius: item.type === TYPE.circle ? "50%" : 0,
-
-              background: item.background?.value,
             }}
           ></div>
         );
@@ -615,8 +622,6 @@ function Canvas() {
               fontFamily: item.font?.family,
               fontSize: item.font ? item.font.size * sizePx.ratio : null,
               color: item.font?.color?.value,
-
-              background: item.background?.value,
             }}
           >
             {item.var.type === "format"
@@ -845,6 +850,70 @@ function Layer() {
     </DragDropContext>
   );
 }
+function CustomColorInput({ selected, color, action, icon }) {
+  // Provider
+  const dispatch = useDispatch();
+
+  return (
+    <ColorInput
+      size="xs"
+      value={color.value}
+      format={color.format}
+      onChange={(value) =>
+        dispatch(
+          action({
+            index: selected,
+            color: { ...color, value },
+          })
+        )
+      }
+      rightSection={
+        <>
+          <Group
+            size="xs"
+            sx={(theme) => {
+              return {
+                width: 18,
+                height: 18,
+                marginLeft: "auto",
+                alignContent: "center",
+                color:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.gray[7]
+                    : theme.colors.gray[4],
+              };
+            }}
+          >
+            {icon}
+          </Group>
+          <ActionIcon
+            mr="xs"
+            variant="transparent"
+            onClick={() =>
+              dispatch(
+                action({
+                  index: selected,
+                  color: {
+                    ...color,
+                    format: nextColorFormat(color),
+                  },
+                })
+              )
+            }
+          >
+            {color.format === "rgba" ? (
+              <IconHexagonLetterR size={DETAIL_ICON_SIZE + 2} />
+            ) : color.format === "hsla" ? (
+              <IconHexagonLetterH size={DETAIL_ICON_SIZE + 2} />
+            ) : (
+              <IconHexagonLetterX size={DETAIL_ICON_SIZE + 2} />
+            )}
+          </ActionIcon>
+        </>
+      }
+    />
+  );
+}
 function Detail() {
   // Provider
   const dispatch = useDispatch();
@@ -853,19 +922,17 @@ function Detail() {
   const selected = useSelector((state) => state.draw.selected);
   const rename = useSelector((state) => state.draw.rename);
 
-  let color =
-    selected === -1
-      ? {}
-      : layer[selected].type === TYPE.text
-      ? layer[selected].font?.color
-        ? layer[selected].font.color
-        : {}
-      : layer[selected].border?.color
+  const borderColor =
+    selected !== -1 && layer[selected].border?.color
       ? layer[selected].border.color
       : {};
-  let background =
-    selected !== -1 && layer[selected].background
-      ? layer[selected].background
+  const backColor =
+    selected !== -1 && layer[selected].background?.color
+      ? layer[selected].background.color
+      : {};
+  const fontColor =
+    selected !== -1 && layer[selected].font?.color
+      ? layer[selected].font.color
       : {};
 
   const selectedLayerSize = () => {
@@ -879,12 +946,6 @@ function Detail() {
         h: textElement ? Math.ceil(textElement.offsetHeight / sizePx.ratio) : 0,
       };
     } else return layer[selected].size;
-  };
-  const nextColorFormat = (color) => {
-    if (color.format === "rgba") return "hsla";
-    else if (color.format === "hsla" && !color.value.includes("0."))
-      return "hex";
-    else return "rgba";
   };
 
   return (
@@ -1018,18 +1079,9 @@ function Detail() {
             />
           </Grid.Col>
           <Grid.Col pb={1}>
-            <NumberInput
-              size="xs"
-              icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
-              value={1}
-              onChange={(value) => {}}
-            />
-          </Grid.Col>
-          <Grid.Col py={1}>
             <Select
               placeholder="Border Style"
               size="xs"
-              mt={2}
               icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
               data={[
                 { value: "solid", label: "solid" },
@@ -1043,124 +1095,41 @@ function Detail() {
               ]}
             />
           </Grid.Col>
-          <Grid.Col pt={1}>
-            <ColorInput
+          <Grid.Col py={1}>
+            <NumberInput
+              placeholder="Border Width"
               size="xs"
-              value={color.value}
-              format={color.format}
-              onChange={(value) => {
-                dispatch(
-                  setLayerColor({
-                    index: selected,
-                    color: { ...color, value },
-                  })
-                );
-              }}
-              rightSection={
-                <>
-                  <Group
-                    size="xs"
-                    sx={(theme) => {
-                      return {
-                        width: 18,
-                        height: 18,
-                        marginLeft: "auto",
-                        alignContent: "center",
-                        color:
-                          theme.colorScheme === "dark"
-                            ? theme.colors.gray[7]
-                            : theme.colors.gray[4],
-                      };
-                    }}
-                  >
-                    <IconBrush size={DETAIL_ICON_SIZE} />
-                  </Group>
-                  <ActionIcon
-                    mr="xs"
-                    variant="transparent"
-                    onClick={() =>
-                      dispatch(
-                        setLayerColor({
-                          index: selected,
-                          color: {
-                            ...color,
-                            format: nextColorFormat(color),
-                          },
-                        })
-                      )
-                    }
-                  >
-                    {color.format === "rgba" ? (
-                      <IconHexagonLetterR size={DETAIL_ICON_SIZE + 2} />
-                    ) : color.format === "hsla" ? (
-                      <IconHexagonLetterH size={DETAIL_ICON_SIZE + 2} />
-                    ) : (
-                      <IconHexagonLetterX size={DETAIL_ICON_SIZE + 2} />
-                    )}
-                  </ActionIcon>
-                </>
-              }
+              icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
+              value={1}
+              onChange={(value) => {}}
+            />
+          </Grid.Col>
+          <Grid.Col pt={1}>
+            <CustomColorInput
+              selected={selected}
+              color={borderColor}
+              action={setLayerBorderColor}
+              icon={<IconBrush size={DETAIL_ICON_SIZE} />}
             />
           </Grid.Col>
           <Grid.Col>
-            <ColorInput
-              size="xs"
-              value={background.value}
-              format={background.format}
-              onChange={(value) =>
-                dispatch(
-                  setLayerBackground({
-                    index: selected,
-                    background: { ...background, value },
-                  })
-                )
-              }
-              rightSection={
-                <>
-                  <Group
-                    size="xs"
-                    sx={(theme) => {
-                      return {
-                        width: 18,
-                        height: 18,
-                        marginLeft: "auto",
-                        alignContent: "center",
-                        color:
-                          theme.colorScheme === "dark"
-                            ? theme.colors.gray[7]
-                            : theme.colors.gray[4],
-                      };
-                    }}
-                  >
-                    <IconBucketDroplet size={DETAIL_ICON_SIZE} />
-                  </Group>
-                  <ActionIcon
-                    mr="xs"
-                    variant="transparent"
-                    onClick={() =>
-                      dispatch(
-                        setLayerBackground({
-                          index: selected,
-                          background: {
-                            ...background,
-                            format: nextColorFormat(background),
-                          },
-                        })
-                      )
-                    }
-                  >
-                    {background.format === "rgba" ? (
-                      <IconHexagonLetterR size={DETAIL_ICON_SIZE + 2} />
-                    ) : background.format === "hsla" ? (
-                      <IconHexagonLetterH size={DETAIL_ICON_SIZE + 2} />
-                    ) : (
-                      <IconHexagonLetterX size={DETAIL_ICON_SIZE + 2} />
-                    )}
-                  </ActionIcon>
-                </>
-              }
+            <CustomColorInput
+              selected={selected}
+              color={backColor}
+              action={setLayerBackColor}
+              icon={<IconBucketDroplet size={DETAIL_ICON_SIZE} />}
             />
           </Grid.Col>
+          {layer[selected].type === TYPE.text && (
+            <Grid.Col>
+              <CustomColorInput
+                selected={selected}
+                color={fontColor}
+                action={setLayerFontColor}
+                icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+              />
+            </Grid.Col>
+          )}
         </Grid>
       </>
     )

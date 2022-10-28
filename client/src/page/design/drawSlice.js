@@ -43,7 +43,7 @@ const slice = createSlice({
         border: {
           style: "solid",
           width: 1,
-          color: { type: "hex", value: "#ff0000" },
+          color: { format: "hex", value: "#ff0000" },
         },
       },
       {
@@ -55,7 +55,9 @@ const slice = createSlice({
           w: 20,
           h: 20,
         },
-        background: { format: "hsla", value: "hsla(241, 79%, 46%, 0.6)" },
+        background: {
+          color: { format: "hsla", value: "hsla(241, 79%, 46%, 0.6)" },
+        },
       },
       {
         name: "OurText",
@@ -66,7 +68,7 @@ const slice = createSlice({
         },
         font: { size: 10, color: { format: "hex", value: "#0000ff" } },
         var: { type: "static", static: "Sample Text" },
-        background: { format: "rgba", value: "rgba(0, 0, 0, 0.1)" },
+        background: { color: { format: "rgba", value: "rgba(0, 0, 0, 0.1)" } },
       },
     ],
     selected: -1,
@@ -112,15 +114,25 @@ const slice = createSlice({
     setLayerBorder: (state, action) => {
       state.layer[action.payload.index].border = action.payload.border;
     },
-    setLayerColor: (state, action) => {
-      if (state.layer[action.payload.index].type === "text")
-        state.layer[action.payload.index].font.color = action.payload.color;
-      else
-        state.layer[action.payload.index].border.color = action.payload.color;
+
+    /**
+     *
+     * @param {*} state
+     * @param {payload: {index, color:{value, format}}} action
+     */
+    setLayerBorderColor: (state, action) => {
+      state.layer[action.payload.index].border = {
+        ...state.layer[action.payload.index].border,
+        color: action.payload.color,
+      };
     },
-    setLayerBackground: (state, action) => {
-      state.layer[action.payload.index].background = action.payload.background;
+    setLayerBackColor: (state, action) => {
+      state.layer[action.payload.index].background.color = action.payload.color;
     },
+    setLayerFontColor: (state, action) => {
+      state.layer[action.payload.index].font.color = action.payload.color;
+    },
+
     setLayerVar: (state, action) => {
       state.layer[action.payload.index].var = action.payload.var;
     },
@@ -153,8 +165,9 @@ export const {
   setLayerSize,
   setLayerFont,
   setLayerBorder,
-  setLayerColor,
-  setLayerBackground,
+  setLayerBorderColor,
+  setLayerBackColor,
+  setLayerFontColor,
   setLayerVar,
   renameLayer,
   setSelected,
