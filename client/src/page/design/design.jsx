@@ -48,6 +48,8 @@ import {
   IconHexagonLetterH,
   IconHexagonLetterR,
   IconHexagonLetterX,
+  IconBorderStyle2,
+  IconBorderStyle,
 } from "@tabler/icons";
 import {
   setSize,
@@ -1015,7 +1017,33 @@ function Detail() {
               }
             />
           </Grid.Col>
-          <Grid.Col>
+          <Grid.Col pb={1}>
+            <NumberInput
+              size="xs"
+              icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
+              value={1}
+              onChange={(value) => {}}
+            />
+          </Grid.Col>
+          <Grid.Col py={1}>
+            <Select
+              placeholder="Border Style"
+              size="xs"
+              mt={2}
+              icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
+              data={[
+                { value: "solid", label: "solid" },
+                { value: "dashed", label: "dashed" },
+                { value: "dotted", label: "dotted" },
+                { value: "double", label: "double" },
+                { value: "groove", label: "groove" },
+                { value: "ridge", label: "ridge" },
+                { value: "inset", label: "inset" },
+                { value: "outset", label: "outset" },
+              ]}
+            />
+          </Grid.Col>
+          <Grid.Col pt={1}>
             <ColorInput
               size="xs"
               value={color.value}
