@@ -19,7 +19,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *
  * page: 1
  *
- * rename: ""
+ * rename: { value, error }
  */
 const slice = createSlice({
   name: "draw",
@@ -127,10 +127,16 @@ const slice = createSlice({
       };
     },
     setLayerBackColor: (state, action) => {
-      state.layer[action.payload.index].background.color = action.payload.color;
+      state.layer[action.payload.index].background = {
+        ...state.layer[action.payload.index].background,
+        color: action.payload.color,
+      };
     },
     setLayerFontColor: (state, action) => {
-      state.layer[action.payload.index].font.color = action.payload.color;
+      state.layer[action.payload.index].font = {
+        ...state.layer[action.payload.index].font,
+        color: action.payload.color,
+      };
     },
 
     setLayerVar: (state, action) => {

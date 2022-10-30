@@ -1021,6 +1021,11 @@ function Detail() {
               <ActionIcon
                 variant=""
                 size="md"
+                color="blue.6"
+                disabled={
+                  rename.value === "" ||
+                  layer.some((o) => o.name === rename.value)
+                }
                 onClick={(event) => {
                   if (
                     layer.some(
@@ -1181,15 +1186,17 @@ function Detail() {
               icon={<IconBrush size={DETAIL_ICON_SIZE} />}
             />
           </Grid.Col>
-          <Grid.Col>
-            <CustomColorInput
-              placeholder="Background Color"
-              selected={selected}
-              color={backColor}
-              action={setLayerBackColor}
-              icon={<IconBucketDroplet size={DETAIL_ICON_SIZE} />}
-            />
-          </Grid.Col>
+          {layer[selected].type !== TYPE.qr && (
+            <Grid.Col>
+              <CustomColorInput
+                placeholder="Background Color"
+                selected={selected}
+                color={backColor}
+                action={setLayerBackColor}
+                icon={<IconBucketDroplet size={DETAIL_ICON_SIZE} />}
+              />
+            </Grid.Col>
+          )}
           {layer[selected].type === TYPE.text && (
             <Grid.Col>
               <CustomColorInput
