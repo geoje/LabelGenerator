@@ -1058,14 +1058,15 @@ function Detail() {
               min={0}
               max={(sizePx.w - selectedLayerSize().w) * sizePx.ratio - 2}
               value={layer[selected].size.x}
-              onChange={(value) =>
+              onChange={(value) => {
+                if (!value) return;
                 dispatch(
                   setLayerSize({
                     index: selected,
                     size: { ...layer[selected].size, x: value },
                   })
-                )
-              }
+                );
+              }}
             />
           </Grid.Col>
           <Grid.Col span={6}>
@@ -1075,14 +1076,15 @@ function Detail() {
               min={0}
               max={(sizePx.h - selectedLayerSize().h) * sizePx.ratio - 2}
               value={layer[selected].size.y}
-              onChange={(value) =>
+              onChange={(value) => {
+                if (!value) return;
                 dispatch(
                   setLayerSize({
                     index: selected,
                     size: { ...layer[selected].size, y: value },
                   })
-                )
-              }
+                );
+              }}
             />
           </Grid.Col>
           <Grid.Col span={6}>
@@ -1092,14 +1094,19 @@ function Detail() {
               min={layer[selected].type === TYPE.qr ? 18 : 1}
               value={selectedLayerSize().w}
               disabled={layer[selected].type === TYPE.text}
-              onChange={(value) =>
+              onChange={(value) => {
+                if (
+                  !value ||
+                  value < (layer[selected].type === TYPE.qr ? 18 : 1)
+                )
+                  return;
                 dispatch(
                   setLayerSize({
                     index: selected,
                     size: { ...layer[selected].size, w: value },
                   })
-                )
-              }
+                );
+              }}
             />
           </Grid.Col>
           <Grid.Col span={6}>
@@ -1110,6 +1117,11 @@ function Detail() {
               value={selectedLayerSize().h}
               disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
               onChange={(value) => {
+                if (
+                  !value ||
+                  value < (layer[selected].type === TYPE.qr ? 18 : 1)
+                )
+                  return;
                 dispatch(
                   setLayerSize({
                     index: selected,
