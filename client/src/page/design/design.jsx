@@ -68,6 +68,7 @@ import {
   setLayerFontColor,
   setLayerBorder,
 } from "./drawSlice";
+import { QRCodeSVG } from "qrcode.react";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
 const TYPE = {
@@ -334,7 +335,6 @@ function Tool() {
   // Provider
   const dispatch = useDispatch();
   const sizePx = convertSize.px(useSelector((state) => state.draw.size));
-  const format = useSelector((state) => state.qr.format);
   const layer = useSelector((state) => state.draw.layer);
 
   let [layerCount, setLayerCount] = useState(1);
@@ -441,9 +441,19 @@ function Tool() {
       <Tooltip label="QR Code">
         <ActionIcon
           variant="subtle"
-          onClick={() => {
-            console.log(format);
-          }}
+          onClick={() =>
+            dispatch(
+              addLayer({
+                name: getLayerName(),
+                type: TYPE.qr,
+                size: {
+                  x: sizePx.w / 2 - 10,
+                  y: sizePx.h / 2 - 10,
+                  w: 20,
+                },
+              })
+            )
+          }
         >
           <IconQrcode />
         </ActionIcon>
@@ -473,6 +483,11 @@ function Canvas() {
         ...layer[selected].size,
         w: textElement ? Math.ceil(textElement.offsetWidth / sizePx.ratio) : 0,
         h: textElement ? Math.ceil(textElement.offsetHeight / sizePx.ratio) : 0,
+      };
+    } else if (layer[selected].type === TYPE.qr) {
+      return {
+        ...layer[selected].size,
+        h: layer[selected].size.w,
       };
     } else return layer[selected].size;
   };
@@ -637,6 +652,17 @@ function Canvas() {
                 : ""
               : item.var.static}
           </Text>
+        );
+      case TYPE.qr:
+        return (
+          <div
+            key={`canvas-${item.name}`}
+            ref={(el) => (refLayer.current[index] = el)}
+            onMouseDown={(event) => onMouseDown(event, index)}
+            style={defaultStyle}
+          >
+            <QRCodeSVG size={item.size.w * sizePx.ratio} />
+          </div>
         );
       default:
         return null;
@@ -956,6 +982,11 @@ function Detail() {
         w: textElement ? Math.ceil(textElement.offsetWidth / sizePx.ratio) : 0,
         h: textElement ? Math.ceil(textElement.offsetHeight / sizePx.ratio) : 0,
       };
+    } else if (layer[selected].type === TYPE.qr) {
+      return {
+        ...layer[selected].size,
+        h: layer[selected].size.w,
+      };
     } else return layer[selected].size;
   };
 
@@ -1019,15 +1050,14 @@ function Detail() {
             <NumberInput
               size="xs"
               icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
+              min={0}
+              max={(sizePx.w - selectedLayerSize().w) * sizePx.ratio - 2}
               value={layer[selected].size.x}
               onChange={(value) =>
                 dispatch(
                   setLayerSize({
                     index: selected,
-                    size: {
-                      ...layer[selected].size,
-                      x: value,
-                    },
+                    size: { ...layer[selected].size, x: value },
                   })
                 )
               }
@@ -1037,15 +1067,14 @@ function Detail() {
             <NumberInput
               size="xs"
               icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
+              min={0}
+              max={(sizePx.h - selectedLayerSize().h) * sizePx.ratio - 2}
               value={layer[selected].size.y}
               onChange={(value) =>
                 dispatch(
                   setLayerSize({
                     index: selected,
-                    size: {
-                      ...layer[selected].size,
-                      y: value,
-                    },
+                    size: { ...layer[selected].size, y: value },
                   })
                 )
               }
@@ -1055,16 +1084,14 @@ function Detail() {
             <NumberInput
               size="xs"
               icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+              min={layer[selected].type === TYPE.qr ? 18 : 1}
               value={selectedLayerSize().w}
               disabled={layer[selected].type === TYPE.text}
               onChange={(value) =>
                 dispatch(
                   setLayerSize({
                     index: selected,
-                    size: {
-                      ...layer[selected].size,
-                      w: value,
-                    },
+                    size: { ...layer[selected].size, w: value },
                   })
                 )
               }
@@ -1074,19 +1101,17 @@ function Detail() {
             <NumberInput
               size="xs"
               icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
+              min={layer[selected].type === TYPE.qr ? 18 : 1}
               value={selectedLayerSize().h}
-              disabled={layer[selected].type === TYPE.text}
-              onChange={(value) =>
+              disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
+              onChange={(value) => {
                 dispatch(
                   setLayerSize({
                     index: selected,
-                    size: {
-                      ...layer[selected].size,
-                      h: value,
-                    },
+                    size: { ...layer[selected].size, h: value },
                   })
-                )
-              }
+                );
+              }}
             />
           </Grid.Col>
           <Grid.Col pb={1}>
