@@ -12,7 +12,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    font: { family:"", size:0, color:"" }
  *    border: { style: "", width: 0, color: "" }
  *    background: "",
- *    text: { type: "", static: "", format: { ... } }
+ *    var: { type: "", static: "", format: { ... } }
  * }, ...]
  *
  * selected: -1

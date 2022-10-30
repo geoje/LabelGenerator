@@ -150,7 +150,11 @@ const typeToIcon = (type) => {
 };
 const nextColorFormat = (color) => {
   if (color.format === "rgba") return "hsla";
-  else if (color.format === "hsla" && !color.value.includes("0.")) return "hex";
+  else if (
+    color.format === "hsla" &&
+    (!color.value || !color.value.includes("0."))
+  )
+    return "hex";
   else return "rgba";
 };
 
@@ -425,7 +429,7 @@ function Tool() {
                   x: sizePx.w / 2 - 10,
                   y: sizePx.h / 2 - 10,
                 },
-                var: { default: "New Text" },
+                var: { type: "static", static: "New Text" },
               })
             );
           }}
@@ -465,10 +469,11 @@ function Canvas() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
+  const page = useSelector((state) => state.draw.page);
+  const format = useSelector((state) => state.qr.format);
   const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
   let selected = useSelector((state) => state.draw.selected);
-  const page = useSelector((state) => state.draw.page);
 
   const refCanvas = useRef();
   const refLayer = useRef({ current: [] });
@@ -661,7 +666,22 @@ function Canvas() {
             onMouseDown={(event) => onMouseDown(event, index)}
             style={defaultStyle}
           >
-            <QRCodeSVG size={item.size.w * sizePx.ratio} />
+            <QRCodeSVG
+              size={item.size.w * sizePx.ratio}
+              value={
+                data.length
+                  ? format
+                      .filter(
+                        (o) =>
+                          o.literal || Object.keys(data[0]).includes(o.value)
+                      )
+                      .map((o) =>
+                        o.literal ? o.value : data[page - 1][o.value]
+                      )
+                      .join("")
+                  : ""
+              }
+            />
           </div>
         );
       default:
@@ -675,6 +695,7 @@ function Canvas() {
         position: "relative",
         width: sizePx.w * sizePx.ratio,
         height: sizePx.h * sizePx.ratio,
+        background: "#fff",
       }}
       ref={refCanvas}
       radius={0}
