@@ -159,6 +159,11 @@ function FormatMultiSelect() {
     );
   };
   const importFormat = (text) => {
+    if (text === "") {
+      setErrorImportFormat("Empty text");
+      return;
+    }
+
     try {
       let keys = [];
       if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
@@ -247,12 +252,7 @@ function FormatMultiSelect() {
           opened={openedImportFormat}
         >
           <Popover.Target>
-            <ActionIcon
-              variant="subtle"
-              onClick={() => {
-                toggleImportFormat();
-              }}
-            >
+            <ActionIcon variant="subtle" onClick={() => toggleImportFormat()}>
               <IconForms />
             </ActionIcon>
           </Popover.Target>
@@ -264,15 +264,6 @@ function FormatMultiSelect() {
                   : theme.white,
             })}
           >
-            <ActionIcon
-              variant="subtle"
-              onClick={() => {
-                closeImportFormat();
-              }}
-              style={{ float: "right" }}
-            >
-              <IconX />
-            </ActionIcon>
             <JsonInput
               label="Import format from text"
               placeholder="Enter the variable text"
@@ -284,15 +275,20 @@ function FormatMultiSelect() {
                 setErrorImportFormat(null);
                 setTextImportFormat(value);
               }}
-              mt="xs"
             />
-            <Button
-              mt="xs"
-              size="xs"
-              onClick={() => importFormat(textImportFormat)}
-            >
-              Submit
-            </Button>
+            <Group mt="xs">
+              <Button size="xs" onClick={() => importFormat(textImportFormat)}>
+                Submit
+              </Button>
+              <Button
+                ml="auto"
+                variant="subtle"
+                size="xs"
+                onClick={() => closeImportFormat()}
+              >
+                Close
+              </Button>
+            </Group>
           </Popover.Dropdown>
         </Popover>
 
@@ -710,7 +706,7 @@ export default function Import() {
 
                     <div>
                       <Text size="xl" inline>
-                        Drag data file here or click to select file
+                        Drag data file or click to select file
                       </Text>
                       <Text size="sm" color="dimmed" inline mt={7}>
                         Attach MS Excel or CSV file, file should not exceed 5mb

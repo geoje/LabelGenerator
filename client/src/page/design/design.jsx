@@ -15,9 +15,14 @@ import {
   TextInput,
   SegmentedControl,
   ColorInput,
+  Popover,
+  Button,
+  useMantineTheme,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import React, { useEffect, useRef } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { IMAGE_MIME_TYPE, Dropzone } from "@mantine/dropzone";
+import React, { useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -50,6 +55,8 @@ import {
   IconHexagonLetterX,
   IconBorderStyle2,
   IconBorderStyle,
+  IconUpload,
+  IconLink,
 } from "@tabler/icons";
 import {
   setSize,
@@ -341,6 +348,13 @@ function Tool() {
   const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
 
+  const theme = useMantineTheme();
+  const addImageHook = useDisclosure(false);
+  const openedAddImageFormat = addImageHook[0],
+    closeAddImageFormat = addImageHook[1].close,
+    toggleAddImageFormat = addImageHook[1].toggle;
+
+  const [uploadImage, setUploadImage] = useState(null);
   let [layerCount, setLayerCount] = useState(1);
   const prediectLayerName = (o) => o.name === "layer" + layerCount;
   const getLayerName = () => {
@@ -437,11 +451,110 @@ function Tool() {
           <IconTypography />
         </ActionIcon>
       </Tooltip>
-      <Tooltip label="Image">
-        <ActionIcon variant="subtle" onClick={() => {}}>
-          <IconPhoto />
-        </ActionIcon>
-      </Tooltip>
+
+      <Popover
+        width={400}
+        trapFocus
+        position="bottom"
+        withArrow
+        shadow="md"
+        opened={openedAddImageFormat}
+      >
+        <Popover.Target>
+          <Tooltip label="Image">
+            <ActionIcon variant="subtle" onClick={() => toggleAddImageFormat()}>
+              <IconPhoto />
+            </ActionIcon>
+          </Tooltip>
+        </Popover.Target>
+        <Popover.Dropdown
+          sx={(theme) => ({
+            background:
+              theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
+          })}
+        >
+          <Group noWrap spacing="xs">
+            <TextInput
+              sx={() => {
+                return { flex: 1 };
+              }}
+              size="xs"
+              placeholder="Enter image url"
+              icon={<IconLink size={DETAIL_ICON_SIZE} />}
+            />
+            <ActionIcon size="md" variant="" color="blue.6" disabled={false}>
+              <IconCheck size={18} />
+            </ActionIcon>
+          </Group>
+          <Dropzone
+            mt="xs"
+            maxSize={3 * 1024 ** 2}
+            accept={IMAGE_MIME_TYPE}
+            onDrop={(files) => console.log("accepted files", files)}
+            onReject={(files) => console.log("rejected files", files)}
+          >
+            <Group
+              position="center"
+              spacing="xl"
+              style={{ minHeight: 220, pointerEvents: "none" }}
+            >
+              <Dropzone.Accept>
+                <IconUpload
+                  size={36}
+                  stroke={1.5}
+                  color={
+                    theme.colors[theme.primaryColor][
+                      theme.colorScheme === "dark" ? 4 : 6
+                    ]
+                  }
+                />
+              </Dropzone.Accept>
+              <Dropzone.Reject>
+                <IconX
+                  size={36}
+                  stroke={1.5}
+                  color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]}
+                />
+              </Dropzone.Reject>
+              <Dropzone.Idle>
+                <IconPhoto size={36} stroke={1.5} />
+              </Dropzone.Idle>
+
+              <div>
+                <Text size="lg" inline>
+                  Drag image or click to select file
+                </Text>
+                <Text size="xs" color="dimmed" inline mt={7}>
+                  Attach image file, file should not exceed 5mb
+                </Text>
+              </div>
+            </Group>
+          </Dropzone>
+
+          <Group mt="xs">
+            <Button size="xs" onClick={() => {}}>
+              Submit
+            </Button>
+            <Button
+              ml="auto"
+              variant="subtle"
+              size="xs"
+              color="gray"
+              onClick={() => {}}
+            >
+              Reset
+            </Button>
+            <Button
+              variant="subtle"
+              size="xs"
+              onClick={() => closeAddImageFormat()}
+            >
+              Close
+            </Button>
+          </Group>
+        </Popover.Dropdown>
+      </Popover>
+
       <Tooltip label="QR Code">
         <ActionIcon
           variant="subtle"
@@ -618,7 +731,10 @@ function Canvas() {
               userSelect: "none" /* Standard syntax */,
 
               fontFamily: item.font?.family,
-              fontSize: item.font ? item.font.size * sizePx.ratio : null,
+              fontSize:
+                item.font && item.font.size
+                  ? item.font.size * sizePx.ratio
+                  : null,
               color: item.font?.color?.value,
             }}
           >
