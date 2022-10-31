@@ -9,7 +9,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    name: "",
  *    type: "",
  *    size: { x: 0, y: 0, w: 0, h: 0 },
- *    font: { family:"", size:0, color:"" }
+ *    font: { family: "", size:0, color:"" }
  *    border: { style: "", width: 0, color: "" }
  *    background: "",
  *    var: { type: "", static: "", format: { ... } }

@@ -15,6 +15,9 @@ import {
   TextInput,
   SegmentedControl,
   ColorInput,
+  FileButton,
+  Button,
+  Image as ManImage,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import React, { useRef } from "react";
@@ -50,6 +53,8 @@ import {
   IconHexagonLetterX,
   IconBorderStyle2,
   IconBorderStyle,
+  IconLink,
+  IconLinkOff,
 } from "@tabler/icons";
 import {
   setSize,
@@ -79,6 +84,7 @@ const TYPE = {
   qr: "qr",
 };
 const DETAIL_ICON_SIZE = 14;
+const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
 const convertSize = {
   inch: (size) => {
@@ -343,7 +349,7 @@ function Tool() {
 
   let [layerCount, setLayerCount] = useState(1);
   const prediectLayerName = (o) => o.name === "layer" + layerCount;
-  const getLayerName = () => {
+  const getNextLayerName = () => {
     while (layer.some(prediectLayerName)) layerCount++;
     setLayerCount(layerCount + 1);
     return "layer" + layerCount;
@@ -369,7 +375,7 @@ function Tool() {
           onClick={() =>
             dispatch(
               addLayer({
-                name: getLayerName(),
+                name: getNextLayerName(),
                 type: TYPE.rect,
                 size: {
                   x: sizePx.w / 2 - 10,
@@ -395,7 +401,7 @@ function Tool() {
           onClick={() =>
             dispatch(
               addLayer({
-                name: getLayerName(),
+                name: getNextLayerName(),
                 type: TYPE.circle,
                 size: {
                   x: sizePx.w / 2 - 10,
@@ -423,7 +429,7 @@ function Tool() {
           onClick={() => {
             dispatch(
               addLayer({
-                name: getLayerName(),
+                name: getNextLayerName(),
                 type: TYPE.text,
                 size: {
                   x: sizePx.w / 2 - 10,
@@ -439,9 +445,71 @@ function Tool() {
       </Tooltip>
 
       <Tooltip label="Image">
-        <ActionIcon variant="subtle" onClick={() => {}}>
-          <IconPhoto />
-        </ActionIcon>
+        <FileButton
+          sx={() => {
+            return { width: 28, height: 28 };
+          }}
+          accept="image/*"
+          onChange={(file) => {
+            // Empty
+            if (!file) return;
+
+            // No image type
+            if (!file.type.startsWith("image/")) {
+              showNotification({
+                title: "Unsupported file type",
+                message: "File type must be one of (png, jpg, svg, ...)",
+                color: "red",
+              });
+              return;
+            }
+
+            // Exceed file size
+            if (file.size > MAX_FILE_SIZE) {
+              showNotification({
+                title: "Too large file",
+                message: "File size exceed 5mb",
+                color: "red",
+              });
+              return;
+            }
+
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+              const wRatio = sizePx.w / img.width;
+              const hRatio = sizePx.h / img.height;
+              const w = Math.floor(Math.min(wRatio, hRatio) * img.width);
+              const h = Math.floor(Math.min(wRatio, hRatio) * img.height);
+
+              dispatch(
+                addLayer({
+                  name: getNextLayerName(),
+                  type: TYPE.image,
+                  size: {
+                    x: sizePx.w / 2 - w / 2,
+                    y: sizePx.h / 2 - h / 2,
+                    w,
+                    h,
+                  },
+                  var: { type: "static", static: url },
+                })
+              );
+            };
+            img.src = url;
+          }}
+        >
+          {(props) => (
+            <Button
+              p={0}
+              color="gray"
+              variant="subtle"
+              leftIcon={<IconPhoto />}
+              styles={() => ({ leftIcon: { marginRight: 0 } })}
+              {...props}
+            ></Button>
+          )}
+        </FileButton>
       </Tooltip>
 
       <Tooltip label="QR Code">
@@ -450,7 +518,7 @@ function Tool() {
           onClick={() =>
             dispatch(
               addLayer({
-                name: getLayerName(),
+                name: getNextLayerName(),
                 type: TYPE.qr,
                 size: {
                   x: sizePx.w / 2 - 10,
@@ -509,7 +577,7 @@ function Canvas() {
           Math.max(
             0,
             Math.min(
-              (sizePx.w - selectedLayerSize().w) * sizePx.ratio - 2,
+              (sizePx.w - selectedLayerSize().w) * sizePx.ratio,
               event.pageX - refCanvas.current.offsetLeft - move.ox
             )
           ) / sizePx.ratio
@@ -518,7 +586,7 @@ function Canvas() {
           Math.max(
             0,
             Math.min(
-              (sizePx.h - selectedLayerSize().h) * sizePx.ratio - 2,
+              (sizePx.h - selectedLayerSize().h) * sizePx.ratio,
               event.pageY - refCanvas.current.offsetTop - move.oy
             )
           ) / sizePx.ratio
@@ -660,6 +728,18 @@ function Canvas() {
             />
           </div>
         );
+      case TYPE.image:
+        return (
+          <ManImage
+            width={item.size.w * sizePx.ratio}
+            height={item.size.h * sizePx.ratio}
+            key={`canvas-${item.name}`}
+            ref={(el) => (refLayer.current[index] = el)}
+            onMouseDown={(event) => onMouseDown(event, index)}
+            style={defaultStyle}
+            src={item.var.static}
+          />
+        );
       default:
         return null;
     }
@@ -671,11 +751,11 @@ function Canvas() {
         position: "relative",
         width: sizePx.w * sizePx.ratio,
         height: sizePx.h * sizePx.ratio,
+        boxSizing: "content-box",
         background: "#fff",
       }}
       ref={refCanvas}
       radius={0}
-      shadow="xs"
       withBorder
       onMouseDown={() => dispatch(setSelected(-1))}
     >
@@ -956,6 +1036,7 @@ function Detail() {
   const selected = useSelector((state) => state.draw.selected);
   const rename = useSelector((state) => state.draw.rename);
 
+  const [linkSize, setLinkSize] = useState(true);
   const borderColor =
     selected !== -1 && layer[selected].border?.color
       ? layer[selected].border.color
@@ -1053,14 +1134,20 @@ function Detail() {
               size="xs"
               icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
               min={0}
-              max={(sizePx.w - selectedLayerSize().w) * sizePx.ratio - 2}
+              max={sizePx.w - selectedLayerSize().w}
               value={layer[selected].size.x}
               onChange={(value) => {
-                if (!value) return;
+                if (value === null) return;
                 dispatch(
                   setLayerSize({
                     index: selected,
-                    size: { ...layer[selected].size, x: value },
+                    size: {
+                      ...layer[selected].size,
+                      x: Math.max(
+                        0,
+                        Math.min(sizePx.w - selectedLayerSize().w, value)
+                      ),
+                    },
                   })
                 );
               }}
@@ -1071,130 +1158,154 @@ function Detail() {
               size="xs"
               icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
               min={0}
-              max={(sizePx.h - selectedLayerSize().h) * sizePx.ratio - 2}
+              max={sizePx.h - selectedLayerSize().h}
               value={layer[selected].size.y}
               onChange={(value) => {
-                if (!value) return;
+                if (value === null) return;
                 dispatch(
                   setLayerSize({
                     index: selected,
-                    size: { ...layer[selected].size, y: value },
+                    size: {
+                      ...layer[selected].size,
+                      y: Math.max(
+                        0,
+                        Math.min(sizePx.h - selectedLayerSize().h, value)
+                      ),
+                    },
                   })
                 );
               }}
             />
           </Grid.Col>
-          <Grid.Col span={6}>
-            <NumberInput
-              size="xs"
-              icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
-              min={layer[selected].type === TYPE.qr ? 18 : 1}
-              value={selectedLayerSize().w}
-              disabled={layer[selected].type === TYPE.text}
-              onChange={(value) => {
-                if (
-                  !value ||
-                  value < (layer[selected].type === TYPE.qr ? 18 : 1)
-                )
-                  return;
-                dispatch(
-                  setLayerSize({
-                    index: selected,
-                    size: { ...layer[selected].size, w: value },
-                  })
-                );
-              }}
-            />
+          <Grid.Col>
+            <Group noWrap spacing={0}>
+              <NumberInput
+                size="xs"
+                style={{ flex: 1 }}
+                icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+                min={layer[selected].type === TYPE.qr ? 18 : 1}
+                value={selectedLayerSize().w}
+                disabled={layer[selected].type === TYPE.text}
+                onChange={(value) => {
+                  if (
+                    !value ||
+                    value < (layer[selected].type === TYPE.qr ? 18 : 1)
+                  )
+                    return;
+                  dispatch(
+                    setLayerSize({
+                      index: selected,
+                      size: { ...layer[selected].size, w: value },
+                    })
+                  );
+                }}
+              />
+              <ActionIcon
+                variant="subtle"
+                size="md"
+                onClick={() => setLinkSize(!linkSize)}
+              >
+                {linkSize ? (
+                  <IconLink size={DETAIL_ICON_SIZE} />
+                ) : (
+                  <IconLinkOff size={DETAIL_ICON_SIZE} />
+                )}
+              </ActionIcon>
+              <NumberInput
+                size="xs"
+                style={{ flex: 1 }}
+                icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
+                min={layer[selected].type === TYPE.qr ? 18 : 1}
+                value={selectedLayerSize().h}
+                disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
+                onChange={(value) => {
+                  if (
+                    !value ||
+                    value < (layer[selected].type === TYPE.qr ? 18 : 1)
+                  )
+                    return;
+                  dispatch(
+                    setLayerSize({
+                      index: selected,
+                      size: { ...layer[selected].size, h: value },
+                    })
+                  );
+                }}
+              />
+            </Group>
           </Grid.Col>
-          <Grid.Col span={6}>
-            <NumberInput
-              size="xs"
-              icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
-              min={layer[selected].type === TYPE.qr ? 18 : 1}
-              value={selectedLayerSize().h}
-              disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
-              onChange={(value) => {
-                if (
-                  !value ||
-                  value < (layer[selected].type === TYPE.qr ? 18 : 1)
-                )
-                  return;
-                dispatch(
-                  setLayerSize({
-                    index: selected,
-                    size: { ...layer[selected].size, h: value },
-                  })
-                );
-              }}
-            />
-          </Grid.Col>
-          <Grid.Col pb={1}>
-            <Select
-              placeholder="Border Style"
-              size="xs"
-              transitionDuration={100}
-              transition="pop-top-left"
-              transitionTimingFunction="ease"
-              icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
-              clearable
-              data={[
-                { value: "solid", label: "solid" },
-                { value: "dashed", label: "dashed" },
-                { value: "dotted", label: "dotted" },
-                { value: "double", label: "double" },
-                { value: "groove", label: "groove" },
-                { value: "ridge", label: "ridge" },
-                { value: "inset", label: "inset" },
-                { value: "outset", label: "outset" },
-              ]}
-              value={layer[selected].border?.style}
-              onChange={(value) =>
-                dispatch(
-                  setLayerBorder({
-                    index: selected,
-                    border: value
-                      ? {
-                          style: value,
-                          width: layer[selected].border?.width
-                            ? layer[selected].border?.width
-                            : 1,
-                          color: layer[selected].border?.color,
-                        }
-                      : {},
-                  })
-                )
-              }
-            />
-          </Grid.Col>
-          <Grid.Col py={1}>
-            <NumberInput
-              placeholder="Border Width"
-              size="xs"
-              icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
-              min={1}
-              max={
-                Math.min(selectedLayerSize().w, selectedLayerSize().h) / 2 - 1
-              }
-              value={layer[selected].border?.width}
-              onChange={(value) =>
-                dispatch(
-                  setLayerBorder({
-                    index: selected,
-                    border: { ...layer[selected].border, width: value },
-                  })
-                )
-              }
-            />
-          </Grid.Col>
-          <Grid.Col pt={1}>
-            <CustomColorInput
-              placeholder="Border Color"
-              selected={selected}
-              color={borderColor}
-              action={setLayerBorderColor}
-              icon={<IconBrush size={DETAIL_ICON_SIZE} />}
-            />
-          </Grid.Col>
+          {layer[selected].type !== TYPE.image && (
+            <>
+              <Grid.Col span={4} md={12} pb={1}>
+                <Select
+                  placeholder="Border Style"
+                  size="xs"
+                  transitionDuration={100}
+                  transition="pop-top-left"
+                  transitionTimingFunction="ease"
+                  icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
+                  clearable
+                  data={[
+                    { value: "solid", label: "solid" },
+                    { value: "dashed", label: "dashed" },
+                    { value: "dotted", label: "dotted" },
+                    { value: "double", label: "double" },
+                    { value: "groove", label: "groove" },
+                    { value: "ridge", label: "ridge" },
+                    { value: "inset", label: "inset" },
+                    { value: "outset", label: "outset" },
+                  ]}
+                  value={layer[selected].border?.style}
+                  onChange={(value) =>
+                    dispatch(
+                      setLayerBorder({
+                        index: selected,
+                        border: value
+                          ? {
+                              style: value,
+                              width: layer[selected].border?.width
+                                ? layer[selected].border?.width
+                                : 1,
+                              color: layer[selected].border?.color,
+                            }
+                          : {},
+                      })
+                    )
+                  }
+                />
+              </Grid.Col>
+              <Grid.Col span={4} md={12} py={1}>
+                <NumberInput
+                  placeholder="Border Width"
+                  size="xs"
+                  icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
+                  min={1}
+                  max={
+                    Math.min(selectedLayerSize().w, selectedLayerSize().h) / 2 -
+                    1
+                  }
+                  value={layer[selected].border?.width}
+                  onChange={(value) =>
+                    dispatch(
+                      setLayerBorder({
+                        index: selected,
+                        border: { ...layer[selected].border, width: value },
+                      })
+                    )
+                  }
+                />
+              </Grid.Col>
+              <Grid.Col span={4} md={12} pt={1}>
+                <CustomColorInput
+                  placeholder="Border Color"
+                  selected={selected}
+                  color={borderColor}
+                  action={setLayerBorderColor}
+                  icon={<IconBrush size={DETAIL_ICON_SIZE} />}
+                />
+              </Grid.Col>
+            </>
+          )}
           {layer[selected].type !== TYPE.qr && (
             <Grid.Col>
               <CustomColorInput
