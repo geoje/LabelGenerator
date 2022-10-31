@@ -340,21 +340,78 @@ function Variable() {
             Variable
           </Title>
           <Divider my="sm" />
-          <Select
-            placeholder="Data Column"
-            size="xs"
-            transitionDuration={100}
-            transition="pop-top-left"
-            transitionTimingFunction="ease"
-            icon={<IconVariable size={DETAIL_ICON_SIZE} />}
-            data={Object.keys(data.length ? data[0] : []).map((s) => {
-              return { value: s, label: s };
-            })}
-            value={layer[selected].var.format}
-            onChange={(value) =>
-              dispatch(setLayerVar({ ...layer[selected].var, format: value }))
-            }
-          />
+          <Grid>
+            <Grid.Col>
+              <Select
+                placeholder="Data Column"
+                size="xs"
+                transitionDuration={100}
+                transition="pop-top-left"
+                transitionTimingFunction="ease"
+                icon={<IconVariable size={DETAIL_ICON_SIZE} />}
+                data={Object.keys(data.length ? data[0] : []).map((s) => {
+                  return { value: s, label: s };
+                })}
+                value={layer[selected].var.format}
+                onChange={(value) => {
+                  let img = {};
+                  new Set(data.map((o) => o[value])).forEach(
+                    (v) => (img[v] = "")
+                  );
+
+                  dispatch(
+                    setLayerVar({
+                      index: selected,
+                      var: { ...layer[selected].var, format: value, img },
+                    })
+                  );
+                }}
+              />
+            </Grid.Col>
+            {layer[selected].var.format && (
+              <Grid.Col>
+                <Grid>
+                  {Object.keys(layer[selected].var.img).map((k) => (
+                    <Grid.Col key={`variable-${k}`} span={3} md={12} py={0}>
+                      <FileButton
+                        sx={() => {
+                          return { width: "100%" };
+                        }}
+                        accept="image/*"
+                        onChange={(file) => {
+                          if (!file) return;
+                        }}
+                      >
+                        {(props) => (
+                          <Button
+                            sx={(theme) => {
+                              return {
+                                border: `1px solid ${
+                                  theme.colorScheme === "dark"
+                                    ? theme.colors.dark[4]
+                                    : theme.colors.gray[4]
+                                }`,
+                                backgroundColor:
+                                  theme.colorScheme === "dark"
+                                    ? theme.colors.dark[5]
+                                    : theme.white,
+                              };
+                            }}
+                            size="xs"
+                            variant="outline"
+                            compact
+                            {...props}
+                          >
+                            {k}
+                          </Button>
+                        )}
+                      </FileButton>
+                    </Grid.Col>
+                  ))}
+                </Grid>
+              </Grid.Col>
+            )}
+          </Grid>
         </>
       );
     default:
@@ -1209,7 +1266,10 @@ function Detail() {
             />
           </Grid.Col>
           <Grid.Col>
-            <Group noWrap spacing={0}>
+            <Group
+              noWrap
+              spacing={layer[selected].type === TYPE.image ? 0 : "md"}
+            >
               <NumberInput
                 size="xs"
                 style={{ flex: 1 }}
@@ -1241,17 +1301,19 @@ function Detail() {
                   );
                 }}
               />
-              <ActionIcon
-                variant="subtle"
-                size="md"
-                onClick={() => setLinkSize(!linkSize)}
-              >
-                {linkSize ? (
-                  <IconLink size={DETAIL_ICON_SIZE} />
-                ) : (
-                  <IconLinkOff size={DETAIL_ICON_SIZE} />
-                )}
-              </ActionIcon>
+              {layer[selected].type === TYPE.image && (
+                <ActionIcon
+                  variant="subtle"
+                  size="md"
+                  onClick={() => setLinkSize(!linkSize)}
+                >
+                  {linkSize ? (
+                    <IconLink size={DETAIL_ICON_SIZE} />
+                  ) : (
+                    <IconLinkOff size={DETAIL_ICON_SIZE} />
+                  )}
+                </ActionIcon>
+              )}
               <NumberInput
                 size="xs"
                 style={{ flex: 1 }}
