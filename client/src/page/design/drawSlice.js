@@ -8,11 +8,12 @@ import { createSlice } from "@reduxjs/toolkit";
  * layer: [{
  *    name: "",
  *    type: "",
- *    size: { x: 0, y: 0, w: 0, h: 0 },
+ *    size: { x: 0, y: 0, w: 0, h: 0, nw, nh },
  *    font: { family: "", size:0, color:"" }
  *    border: { style: "", width: 0, color: "" }
  *    background: "",
- *    var: { type: "", static: "", format: { ... } }
+ *    var: { type: "", static: "", format: "" } // text
+ *    var: { default: "", format: "", img: { [key]: [url] } } // image
  * }, ...]
  *
  * selected: -1

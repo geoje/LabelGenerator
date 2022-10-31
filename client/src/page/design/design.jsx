@@ -334,7 +334,29 @@ function Variable() {
         </>
       );
     case TYPE.image:
-      return <></>;
+      return (
+        <>
+          <Title order={6} align="center">
+            Variable
+          </Title>
+          <Divider my="sm" />
+          <Select
+            placeholder="Data Column"
+            size="xs"
+            transitionDuration={100}
+            transition="pop-top-left"
+            transitionTimingFunction="ease"
+            icon={<IconVariable size={DETAIL_ICON_SIZE} />}
+            data={Object.keys(data.length ? data[0] : []).map((s) => {
+              return { value: s, label: s };
+            })}
+            value={layer[selected].var.format}
+            onChange={(value) =>
+              dispatch(setLayerVar({ ...layer[selected].var, format: value }))
+            }
+          />
+        </>
+      );
     default:
       return <></>;
   }
@@ -491,8 +513,10 @@ function Tool() {
                     y: sizePx.h / 2 - h / 2,
                     w,
                     h,
+                    nw: w,
+                    nh: h,
                   },
-                  var: { type: "static", static: url },
+                  var: { default: url },
                 })
               );
             };
@@ -731,13 +755,20 @@ function Canvas() {
       case TYPE.image:
         return (
           <ManImage
+            src={
+              item.var.img &&
+              item.var.format &&
+              Object.keys(item.var.img).includes(item.var.format)
+                ? item.var.img[data[page][item.var.format]]
+                : item.var.default
+            }
             width={item.size.w * sizePx.ratio}
             height={item.size.h * sizePx.ratio}
             key={`canvas-${item.name}`}
             ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
             style={defaultStyle}
-            src={item.var.static}
+            fit="contain"
           />
         );
       default:
@@ -1195,7 +1226,17 @@ function Detail() {
                   dispatch(
                     setLayerSize({
                       index: selected,
-                      size: { ...layer[selected].size, w: value },
+                      size:
+                        layer[selected].type === TYPE.image && linkSize
+                          ? {
+                              ...layer[selected].size,
+                              w: value,
+                              h: Math.ceil(
+                                (value / layer[selected].size.nw) *
+                                  layer[selected].size.nh
+                              ),
+                            }
+                          : { ...layer[selected].size, w: value },
                     })
                   );
                 }}
@@ -1227,7 +1268,17 @@ function Detail() {
                   dispatch(
                     setLayerSize({
                       index: selected,
-                      size: { ...layer[selected].size, h: value },
+                      size:
+                        layer[selected].type === TYPE.image && linkSize
+                          ? {
+                              ...layer[selected].size,
+                              w: Math.floor(
+                                (value / layer[selected].size.nh) *
+                                  layer[selected].size.nw
+                              ),
+                              h: value,
+                            }
+                          : { ...layer[selected].size, h: value },
                     })
                   );
                 }}
