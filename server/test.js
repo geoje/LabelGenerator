@@ -8,3 +8,5 @@ console.log({
   w: Math.floor(Math.min(wRatio, hRatio) * img.width),
   h: Math.floor(Math.min(wRatio, hRatio) * img.height),
 });
+
+// Changing at github
