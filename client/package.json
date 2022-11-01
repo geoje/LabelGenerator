@@ -24,7 +24,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "deploy": "git add . && git commit -a -m \"Deploy with scripts\" && git push && git checkout master && git pull && git merge develop && git push"
   },
   "eslintConfig": {
     "extends": [
