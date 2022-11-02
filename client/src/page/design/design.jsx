@@ -249,6 +249,7 @@ function Variable() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
+  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
 
@@ -423,22 +424,8 @@ function Variable() {
                                 Math.min(wRatio, hRatio) * img.height
                               );
 
-                              dispatch(
-                                setLayerVar({
-                                  //TODO
-                                  name: getNextLayerName(),
-                                  type: TYPE.image,
-                                  size: {
-                                    x: sizePx.w / 2 - w / 2,
-                                    y: sizePx.h / 2 - h / 2,
-                                    w,
-                                    h,
-                                    nw: w,
-                                    nh: h,
-                                  },
-                                  var: { default: url },
-                                })
-                              );
+                              /************* TODO *************/
+                              dispatch(setLayerVar({ w, h }));
                             };
                             img.src = url;
                           }}
