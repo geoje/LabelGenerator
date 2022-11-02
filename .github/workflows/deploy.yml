@@ -24,4 +24,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           server: ${{ secrets.HOST }}
           ssh_private_key: ${{ secrets.PRIVATE_KEY }}
-          server-dir: label-generator/
+          remote_path: label-generator/
