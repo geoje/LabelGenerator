@@ -1,4 +1,4 @@
-name: Deploy
+name: 🚀 Deploy
 
 on:
   push:
@@ -16,44 +16,31 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: 🍀 Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
-      - name: Install client modules
+      - name: 📥 Install client modules
         run: cd client && npm i --omit=dev
 
-      - name: Build client
+      - name: 🛠️ Build client
         run: cd client && npm run build
 
-      - name: Install server modules
+      - name: 📥 Install server modules
         run: npm i --omit=dev
 
-      - name: Generate deployment package
-        run: zip -r deploy.zip . -x "*.git*" "*client/node_modules**"
-
-      - name: Get timestamp
-        uses: gerred/actions/current-time@master
-        id: current-time
-
-      - name: Run string replace
-        uses: frabert/replace-string-action@master
-        id: format-time
+      - name: 📦 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.3.2
         with:
-          pattern: '[:\.]+'
-          string: "${{ steps.current-time.outputs.time }}"
-          replace-with: "-"
-          flags: "g"
-
-      - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v20
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: Label Generator
-          environment_name: Labelgenerator-env
-          version_label: "label-generator-${{ steps.format-time.outputs.replaced }}"
-          region: us-west-2
-          deployment_package: deploy.zip
+          server: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          password: ${{ secrets.AWS_PRIVATE_KEY }}
+          port: 22
+          protocol: sftp
+          server-dir: label-generator/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            *client/node_modules**

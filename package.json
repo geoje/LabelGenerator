@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
-    "start": "node server/app.js",
+    "start": "nodemon server/app.js",
     "test": "node server/test.js",
     "deploy": "git add . && git commit -a -m \"Script deployment\" && git push && git checkout master && git pull && git merge develop && git push && git checkout develop"
   },

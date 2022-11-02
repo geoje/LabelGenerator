@@ -387,7 +387,60 @@ function Variable() {
                           }}
                           accept="image/*"
                           onChange={(file) => {
+                            // Empty
                             if (!file) return;
+
+                            // No image type
+                            if (!file.type.startsWith("image/")) {
+                              showNotification({
+                                title: "Unsupported file type",
+                                message:
+                                  "File type must be one of (png, jpg, svg, ...)",
+                                color: "red",
+                              });
+                              return;
+                            }
+
+                            // Exceed file size
+                            if (file.size > MAX_FILE_SIZE) {
+                              showNotification({
+                                title: "Too large file",
+                                message: "File size exceed 5mb",
+                                color: "red",
+                              });
+                              return;
+                            }
+
+                            const url = URL.createObjectURL(file);
+                            const img = new Image();
+                            img.onload = () => {
+                              const wRatio = sizePx.w / img.width;
+                              const hRatio = sizePx.h / img.height;
+                              const w = Math.floor(
+                                Math.min(wRatio, hRatio) * img.width
+                              );
+                              const h = Math.floor(
+                                Math.min(wRatio, hRatio) * img.height
+                              );
+
+                              dispatch(
+                                setLayerVar({
+                                  //TODO
+                                  name: getNextLayerName(),
+                                  type: TYPE.image,
+                                  size: {
+                                    x: sizePx.w / 2 - w / 2,
+                                    y: sizePx.h / 2 - h / 2,
+                                    w,
+                                    h,
+                                    nw: w,
+                                    nh: h,
+                                  },
+                                  var: { default: url },
+                                })
+                              );
+                            };
+                            img.src = url;
                           }}
                         >
                           {(props) => (
