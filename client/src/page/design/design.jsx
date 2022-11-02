@@ -371,43 +371,44 @@ function Variable() {
             {layer[selected].var.format && (
               <Grid.Col>
                 <Grid>
-                  {Object.keys(layer[selected].var.img).map((k) => (
-                    <Grid.Col key={`variable-${k}`} span={3} md={12} py={0}>
-                      <FileButton
-                        sx={() => {
-                          return { width: "100%" };
-                        }}
-                        accept="image/*"
-                        onChange={(file) => {
-                          if (!file) return;
-                        }}
-                      >
-                        {(props) => (
-                          <Button
-                            sx={(theme) => {
-                              return {
-                                border: `1px solid ${
-                                  theme.colorScheme === "dark"
-                                    ? theme.colors.dark[4]
-                                    : theme.colors.gray[4]
-                                }`,
-                                backgroundColor:
-                                  theme.colorScheme === "dark"
-                                    ? theme.colors.dark[5]
-                                    : theme.white,
-                              };
-                            }}
-                            size="xs"
-                            variant="outline"
-                            compact
-                            {...props}
-                          >
-                            {k}
-                          </Button>
-                        )}
-                      </FileButton>
-                    </Grid.Col>
-                  ))}
+                  {Object.keys(layer[selected].var.img)
+                    .filter((k) => k !== "")
+                    .map((k) => (
+                      <Grid.Col key={`variable-${k}`} span={3} md={12} py={0}>
+                        <FileButton
+                          sx={(theme) => {
+                            return {
+                              width: "100%",
+                              background:
+                                theme.colorScheme === "dark"
+                                  ? "#2C2E33"
+                                  : "#fff",
+                            };
+                          }}
+                          accept="image/*"
+                          onChange={(file) => {
+                            if (!file) return;
+                          }}
+                        >
+                          {(props) => (
+                            <Button
+                              compact
+                              size="xs"
+                              variant="outline"
+                              rightIcon={<IconPhoto size={DETAIL_ICON_SIZE} />}
+                              {...props}
+                              styles={() => ({
+                                rightIcon: {
+                                  marginLeft: "auto",
+                                },
+                              })}
+                            >
+                              {k}
+                            </Button>
+                          )}
+                        </FileButton>
+                      </Grid.Col>
+                    ))}
                 </Grid>
               </Grid.Col>
             )}
@@ -1424,7 +1425,7 @@ function Detail() {
               </Grid.Col>
             </>
           )}
-          {layer[selected].type !== TYPE.qr && (
+          {![TYPE.qr, TYPE.image].includes(layer[selected].type) && (
             <Grid.Col>
               <CustomColorInput
                 placeholder="Background Color"
