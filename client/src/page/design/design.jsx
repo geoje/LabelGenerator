@@ -800,9 +800,7 @@ function Canvas() {
                         (o) =>
                           o.literal || Object.keys(data[0]).includes(o.value)
                       )
-                      .map((o) =>
-                        o.literal ? o.value : data[page - 1][o.value]
-                      )
+                      .map((o) => (o.literal ? o.value : data[page][o.value]))
                       .join("")
                   : ""
               }
@@ -892,25 +890,30 @@ function Pagenation() {
         size={36}
         variant="filled"
         disabled={!data.length}
-        onClick={() => handlers.current.decrement()}
+        onClick={() =>
+          dispatch(setPage(Math.min(Math.max(0, page - 1), data.length - 1)))
+        }
       >
         <IconChevronLeft />
       </ActionIcon>
 
       <NumberInput
         hideControls
-        value={page}
+        value={page + 1}
         onChange={(val) =>
           dispatch(
             setPage(
-              Math.min(Math.max(Number.isNaN(val) ? 1 : val, 1), data.length)
+              Math.min(
+                Math.max(1, Number.isNaN(val) ? 1 : val - 1),
+                data.length
+              )
             )
           )
         }
         handlersRef={handlers}
         step={1}
         min={1}
-        max={100}
+        max={data.length}
         disabled={!data.length}
         styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
       />
@@ -919,7 +922,9 @@ function Pagenation() {
         size={36}
         variant="filled"
         disabled={!data.length}
-        onClick={() => handlers.current.increment()}
+        onClick={() =>
+          dispatch(setPage(Math.min(Math.max(0, page + 1), data.length - 1)))
+        }
       >
         <IconChevronRight />
       </ActionIcon>

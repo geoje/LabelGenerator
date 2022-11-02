@@ -35,12 +35,13 @@ import {
   IconClipboard,
 } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
 import { set as setData } from "./dataSlice";
 import { setFormat, setCustom, setSelected } from "./qrSlice";
+import { setPage } from "../design/drawSlice";
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
 function StringReplaceAt(str, index, replacement) {
@@ -389,11 +390,10 @@ function FormatMultiSelect() {
 }
 function QRCodePaper() {
   // Provider
+  const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.qr.format);
-
-  const [page, setPage] = useState(1);
-  const handlers = useRef();
+  const page = useSelector((state) => state.draw.page);
 
   const keys = data.length ? Object.keys(data[0]) : [];
   const content = format
@@ -453,20 +453,28 @@ function QRCodePaper() {
             size={36}
             variant="filled"
             disabled={!data.length}
-            onClick={() => handlers.current.decrement()}
+            onClick={() =>
+              dispatch(
+                setPage(Math.min(Math.max(0, page - 1), data.length - 1))
+              )
+            }
           >
             <IconChevronLeft />
           </ActionIcon>
 
           <NumberInput
             hideControls
-            value={page}
+            value={page + 1}
             onChange={(val) =>
-              setPage(
-                Math.min(Math.max(Number.isNaN(val) ? 1 : val, 1), data.length)
+              dispatch(
+                setPage(
+                  Math.min(
+                    Math.max(1, Number.isNaN(val) ? 1 : val - 1),
+                    data.length
+                  )
+                )
               )
             }
-            handlersRef={handlers}
             step={1}
             min={1}
             max={data.length}
@@ -478,7 +486,11 @@ function QRCodePaper() {
             size={36}
             variant="filled"
             disabled={!data.length}
-            onClick={() => handlers.current.increment()}
+            onClick={() =>
+              dispatch(
+                setPage(Math.min(Math.max(0, page + 1), data.length - 1))
+              )
+            }
           >
             <IconChevronRight />
           </ActionIcon>
