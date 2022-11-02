@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
-    "start": "node server/app.js",
+    "start": "nodemon server/app.js",
     "test": "node server/test.js",
     "deploy": "git checkout master && git pull && git merge develop && git push && git checkout develop"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20"
   },
   "devDependencies": {
-    "concurrently": "^7.5.0",
-    "nodemon": "^2.0.20"
+    "concurrently": "^7.5.0"
   }
 }

@@ -33,9 +33,6 @@ jobs:
       - name: 🗑️ Remove modules
         run: rm -rf client/node_modules/
 
-      - name: 📥 Install server modules
-        run: npm i --omit=dev
-
       - name: 📦 SFTP Deploy
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
