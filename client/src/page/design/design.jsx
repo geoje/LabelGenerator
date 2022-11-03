@@ -250,6 +250,7 @@ function Variable() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
+  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
 
@@ -378,13 +379,34 @@ function Variable() {
 
                   const url = URL.createObjectURL(file);
                   const img = new Image();
-                  img.onload = () =>
+                  img.onload = () => {
+                    const wRatio = sizePx.w / img.width;
+                    const hRatio = sizePx.h / img.height;
+                    const w = Math.floor(Math.min(wRatio, hRatio) * img.width);
+                    const h = Math.floor(Math.min(wRatio, hRatio) * img.height);
+
                     dispatch(
                       setLayerVar({
                         index: selected,
                         var: { ...layer[selected].var, default: url },
                       })
                     );
+
+                    dispatch(
+                      setLayerSize({
+                        index: selected,
+                        size: {
+                          ...layer[selected].size,
+                          x: sizePx.w / 2 - w / 2,
+                          y: sizePx.h / 2 - h / 2,
+                          w,
+                          h,
+                          nw: w,
+                          nh: h,
+                        },
+                      })
+                    );
+                  };
 
                   img.src = url;
                 }}
@@ -421,6 +443,7 @@ function Variable() {
               <Select
                 placeholder="Data Column"
                 size="xs"
+                clearable
                 transitionDuration={100}
                 transition="pop-top-left"
                 transitionTimingFunction="ease"
@@ -431,9 +454,10 @@ function Variable() {
                 value={layer[selected].var.format}
                 onChange={(value) => {
                   let img = {};
-                  new Set(data.map((o) => o[value])).forEach(
-                    (v) => (img[v] = "")
-                  );
+                  if (value)
+                    new Set(data.map((o) => o[value])).forEach(
+                      (v) => (img[v] = "")
+                    );
 
                   dispatch(
                     setLayerVar({
