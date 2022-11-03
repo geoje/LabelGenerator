@@ -76,7 +76,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { QRCodeSVG } from "qrcode.react";
 import { saveAs } from "file-saver";
-import { JSZip } from "jszip";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
 const TYPE = {
@@ -571,13 +570,6 @@ function Variable() {
 }
 
 // Middle
-function blobToBase64(blob) {
-  return new Promise((resolve, _) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
-}
 function Tool() {
   // Provider
   const dispatch = useDispatch();
@@ -603,20 +595,27 @@ function Tool() {
         <ActionIcon
           variant="subtle"
           onClick={() => {
-            const zip = new JSZip();
+            const zip = require("jszip")();
             zip.file("layer.json", JSON.stringify(layer));
             const imgDir = zip.folder("images");
             layer
               .filter((o) => o.type === TYPE.image)
               .forEach((o) => {
+                if (!o.var) return;
+
                 // Default image
-                imgDir.file(o.name, o.img.default);
+                if (o.var.default)
+                  fetch(o.var.default)
+                    .then((res) => res.blob())
+                    .then((blob) => imgDir.file(o.name, blob));
 
                 // Variable images
-                const varDir = imgDir.folder(o.name);
-                Object.keys(o.img)
-                  .filter((k) => o.img[k] !== "")
-                  .forEach((k) => varDir.file(`${k}`, o.img[k]));
+                if (o.var.img) {
+                  const varDir = imgDir.folder(o.name);
+                  Object.keys(o.var.img)
+                    .filter((k) => o.var.img[k] !== "")
+                    .forEach((k) => varDir.file(`${k}`, o.var.img[k]));
+                }
               });
 
             zip.generateAsync({ type: "blob" }).then((content) => {
