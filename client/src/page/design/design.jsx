@@ -165,6 +165,17 @@ const nextColorFormat = (color) => {
     return "hex";
   else return "rgba";
 };
+const mimeToExt = {
+  "image/avif": ".avi",
+  "image/bmp": ".bmp",
+  "image/gif": ".gif",
+  "image/vnd.microsoft.icon": ".ico",
+  "image/jpeg": ".jpeg",
+  "image/png": ".png",
+  "image/svg+xml": ".svg",
+  "image/tiff": ".tiff",
+  "image/webp": ".webp",
+};
 
 // Left
 function LayoutSize() {
@@ -595,32 +606,38 @@ function Tool() {
         <ActionIcon
           variant="subtle"
           onClick={() => {
-            const zip = require("jszip")();
-            zip.file("layer.json", JSON.stringify(layer));
-            const imgDir = zip.folder("images");
-            layer
-              .filter((o) => o.type === TYPE.image)
-              .forEach((o) => {
-                if (!o.var) return;
+            // Archive design project
+            (async () => {
+              const zip = require("jszip")();
+              zip.file("layer.json", JSON.stringify(layer));
+              const imgDir = zip.folder("images");
+              await layer
+                .filter((o) => o.type === TYPE.image)
+                .forEach(async (o) => {
+                  if (!o.var) return;
 
-                // Default image
-                if (o.var.default)
-                  fetch(o.var.default)
-                    .then((res) => res.blob())
-                    .then((blob) => imgDir.file(o.name, blob));
+                  // Default image
+                  if (o.var.default)
+                    await fetch(o.var.default)
+                      .then((res) => res.blob())
+                      .then((blob) => {
+                        imgDir.file(`${o.name}${mimeToExt[blob.type]}`, blob);
+                      });
 
-                // Variable images
-                if (o.var.img) {
-                  const varDir = imgDir.folder(o.name);
-                  Object.keys(o.var.img)
-                    .filter((k) => o.var.img[k] !== "")
-                    .forEach((k) => varDir.file(`${k}`, o.var.img[k]));
-                }
+                  // Variable images
+                  if (o.var.img) {
+                    const varDir = imgDir.folder(o.name);
+                    Object.keys(o.var.img)
+                      .filter((k) => o.var.img[k] !== "")
+                      .forEach((k) => varDir.file(`${k}`, o.var.img[k]));
+                  }
+                });
+              return zip;
+            })().then((zip) => {
+              zip.generateAsync({ type: "blob" }).then((content) => {
+                // see FileSaver.js
+                saveAs(content, "LabelDesign.zip");
               });
-
-            zip.generateAsync({ type: "blob" }).then((content) => {
-              // see FileSaver.js
-              saveAs(content, "LabelDesign.zip");
             });
           }}
         >
