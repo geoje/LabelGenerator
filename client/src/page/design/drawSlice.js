@@ -84,6 +84,9 @@ const slice = createSlice({
       state.layout.ratio = action.payload;
     },
 
+    setLayer: (state, action) => {
+      state.layer = action.payload;
+    },
     addLayer: (state, action) => {
       state.layer.unshift(action.payload);
       state.selected = 0;
@@ -170,6 +173,7 @@ const slice = createSlice({
 export const {
   setLayout,
   setLayoutRatio,
+  setLayer,
   addLayer,
   changeLayerIndex,
   removeLayerByIndex,

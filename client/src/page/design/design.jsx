@@ -68,6 +68,7 @@ import {
   setLayerFontColor,
   setLayerBorder,
   setLayerVarImg,
+  setLayer,
 } from "./drawSlice";
 import React, { useRef } from "react";
 import { showNotification } from "@mantine/notifications";
@@ -584,7 +585,8 @@ function Variable() {
 function Tool() {
   // Provider
   const dispatch = useDispatch();
-  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
+  const layout = useSelector((state) => state.draw.layout);
+  const layoutPx = convertLayout.px(layout);
   const layer = useSelector((state) => state.draw.layer);
 
   let [layerCount, setLayerCount] = useState(1);
@@ -622,9 +624,66 @@ function Tool() {
                 }
 
                 zip
+                  .file("layout.json")
+                  .async("string")
+                  .then((strLayout) =>
+                    dispatch(setLayout(JSON.parse(strLayout)))
+                  );
+
+                zip
                   .file("layer.json")
                   .async("string")
-                  .then((strLayer) => console.log(strLayer));
+                  .then(async (strLayer) => {
+                    const imgKeys = Object.keys(zip.files).filter(
+                      (s) => s.startsWith("images/") && !zip.files[s].dir
+                    );
+                    let idxToKey = {};
+                    imgKeys.forEach((k) => {
+                      const idxs = [...k.matchAll(/(\d+|default)/g)].map(
+                        (m) => m[0]
+                      );
+                      if (idxs.length < 2) return;
+
+                      if (!idxToKey[idxs[0]]) idxToKey[idxs[0]] = {};
+                      idxToKey[idxs[0]][idxs[1]] = k;
+                    });
+
+                    try {
+                      dispatch(
+                        setLayer(
+                          await Promise.all(
+                            JSON.parse(strLayer).map(async (l, i) => {
+                              if (l.type === TYPE.image) {
+                                let key = idxToKey[i]["default"];
+                                // Default
+                                if (key) {
+                                  await zip
+                                    .file(key)
+                                    .async("arraybuffer")
+                                    .then((content) => {
+                                      var buffer = new Uint8Array(content);
+                                      var blob = new Blob([buffer.buffer]);
+                                      l.var.default = URL.createObjectURL(blob);
+                                      console.log(blob);
+                                    });
+                                }
+
+                                // Variable
+                                Object.keys(l.var.img).forEach((v, j) => {
+                                  if (idxToKey[i][j])
+                                    l.var.img[v] = idxToKey[i][j];
+                                });
+                              }
+                              console.log(l);
+                              return l;
+                            })
+                          )
+                        )
+                      );
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  });
               },
               (err) => {
                 console.error(err);
@@ -657,6 +716,11 @@ function Tool() {
             // Archive design project
             (async () => {
               const zip = require("jszip")();
+
+              // Save layout
+              zip.file("layout.json", JSON.stringify(layout));
+
+              // Save layer
               const copiedLayer = layer.map((l) => {
                 if (l.type !== TYPE.image) return l;
 
