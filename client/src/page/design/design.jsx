@@ -621,6 +621,7 @@ function Tool() {
                     await fetch(o.var.default)
                       .then((res) => res.blob())
                       .then((blob) => {
+                        console.log("blob", blob);
                         imgDir.file(`${o.name}${mimeToExt[blob.type]}`, blob);
                       });
 
@@ -637,7 +638,9 @@ function Tool() {
               zip.generateAsync({ type: "blob" }).then((content) => {
                 // see FileSaver.js
                 saveAs(content, "LabelDesign.zip");
+                console.log("generateAsync", content);
               });
+              console.log("zip", zip);
             });
           }}
         >
