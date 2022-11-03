@@ -18,7 +18,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *
  * selected: -1
  *
- * page: 1
+ * page: 0
  *
  * rename: { value, error }
  */
@@ -73,7 +73,7 @@ const slice = createSlice({
       },
     ],
     selected: -1,
-    page: 1,
+    page: 0,
     rename: { value: "", error: "" },
   },
   reducers: {

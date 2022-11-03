@@ -398,7 +398,7 @@ function QRCodePaper() {
   const keys = data.length ? Object.keys(data[0]) : [];
   const content = format
     .filter((o) => o.literal || keys.includes(o.value))
-    .map((o) => (o.literal ? o.value : data[page - 1][o.value]))
+    .map((o) => (o.literal ? o.value : data[page][o.value]))
     .join("");
 
   return (
