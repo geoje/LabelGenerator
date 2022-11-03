@@ -859,7 +859,9 @@ function Canvas() {
         return (
           <ManImage
             src={
-              item.var.format && item.var.img && item.var.img[item.var.format]
+              item.var.format &&
+              item.var.img &&
+              item.var.img[data[page][item.var.format]]
                 ? item.var.img[data[page][item.var.format]]
                 : item.var.default
             }
@@ -944,16 +946,26 @@ export function Pagenation() {
       <NumberInput
         hideControls
         value={page + 1}
-        onChange={(val) =>
-          dispatch(
-            setPage(val ? Math.min(Math.max(0, val - 1), data.length - 1) : 0)
-          )
-        }
         step={1}
         min={1}
         max={data.length}
         disabled={!data.length}
         styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
+        onChange={(val) =>
+          dispatch(
+            setPage(val ? Math.min(Math.max(0, val - 1), data.length - 1) : 0)
+          )
+        }
+        onWheel={(event) => {
+          const val = Math.min(
+            Math.max(0, page - Math.sign(event.deltaY)),
+            data.length - 1
+          );
+          if (page === val) return;
+
+          dispatch(setPage(val));
+          event.target.blur();
+        }}
       />
 
       <ActionIcon
