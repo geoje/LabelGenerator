@@ -19,11 +19,6 @@ import {
   Button,
   Image as ManImage,
 } from "@mantine/core";
-import { showNotification } from "@mantine/notifications";
-import React, { useRef } from "react";
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -74,7 +69,14 @@ import {
   setLayerBorder,
   setLayerVarImg,
 } from "./drawSlice";
+import React, { useRef } from "react";
+import { showNotification } from "@mantine/notifications";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { QRCodeSVG } from "qrcode.react";
+import { saveAs } from "file-saver";
+import { JSZip } from "jszip";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
 const TYPE = {
@@ -569,6 +571,13 @@ function Variable() {
 }
 
 // Middle
+function blobToBase64(blob) {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
 function Tool() {
   // Provider
   const dispatch = useDispatch();
@@ -585,19 +594,43 @@ function Tool() {
 
   return (
     <Group position="center" spacing="xs">
-      <Tooltip label="Load">
+      <Tooltip label="Load" withArrow>
         <ActionIcon variant="subtle" onClick={() => {}}>
           <IconFolder />
         </ActionIcon>
       </Tooltip>
-      <Tooltip label="Save">
-        <ActionIcon variant="subtle" onClick={() => {}}>
+      <Tooltip label="Save" withArrow>
+        <ActionIcon
+          variant="subtle"
+          onClick={() => {
+            const zip = new JSZip();
+            zip.file("layer.json", JSON.stringify(layer));
+            const imgDir = zip.folder("images");
+            layer
+              .filter((o) => o.type === TYPE.image)
+              .forEach((o) => {
+                // Default image
+                imgDir.file(o.name, o.img.default);
+
+                // Variable images
+                const varDir = imgDir.folder(o.name);
+                Object.keys(o.img)
+                  .filter((k) => o.img[k] !== "")
+                  .forEach((k) => varDir.file(`${k}`, o.img[k]));
+              });
+
+            zip.generateAsync({ type: "blob" }).then((content) => {
+              // see FileSaver.js
+              saveAs(content, "LabelDesign.zip");
+            });
+          }}
+        >
           <IconDeviceFloppy />
         </ActionIcon>
       </Tooltip>
 
       <Divider orientation="vertical" />
-      <Tooltip label="Rectangle">
+      <Tooltip label="Rectangle" withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -623,7 +656,7 @@ function Tool() {
           <IconSquare />
         </ActionIcon>
       </Tooltip>
-      <Tooltip label="Circle">
+      <Tooltip label="Circle" withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -651,7 +684,7 @@ function Tool() {
       </Tooltip>
 
       <Divider orientation="vertical" />
-      <Tooltip label="Text">
+      <Tooltip label="Text" withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() => {
@@ -672,64 +705,64 @@ function Tool() {
         </ActionIcon>
       </Tooltip>
 
-      <Tooltip label="Image">
-        <FileButton
-          sx={() => {
-            return { width: 28, height: 28 };
-          }}
-          accept="image/*"
-          onChange={(file) => {
-            // Empty
-            if (!file) return;
+      <FileButton
+        sx={() => {
+          return { width: 28, height: 28 };
+        }}
+        accept="image/*"
+        onChange={(file) => {
+          // Empty
+          if (!file) return;
 
-            // No image type
-            if (!file.type.startsWith("image/")) {
-              showNotification({
-                title: "Unsupported file type",
-                message: "File type must be one of (png, jpg, svg, ...)",
-                color: "red",
-              });
-              return;
-            }
+          // No image type
+          if (!file.type.startsWith("image/")) {
+            showNotification({
+              title: "Unsupported file type",
+              message: "File type must be one of (png, jpg, svg, ...)",
+              color: "red",
+            });
+            return;
+          }
 
-            // Exceed file size
-            if (file.size > MAX_FILE_SIZE) {
-              showNotification({
-                title: "Too large file",
-                message: "File size exceed 5mb",
-                color: "red",
-              });
-              return;
-            }
+          // Exceed file size
+          if (file.size > MAX_FILE_SIZE) {
+            showNotification({
+              title: "Too large file",
+              message: "File size exceed 5mb",
+              color: "red",
+            });
+            return;
+          }
 
-            const url = URL.createObjectURL(file);
-            const img = new Image();
-            img.onload = () => {
-              const wRatio = sizePx.w / img.width;
-              const hRatio = sizePx.h / img.height;
-              const w = Math.floor(Math.min(wRatio, hRatio) * img.width);
-              const h = Math.floor(Math.min(wRatio, hRatio) * img.height);
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            const wRatio = sizePx.w / img.width;
+            const hRatio = sizePx.h / img.height;
+            const w = Math.floor(Math.min(wRatio, hRatio) * img.width);
+            const h = Math.floor(Math.min(wRatio, hRatio) * img.height);
 
-              dispatch(
-                addLayer({
-                  name: getNextLayerName(),
-                  type: TYPE.image,
-                  size: {
-                    x: sizePx.w / 2 - w / 2,
-                    y: sizePx.h / 2 - h / 2,
-                    w,
-                    h,
-                    nw: w,
-                    nh: h,
-                  },
-                  var: { default: url },
-                })
-              );
-            };
-            img.src = url;
-          }}
-        >
-          {(props) => (
+            dispatch(
+              addLayer({
+                name: getNextLayerName(),
+                type: TYPE.image,
+                size: {
+                  x: sizePx.w / 2 - w / 2,
+                  y: sizePx.h / 2 - h / 2,
+                  w,
+                  h,
+                  nw: w,
+                  nh: h,
+                },
+                var: { default: url },
+              })
+            );
+          };
+          img.src = url;
+        }}
+      >
+        {(props) => (
+          <Tooltip label="Image" withArrow>
             <Button
               p={0}
               color="gray"
@@ -737,12 +770,12 @@ function Tool() {
               leftIcon={<IconPhoto />}
               styles={() => ({ leftIcon: { marginRight: 0 } })}
               {...props}
-            ></Button>
-          )}
-        </FileButton>
-      </Tooltip>
+            />
+          </Tooltip>
+        )}
+      </FileButton>
 
-      <Tooltip label="QR Code">
+      <Tooltip label="QR Code" withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
