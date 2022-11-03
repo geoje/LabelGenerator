@@ -597,50 +597,119 @@ function Tool() {
 
   return (
     <Group position="center" spacing="xs">
-      <Tooltip label="Load" withArrow>
-        <ActionIcon variant="subtle" onClick={() => {}}>
-          <IconFolder />
-        </ActionIcon>
-      </Tooltip>
+      <FileButton
+        sx={() => {
+          return { width: 28, height: 28 };
+        }}
+        accept="application/zip"
+        onChange={(file) => {
+          // Empty
+          if (!file) return;
+
+          require("jszip")()
+            .loadAsync(file)
+            .then(
+              (zip) => {
+                // Check layer.json
+                if (!zip.files["layer.json"]) {
+                  showNotification({
+                    title: "No layer.json",
+                    message:
+                      "There is no layer.json file in the root directory",
+                    color: "read",
+                  });
+                  return;
+                }
+
+                zip
+                  .file("layer.json")
+                  .async("string")
+                  .then((strLayer) => console.log(strLayer));
+              },
+              (err) => {
+                console.error(err);
+              }
+            );
+        }}
+      >
+        {(props) => (
+          <Tooltip label="Load" withArrow>
+            <Button
+              p={0}
+              color="gray"
+              variant="subtle"
+              leftIcon={<IconFolder />}
+              styles={() => ({ leftIcon: { marginRight: 0 } })}
+              {...props}
+            />
+          </Tooltip>
+        )}
+      </FileButton>
       <Tooltip label="Save" withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() => {
+            // showNotification({
+            //   title: "Request saving design project",
+            //   message: "please wait just a moment",
+            //   color: "yellow",
+            // });
             // Archive design project
             (async () => {
               const zip = require("jszip")();
-              zip.file("layer.json", JSON.stringify(layer));
+              const copiedLayer = layer.map((l) => {
+                if (l.type !== TYPE.image) return l;
+
+                let img = {};
+                if (l.var?.img)
+                  Object.keys(l.var.img).forEach((key) => (img[key] = ""));
+
+                return { ...l, var: { default: "", img } };
+              });
+              zip.file("layer.json", JSON.stringify(copiedLayer));
+
               const imgDir = zip.folder("images");
-              await layer
-                .filter((o) => o.type === TYPE.image)
-                .forEach(async (o) => {
-                  if (!o.var) return;
+              await Promise.all(
+                layer.map(async (o, i) => {
+                  // Only image filter and var
+                  if (o.type !== TYPE.image || !o.var) return;
 
                   // Default image
+                  const varDir = imgDir.folder(String(i));
                   if (o.var.default)
                     await fetch(o.var.default)
                       .then((res) => res.blob())
-                      .then((blob) => {
-                        console.log("blob", blob);
-                        imgDir.file(`${o.name}${mimeToExt[blob.type]}`, blob);
-                      });
+                      .then((blob) =>
+                        varDir.file(`default${mimeToExt[blob.type]}`, blob)
+                      );
 
                   // Variable images
                   if (o.var.img) {
-                    const varDir = imgDir.folder(o.name);
-                    Object.keys(o.var.img)
-                      .filter((k) => o.var.img[k] !== "")
-                      .forEach((k) => varDir.file(`${k}`, o.var.img[k]));
+                    await Promise.all(
+                      Object.keys(o.var.img).map(async (key, j) => {
+                        if (o.var.img[key] === "") return;
+
+                        await fetch(o.var.img[key])
+                          .then((res) => res.blob())
+                          .then((blob) =>
+                            varDir.file(`${j}${mimeToExt[blob.type]}`, blob)
+                          );
+                      })
+                    );
                   }
-                });
+                })
+              );
               return zip;
             })().then((zip) => {
               zip.generateAsync({ type: "blob" }).then((content) => {
                 // see FileSaver.js
-                saveAs(content, "LabelDesign.zip");
-                console.log("generateAsync", content);
+                saveAs(content, "Design - Label Generator.zip");
+                showNotification({
+                  title: "Saving design project successfully!",
+                  message: `File size is ${content.size}`,
+                  color: "green",
+                });
               });
-              console.log("zip", zip);
             });
           }}
         >

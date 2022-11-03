@@ -13,7 +13,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    border: { style: "", width: 0, color: "" }
  *    background: "",
  *    var: { type: "", static: "", format: "" } // text
- *    var: { default: "", format: "", img: { [key]: [url] } } // image
+ *    var: { default: "", img: { [key]: [url] } } // image
  * }, ...]
  *
  * selected: -1
@@ -84,7 +84,8 @@ const slice = createSlice({
       state.size.ratio = action.payload;
     },
     addLayer: (state, action) => {
-      state.layer.push(action.payload);
+      state.layer.unshift(action.payload);
+      state.selected = 0;
     },
     changeLayerIndex: (state, action) => {
       state.layer.splice(
