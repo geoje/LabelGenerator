@@ -52,8 +52,8 @@ import {
   IconLinkOff,
 } from "@tabler/icons";
 import {
-  setSize,
-  setSizeRatio,
+  setLayout,
+  setLayoutRatio,
   addLayer,
   changeLayerIndex,
   removeLayerByIndex,
@@ -88,57 +88,57 @@ const TYPE = {
 const DETAIL_ICON_SIZE = 14;
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
-const convertSize = {
-  inch: (size) => {
-    if (size.unit === "cm")
+const convertLayout = {
+  inch: (layout) => {
+    if (layout.unit === "cm")
       return {
-        w: size.w / 2.54,
-        h: size.h / 2.54,
+        w: layout.w / 2.54,
+        h: layout.h / 2.54,
         unit: "inch",
-        ratio: size.ratio,
+        ratio: layout.ratio,
       };
-    else if (size.unit === "px")
+    else if (layout.unit === "px")
       return {
-        w: size.w / 96,
-        h: size.h / 96,
+        w: layout.w / 96,
+        h: layout.h / 96,
         unit: "inch",
-        ratio: size.ratio,
+        ratio: layout.ratio,
       };
-    else return size;
+    else return layout;
   },
-  cm: (size) => {
-    if (size.unit === "inch")
+  cm: (layout) => {
+    if (layout.unit === "inch")
       return {
-        w: size.w * 2.54,
-        h: size.h * 2.54,
+        w: layout.w * 2.54,
+        h: layout.h * 2.54,
         unit: "cm",
-        ratio: size.ratio,
+        ratio: layout.ratio,
       };
-    else if (size.unit === "px")
+    else if (layout.unit === "px")
       return {
-        w: (size.w / 96) * 2.54,
-        h: (size.h / 96) * 2.54,
+        w: (layout.w / 96) * 2.54,
+        h: (layout.h / 96) * 2.54,
         unit: "cm",
-        ratio: size.ratio,
+        ratio: layout.ratio,
       };
-    else return size;
+    else return layout;
   },
-  px: (size) => {
-    if (size.unit === "inch")
+  px: (layout) => {
+    if (layout.unit === "inch")
       return {
-        w: Math.round(size.w * 96),
-        h: Math.round(size.h * 96),
+        w: Math.round(layout.w * 96),
+        h: Math.round(layout.h * 96),
         unit: "px",
-        ratio: size.ratio,
+        ratio: layout.ratio,
       };
-    else if (size.unit === "cm")
+    else if (layout.unit === "cm")
       return {
-        w: Math.round((size.w / 2.54) * 96),
-        h: Math.round((size.h / 2.54) * 96),
+        w: Math.round((layout.w / 2.54) * 96),
+        h: Math.round((layout.h / 2.54) * 96),
         unit: "px",
-        ratio: size.ratio,
+        ratio: layout.ratio,
       };
-    else return size;
+    else return layout;
   },
 };
 const typeToIcon = (type) => {
@@ -181,20 +181,20 @@ const mimeToExt = {
 function LayoutSize() {
   // Provider
   const dispatch = useDispatch();
-  const size = useSelector((state) => state.draw.size);
+  const layout = useSelector((state) => state.draw.layout);
 
   return (
     <Grid>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
-          value={size.w}
+          value={layout.w}
           size="xs"
-          precision={size.unit === "px" ? 0 : 2}
-          step={size.unit === "px" ? 1 : 0.1}
+          precision={layout.unit === "px" ? 0 : 2}
+          step={layout.unit === "px" ? 1 : 0.1}
           onChange={(value) =>
             dispatch(
-              setSize({
-                ...size,
+              setLayout({
+                ...layout,
                 w: value,
               })
             )
@@ -203,14 +203,14 @@ function LayoutSize() {
       </Grid.Col>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
-          value={size.h}
+          value={layout.h}
           size="xs"
-          precision={size.unit === "px" ? 0 : 2}
-          step={size.unit === "px" ? 1 : 0.1}
+          precision={layout.unit === "px" ? 0 : 2}
+          step={layout.unit === "px" ? 1 : 0.1}
           onChange={(value) =>
             dispatch(
-              setSize({
-                ...size,
+              setLayout({
+                ...layout,
                 h: value,
               })
             )
@@ -228,10 +228,10 @@ function LayoutSize() {
           data={Object.keys(UNIT).map((s) => {
             return { value: s, label: s };
           })}
-          value={size.unit}
+          value={layout.unit}
           onChange={(value) => {
-            if (value === size.unit) return;
-            dispatch(setSize(convertSize[value](size)));
+            if (value === layout.unit) return;
+            dispatch(setLayout(convertLayout[value](layout)));
           }}
         />
       </Grid.Col>
@@ -251,7 +251,7 @@ function LayoutSize() {
           ]}
           styles={{ markLabel: { display: "none" } }}
           onChange={(value) => {
-            dispatch(setSizeRatio(1 + value));
+            dispatch(setLayoutRatio(1 + value));
           }}
         />
       </Grid.Col>
@@ -262,7 +262,7 @@ function Variable() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
-  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
+  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
 
@@ -392,8 +392,8 @@ function Variable() {
                   const url = URL.createObjectURL(file);
                   const img = new Image();
                   img.onload = () => {
-                    const wRatio = sizePx.w / img.width;
-                    const hRatio = sizePx.h / img.height;
+                    const wRatio = layoutPx.w / img.width;
+                    const hRatio = layoutPx.h / img.height;
                     const w = Math.floor(Math.min(wRatio, hRatio) * img.width);
                     const h = Math.floor(Math.min(wRatio, hRatio) * img.height);
 
@@ -409,8 +409,8 @@ function Variable() {
                         index: selected,
                         size: {
                           ...layer[selected].size,
-                          x: sizePx.w / 2 - w / 2,
-                          y: sizePx.h / 2 - h / 2,
+                          x: layoutPx.w / 2 - w / 2,
+                          y: layoutPx.h / 2 - h / 2,
                           w,
                           h,
                           nw: w,
@@ -584,7 +584,7 @@ function Variable() {
 function Tool() {
   // Provider
   const dispatch = useDispatch();
-  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
+  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
 
   let [layerCount, setLayerCount] = useState(1);
@@ -727,8 +727,8 @@ function Tool() {
                 name: getNextLayerName(),
                 type: TYPE.rect,
                 size: {
-                  x: sizePx.w / 2 - 10,
-                  y: sizePx.h / 2 - 10,
+                  x: layoutPx.w / 2 - 10,
+                  y: layoutPx.h / 2 - 10,
                   w: 20,
                   h: 20,
                 },
@@ -753,8 +753,8 @@ function Tool() {
                 name: getNextLayerName(),
                 type: TYPE.circle,
                 size: {
-                  x: sizePx.w / 2 - 10,
-                  y: sizePx.h / 2 - 10,
+                  x: layoutPx.w / 2 - 10,
+                  y: layoutPx.h / 2 - 10,
                   w: 20,
                   h: 20,
                 },
@@ -781,8 +781,8 @@ function Tool() {
                 name: getNextLayerName(),
                 type: TYPE.text,
                 size: {
-                  x: sizePx.w / 2 - 10,
-                  y: sizePx.h / 2 - 10,
+                  x: layoutPx.w / 2 - 10,
+                  y: layoutPx.h / 2 - 10,
                 },
                 var: { type: "static", static: "New Text" },
               })
@@ -825,8 +825,8 @@ function Tool() {
           const url = URL.createObjectURL(file);
           const img = new Image();
           img.onload = () => {
-            const wRatio = sizePx.w / img.width;
-            const hRatio = sizePx.h / img.height;
+            const wRatio = layoutPx.w / img.width;
+            const hRatio = layoutPx.h / img.height;
             const w = Math.floor(Math.min(wRatio, hRatio) * img.width);
             const h = Math.floor(Math.min(wRatio, hRatio) * img.height);
 
@@ -835,8 +835,8 @@ function Tool() {
                 name: getNextLayerName(),
                 type: TYPE.image,
                 size: {
-                  x: sizePx.w / 2 - w / 2,
-                  y: sizePx.h / 2 - h / 2,
+                  x: layoutPx.w / 2 - w / 2,
+                  y: layoutPx.h / 2 - h / 2,
                   w,
                   h,
                   nw: w,
@@ -872,8 +872,8 @@ function Tool() {
                 name: getNextLayerName(),
                 type: TYPE.qr,
                 size: {
-                  x: sizePx.w / 2 - 10,
-                  y: sizePx.h / 2 - 10,
+                  x: layoutPx.w / 2 - 10,
+                  y: layoutPx.h / 2 - 10,
                   w: 20,
                 },
               })
@@ -892,7 +892,7 @@ function Canvas() {
   const data = useSelector((state) => state.data.value);
   const page = useSelector((state) => state.draw.page);
   const format = useSelector((state) => state.qr.format);
-  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
+  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
   let selected = useSelector((state) => state.draw.selected);
 
@@ -907,8 +907,12 @@ function Canvas() {
       );
       return {
         ...layer[selected].size,
-        w: textElement ? Math.ceil(textElement.offsetWidth / sizePx.ratio) : 0,
-        h: textElement ? Math.ceil(textElement.offsetHeight / sizePx.ratio) : 0,
+        w: textElement
+          ? Math.ceil(textElement.offsetWidth / layoutPx.ratio)
+          : 0,
+        h: textElement
+          ? Math.ceil(textElement.offsetHeight / layoutPx.ratio)
+          : 0,
       };
     } else if (layer[selected].type === TYPE.qr) {
       return {
@@ -928,19 +932,19 @@ function Canvas() {
           Math.max(
             0,
             Math.min(
-              (sizePx.w - selectedLayerSize().w) * sizePx.ratio,
+              (layoutPx.w - selectedLayerSize().w) * layoutPx.ratio,
               event.pageX - refCanvas.current.offsetLeft - move.ox
             )
-          ) / sizePx.ratio
+          ) / layoutPx.ratio
         ),
         y: Math.round(
           Math.max(
             0,
             Math.min(
-              (sizePx.h - selectedLayerSize().h) * sizePx.ratio,
+              (layoutPx.h - selectedLayerSize().h) * layoutPx.ratio,
               event.pageY - refCanvas.current.offsetTop - move.oy
             )
-          ) / sizePx.ratio
+          ) / layoutPx.ratio
         ),
       })
     );
@@ -987,12 +991,12 @@ function Canvas() {
 
     let defaultStyle = {
       position: "absolute",
-      left: item.size.x * sizePx.ratio,
-      top: item.size.y * sizePx.ratio,
+      left: item.size.x * layoutPx.ratio,
+      top: item.size.y * layoutPx.ratio,
 
       borderStyle: item.border?.style,
       borderWidth: item.border?.width
-        ? item.border?.width * sizePx.ratio
+        ? item.border?.width * layoutPx.ratio
         : null,
       borderColor: item.border?.color?.value,
 
@@ -1002,8 +1006,8 @@ function Canvas() {
     if (move.x !== -1 && index === selected)
       defaultStyle = {
         ...defaultStyle,
-        left: move.x * sizePx.ratio,
-        top: move.y * sizePx.ratio,
+        left: move.x * layoutPx.ratio,
+        top: move.y * layoutPx.ratio,
       };
 
     switch (item.type) {
@@ -1017,8 +1021,8 @@ function Canvas() {
             style={{
               ...defaultStyle,
 
-              width: item.size.w * sizePx.ratio,
-              height: item.size.h * sizePx.ratio,
+              width: item.size.w * layoutPx.ratio,
+              height: item.size.h * layoutPx.ratio,
 
               borderRadius: item.type === TYPE.circle ? "50%" : 0,
             }}
@@ -1041,7 +1045,7 @@ function Canvas() {
               fontFamily: item.font?.family,
               fontSize:
                 item.font && item.font.size
-                  ? item.font.size * sizePx.ratio
+                  ? item.font.size * layoutPx.ratio
                   : null,
               color: item.font?.color?.value,
             }}
@@ -1062,7 +1066,7 @@ function Canvas() {
             style={defaultStyle}
           >
             <QRCodeSVG
-              size={item.size.w * sizePx.ratio}
+              size={item.size.w * layoutPx.ratio}
               value={
                 data.length
                   ? format
@@ -1087,8 +1091,8 @@ function Canvas() {
                 ? item.var.img[data[page][item.var.format]]
                 : item.var.default
             }
-            width={item.size.w * sizePx.ratio}
-            height={item.size.h * sizePx.ratio}
+            width={item.size.w * layoutPx.ratio}
+            height={item.size.h * layoutPx.ratio}
             key={`canvas-${item.name}`}
             ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
@@ -1105,8 +1109,8 @@ function Canvas() {
     <Paper
       sx={{
         position: "relative",
-        width: sizePx.w * sizePx.ratio,
-        height: sizePx.h * sizePx.ratio,
+        width: layoutPx.w * layoutPx.ratio,
+        height: layoutPx.h * layoutPx.ratio,
         boxSizing: "content-box",
         background: "#fff",
       }}
@@ -1124,14 +1128,14 @@ function Canvas() {
 
             left:
               move.x === -1
-                ? layer[selected].size.x * sizePx.ratio - 1
-                : move.x * sizePx.ratio - 1,
+                ? layer[selected].size.x * layoutPx.ratio - 1
+                : move.x * layoutPx.ratio - 1,
             top:
               move.y === -1
-                ? layer[selected].size.y * sizePx.ratio - 1
-                : move.y * sizePx.ratio - 1,
-            width: selectedLayerSize().w * sizePx.ratio + 2,
-            height: selectedLayerSize().h * sizePx.ratio + 2,
+                ? layer[selected].size.y * layoutPx.ratio - 1
+                : move.y * layoutPx.ratio - 1,
+            width: selectedLayerSize().w * layoutPx.ratio + 2,
+            height: selectedLayerSize().h * layoutPx.ratio + 2,
 
             backgroundImage:
               "repeating-linear-gradient(0deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(90deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(180deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(270deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px)",
@@ -1396,7 +1400,7 @@ function CustomColorInput({ placeholder, selected, color, action, icon }) {
 function Detail() {
   // Provider
   const dispatch = useDispatch();
-  const sizePx = convertSize.px(useSelector((state) => state.draw.size));
+  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
   const rename = useSelector((state) => state.draw.rename);
@@ -1422,8 +1426,12 @@ function Detail() {
       );
       return {
         ...layer[selected].size,
-        w: textElement ? Math.ceil(textElement.offsetWidth / sizePx.ratio) : 0,
-        h: textElement ? Math.ceil(textElement.offsetHeight / sizePx.ratio) : 0,
+        w: textElement
+          ? Math.ceil(textElement.offsetWidth / layoutPx.ratio)
+          : 0,
+        h: textElement
+          ? Math.ceil(textElement.offsetHeight / layoutPx.ratio)
+          : 0,
       };
     } else if (layer[selected].type === TYPE.qr) {
       return {
@@ -1499,7 +1507,7 @@ function Detail() {
               size="xs"
               icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
               min={0}
-              max={sizePx.w - selectedLayerSize().w}
+              max={layoutPx.w - selectedLayerSize().w}
               value={layer[selected].size.x}
               onChange={(value) => {
                 if (value === null) return;
@@ -1510,7 +1518,7 @@ function Detail() {
                       ...layer[selected].size,
                       x: Math.max(
                         0,
-                        Math.min(sizePx.w - selectedLayerSize().w, value)
+                        Math.min(layoutPx.w - selectedLayerSize().w, value)
                       ),
                     },
                   })
@@ -1523,7 +1531,7 @@ function Detail() {
               size="xs"
               icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
               min={0}
-              max={sizePx.h - selectedLayerSize().h}
+              max={layoutPx.h - selectedLayerSize().h}
               value={layer[selected].size.y}
               onChange={(value) => {
                 if (value === null) return;
@@ -1534,7 +1542,7 @@ function Detail() {
                       ...layer[selected].size,
                       y: Math.max(
                         0,
-                        Math.min(sizePx.h - selectedLayerSize().h, value)
+                        Math.min(layoutPx.h - selectedLayerSize().h, value)
                       ),
                     },
                   })

@@ -25,7 +25,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const slice = createSlice({
   name: "draw",
   initialState: {
-    size: {
+    layout: {
       w: 3.74,
       h: 0.79,
       unit: "inch",
@@ -77,12 +77,13 @@ const slice = createSlice({
     rename: { value: "", error: "" },
   },
   reducers: {
-    setSize: (state, action) => {
-      state.size = action.payload;
+    setLayout: (state, action) => {
+      state.layout = action.payload;
     },
-    setSizeRatio: (state, action) => {
-      state.size.ratio = action.payload;
+    setLayoutRatio: (state, action) => {
+      state.layout.ratio = action.payload;
     },
+
     addLayer: (state, action) => {
       state.layer.unshift(action.payload);
       state.selected = 0;
@@ -167,8 +168,8 @@ const slice = createSlice({
 });
 
 export const {
-  setSize,
-  setSizeRatio,
+  setLayout,
+  setLayoutRatio,
   addLayer,
   changeLayerIndex,
   removeLayerByIndex,
