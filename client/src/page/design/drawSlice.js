@@ -139,14 +139,16 @@ const slice = createSlice({
         color: action.payload.color,
       };
     },
-
     setLayerVar: (state, action) => {
       state.layer[action.payload.index].var = action.payload.var;
     },
-
+    setLayerVarImg: (state, action) => {
+      state.layer[action.payload.index].var.img = action.payload.img;
+    },
     renameLayer: (state, action) => {
       state.layer[action.payload.index].name = action.payload.name;
     },
+
     setSelected: (state, action) => {
       state.selected = action.payload;
       state.rename = {
@@ -176,6 +178,7 @@ export const {
   setLayerBackColor,
   setLayerFontColor,
   setLayerVar,
+  setLayerVarImg,
   renameLayer,
   setSelected,
   setPage,

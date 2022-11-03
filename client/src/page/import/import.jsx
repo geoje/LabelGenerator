@@ -12,7 +12,6 @@ import {
   CloseButton,
   Stack,
   Divider,
-  NumberInput,
   ActionIcon,
   Title,
   Popover,
@@ -24,8 +23,6 @@ import {
   IconUpload,
   IconFileSpreadsheet,
   IconX,
-  IconChevronRight,
-  IconChevronLeft,
   IconForms,
   IconSquareNumber3,
   IconDeviceFloppy,
@@ -41,7 +38,7 @@ import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
 import { set as setData } from "./dataSlice";
 import { setFormat, setCustom, setSelected } from "./qrSlice";
-import { setPage } from "../design/drawSlice";
+import { Pagenation } from "../design/design";
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
 function StringReplaceAt(str, index, replacement) {
@@ -390,7 +387,6 @@ function FormatMultiSelect() {
 }
 function QRCodePaper() {
   // Provider
-  const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.qr.format);
   const page = useSelector((state) => state.draw.page);
@@ -448,53 +444,7 @@ function QRCodePaper() {
           </Text>
         </Stack>
         <Divider my="sm" />
-        <Group spacing={5} position="center">
-          <ActionIcon
-            size={36}
-            variant="filled"
-            disabled={!data.length}
-            onClick={() =>
-              dispatch(
-                setPage(Math.min(Math.max(0, page - 1), data.length - 1))
-              )
-            }
-          >
-            <IconChevronLeft />
-          </ActionIcon>
-
-          <NumberInput
-            hideControls
-            value={page + 1}
-            onChange={(val) =>
-              dispatch(
-                setPage(
-                  Math.min(
-                    Math.max(1, Number.isNaN(val) ? 1 : val - 1),
-                    data.length
-                  )
-                )
-              )
-            }
-            step={1}
-            min={1}
-            max={data.length}
-            disabled={!data.length}
-            styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
-          />
-
-          <ActionIcon
-            size={36}
-            variant="filled"
-            disabled={!data.length}
-            onClick={() =>
-              dispatch(
-                setPage(Math.min(Math.max(0, page + 1), data.length - 1))
-              )
-            }
-          >
-            <IconChevronRight />
-          </ActionIcon>
-        </Group>
+        <Pagenation />
       </Paper>
     </>
   );

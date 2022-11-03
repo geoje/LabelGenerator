@@ -72,6 +72,7 @@ import {
   setLayerBackColor,
   setLayerFontColor,
   setLayerBorder,
+  setLayerVarImg,
 } from "./drawSlice";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -412,22 +413,19 @@ function Variable() {
                               return;
                             }
 
-                            // const url = URL.createObjectURL(file);
-                            // const img = new Image();
-                            // img.onload = () => {
-                            //   const wRatio = sizePx.w / img.width;
-                            //   const hRatio = sizePx.h / img.height;
-                            //   const w = Math.floor(
-                            //     Math.min(wRatio, hRatio) * img.width
-                            //   );
-                            //   const h = Math.floor(
-                            //     Math.min(wRatio, hRatio) * img.height
-                            //   );
-
-                            //   /************* TODO *************/
-                            //   dispatch(setLayerVar({ w, h }));
-                            // };
-                            // img.src = url;
+                            const url = URL.createObjectURL(file);
+                            const img = new Image();
+                            img.onload = () => {
+                              const varImg = { ...layer[selected].var.img };
+                              varImg[k] = url;
+                              dispatch(
+                                setLayerVarImg({
+                                  index: selected,
+                                  img: varImg,
+                                })
+                              );
+                            };
+                            img.src = url;
                           }}
                         >
                           {(props) => (
@@ -435,7 +433,16 @@ function Variable() {
                               compact
                               size="xs"
                               variant="outline"
-                              rightIcon={<IconPhoto size={DETAIL_ICON_SIZE} />}
+                              rightIcon={
+                                layer[selected].var.img[k] ? (
+                                  <ManImage
+                                    height={DETAIL_ICON_SIZE}
+                                    src={layer[selected].var.img[k]}
+                                  />
+                                ) : (
+                                  <IconPhoto size={DETAIL_ICON_SIZE} />
+                                )
+                              }
                               {...props}
                               styles={() => ({
                                 rightIcon: {
@@ -852,9 +859,7 @@ function Canvas() {
         return (
           <ManImage
             src={
-              item.var.img &&
-              item.var.format &&
-              Object.keys(item.var.img).includes(item.var.format)
+              item.var.format && item.var.img && item.var.img[item.var.format]
                 ? item.var.img[data[page][item.var.format]]
                 : item.var.default
             }
@@ -908,7 +913,7 @@ function Canvas() {
               "repeating-linear-gradient(0deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(90deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(180deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(270deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px)",
             backgroundSize:
               "1px calc(100% + 8px), calc(100% + 8px) 1px, 1px calc(100% + 8px) , calc(100% + 8px) 1px",
-            backgroundPosition: " 0 0, 0 0, 100% 0, 0 100%",
+            backgroundPosition: "0 0, 0 0, 100% 0, 0 100%",
             backgroundRepeat: "no-repeat",
             animation: "borderAnimation 0.4s infinite linear",
           }}
@@ -917,13 +922,11 @@ function Canvas() {
     </Paper>
   );
 }
-function Pagenation() {
+export function Pagenation() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
   const page = useSelector((state) => state.draw.page);
-
-  const handlers = useRef();
 
   return (
     <Group spacing={5} position="center">
@@ -943,15 +946,9 @@ function Pagenation() {
         value={page + 1}
         onChange={(val) =>
           dispatch(
-            setPage(
-              Math.min(
-                Math.max(1, Number.isNaN(val) ? 1 : val - 1),
-                data.length
-              )
-            )
+            setPage(val ? Math.min(Math.max(0, val - 1), data.length - 1) : 0)
           )
         }
-        handlersRef={handlers}
         step={1}
         min={1}
         max={data.length}
