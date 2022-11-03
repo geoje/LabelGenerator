@@ -250,7 +250,6 @@ function Variable() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
-  // const sizePx = convertSize.px(useSelector((state) => state.draw.size));
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
 
@@ -343,6 +342,81 @@ function Variable() {
           </Title>
           <Divider my="sm" />
           <Grid>
+            <Grid.Col>
+              <FileButton
+                sx={(theme) => {
+                  return {
+                    width: "100%",
+                    background:
+                      theme.colorScheme === "dark" ? "#2C2E33" : "#fff",
+                  };
+                }}
+                accept="image/*"
+                onChange={(file) => {
+                  // Empty
+                  if (!file) return;
+
+                  // No image type
+                  if (!file.type.startsWith("image/")) {
+                    showNotification({
+                      title: "Unsupported file type",
+                      message: "File type must be one of (png, jpg, svg, ...)",
+                      color: "red",
+                    });
+                    return;
+                  }
+
+                  // Exceed file size
+                  if (file.size > MAX_FILE_SIZE) {
+                    showNotification({
+                      title: "Too large file",
+                      message: "File size exceed 5mb",
+                      color: "red",
+                    });
+                    return;
+                  }
+
+                  const url = URL.createObjectURL(file);
+                  const img = new Image();
+                  img.onload = () =>
+                    dispatch(
+                      setLayerVar({
+                        index: selected,
+                        var: { ...layer[selected].var, default: url },
+                      })
+                    );
+
+                  img.src = url;
+                }}
+              >
+                {(props) => (
+                  <Button
+                    compact
+                    size="xs"
+                    variant="default"
+                    rightIcon={
+                      <ManImage
+                        height={DETAIL_ICON_SIZE}
+                        src={layer[selected].var.default}
+                      />
+                    }
+                    {...props}
+                    styles={(theme) => ({
+                      root: {
+                        fontWeight: 400,
+                        color:
+                          theme.colorScheme === "dark" ? "#C1C2C5" : "#000",
+                      },
+                      rightIcon: {
+                        marginLeft: "auto",
+                      },
+                    })}
+                  >
+                    Default
+                  </Button>
+                )}
+              </FileButton>
+            </Grid.Col>
             <Grid.Col>
               <Select
                 placeholder="Data Column"
@@ -445,6 +519,9 @@ function Variable() {
                               }
                               {...props}
                               styles={() => ({
+                                root: {
+                                  fontWeight: 400,
+                                },
                                 rightIcon: {
                                   marginLeft: "auto",
                                 },
