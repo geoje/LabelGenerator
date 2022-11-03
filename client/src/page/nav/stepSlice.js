@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const slice = createSlice({
   name: "step",
-  initialState: { value: 1 },
+  initialState: { value: 0 },
   reducers: {
     next: (state) => {
       if (state.value < 2) state.value++;
