@@ -319,8 +319,13 @@ function FormatMultiSelect() {
           sx={() => {
             return { width: 28, height: 28 };
           }}
-          accept="application/zip"
-          onChange={(file) => {}}
+          accept="application/json"
+          onChange={(file) => {
+            const reader = new FileReader();
+            reader.onload = (event) => importFormat(event.target.result);
+            reader.onerror = (error) => console.error(error);
+            reader.readAsText(file);
+          }}
         >
           {(props) => (
             <Tooltip label="Load" withArrow>
