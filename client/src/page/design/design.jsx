@@ -666,11 +666,17 @@ function Tool() {
                       idxToKey[idxs[0]][idxs[1]] = k;
                     });
 
+                    let tempLayer = JSON.parse(strLayer);
+                    const families = [
+                      ...new Set(tempLayer.map((l) => l.font?.family)),
+                    ].filter((font) => font !== undefined);
+                    if (families.length) WebFont.load({ google: { families } });
+
                     try {
                       dispatch(
                         setLayer(
                           await Promise.all(
-                            JSON.parse(strLayer).map(async (l, i) => {
+                            tempLayer.map(async (l, i) => {
                               if (l.type === TYPE.image) {
                                 const key = idxToKey[String(i)]["default"];
                                 // Default
@@ -1523,9 +1529,9 @@ function Detail() {
   const rename = useSelector((state) => state.draw.rename);
 
   const [linkSize, setLinkSize] = useState(true);
+  const [fontRename, setFontRename] = useState({ index: -1, value: "" });
   const [fontLoad, setFontLoad] = useState(false);
   const [fontError, setFontError] = useState(false);
-  const refFont = useRef(null);
 
   const borderColor =
     selected !== -1 && layer[selected].border?.color
@@ -1598,7 +1604,7 @@ function Detail() {
                   rename.value === "" ||
                   layer.some((o) => o.name === rename.value)
                 }
-                onClick={(event) => {
+                onClick={() => {
                   if (
                     layer.some(
                       (o, i) => o.name === rename.value && i !== selected
@@ -1840,7 +1846,6 @@ function Detail() {
                   <TextInput
                     sx={{ flex: 1 }}
                     size="xs"
-                    ref={refFont}
                     error={fontError}
                     disabled={fontLoad}
                     placeholder="Get Google Font"
@@ -1858,8 +1863,19 @@ function Detail() {
                         />
                       </ActionIcon>
                     }
+                    value={
+                      selected === fontRename.index
+                        ? fontRename.value
+                        : layer[selected].font.family
+                    }
                     onMouseDown={() => setFontError(false)}
-                    onChange={() => setFontError(false)}
+                    onChange={(event) => {
+                      setFontError(false);
+                      setFontRename({
+                        index: selected,
+                        value: event.target.value,
+                      });
+                    }}
                   />
                   <ActionIcon
                     variant=""
@@ -1869,7 +1885,7 @@ function Detail() {
                     onClick={() => {
                       WebFont.load({
                         google: {
-                          families: [refFont.current.value],
+                          families: [fontRename],
                         },
                         loading: () => {
                           setFontLoad(true);
@@ -1882,7 +1898,7 @@ function Detail() {
                               index: selected,
                               font: {
                                 ...layer[selected].font,
-                                family: refFont.current.value,
+                                family: fontRename,
                               },
                             })
                           );
@@ -1902,6 +1918,7 @@ function Detail() {
                 <Select
                   size="xs"
                   placeholder="Font Weight"
+                  icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
                   data={[
                     { value: 100, label: "100" },
                     { value: 200, label: "200" },
@@ -1913,7 +1930,7 @@ function Detail() {
                     { value: 800, label: "800" },
                     { value: 900, label: "900" },
                   ]}
-                  icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+                  value={layer[selected].font?.weight}
                   onChange={(value) =>
                     dispatch(
                       setLayerFont({
@@ -1930,6 +1947,7 @@ function Detail() {
                   placeholder="Font Size"
                   icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
                   min={1}
+                  value={layer[selected].font?.size}
                   onChange={(value) => {
                     if (!value) return;
 

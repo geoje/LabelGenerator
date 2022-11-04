@@ -196,7 +196,13 @@ function FormatMultiSelect() {
         }
       });
       if (errorValue.length) {
-        setErrorImportFormat(`No value '${errorValue} in data'`);
+        const message = `No column '${errorValue} in data'`;
+        setErrorImportFormat(message);
+        showNotification({
+          title: "Imported Error",
+          message,
+          color: "red",
+        });
         return;
       }
 
