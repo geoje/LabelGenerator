@@ -751,11 +751,6 @@ function Tool() {
         <ActionIcon
           variant="subtle"
           onClick={() => {
-            // showNotification({
-            //   title: "Request saving design project",
-            //   message: "please wait just a moment",
-            //   color: "yellow",
-            // });
             // Archive design project
             (async () => {
               const zip = require("jszip")();
@@ -1866,7 +1861,9 @@ function Detail() {
                     value={
                       selected === fontRename.index
                         ? fontRename.value
-                        : layer[selected].font.family
+                        : layer[selected].font?.family
+                        ? layer[selected].font.family
+                        : ""
                     }
                     onMouseDown={() => setFontError(false)}
                     onChange={(event) => {
@@ -1885,7 +1882,7 @@ function Detail() {
                     onClick={() => {
                       WebFont.load({
                         google: {
-                          families: [fontRename],
+                          families: [fontRename.value],
                         },
                         loading: () => {
                           setFontLoad(true);
@@ -1898,7 +1895,7 @@ function Detail() {
                               index: selected,
                               font: {
                                 ...layer[selected].font,
-                                family: fontRename,
+                                family: fontRename.value,
                               },
                             })
                           );
