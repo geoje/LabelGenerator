@@ -25,7 +25,6 @@ import {
   IconX,
   IconForms,
   IconSquareNumber3,
-  IconDeviceFloppy,
   IconSquareNumber2,
   IconSquareNumber1,
   IconTrash,
