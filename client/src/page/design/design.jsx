@@ -697,7 +697,6 @@ function Tool() {
                                         .file(key)
                                         .async("blob")
                                         .then((blob) => {
-                                          console.log(key);
                                           const matches = key.match(/\.\w+/g);
                                           l.var.img[v] = URL.createObjectURL(
                                             blob.slice(
@@ -712,7 +711,6 @@ function Tool() {
                                   })
                                 );
                               }
-                              console.log(l);
                               return l;
                             })
                           )
@@ -756,7 +754,7 @@ function Tool() {
               const zip = require("jszip")();
 
               // Save layout
-              zip.file("layout.json", JSON.stringify(layout));
+              zip.file("layout.json", JSON.stringify({ ...layout, ratio: 1 }));
 
               // Save layer
               const copiedLayer = layer.map((l) => {
@@ -1155,7 +1153,7 @@ export function Canvas() {
               fontStyle: item.font?.style,
               fontSize: item.font?.size
                 ? item.font.size * layoutPx.ratio
-                : null,
+                : 10 * layoutPx.ratio,
               fontWeight: item.font?.weight,
               color: item.font?.color?.value,
             }}
@@ -1922,7 +1920,7 @@ function Detail() {
                   size="xs"
                   placeholder="Font Size"
                   icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
-                  min={10}
+                  min={1}
                   onChange={(value) => {
                     if (!value) return;
 
