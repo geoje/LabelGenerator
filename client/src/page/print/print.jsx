@@ -1,4 +1,5 @@
 import { Text } from "@mantine/core";
+// import { Canvas } from "../design/design";
 
 export default function Print() {
   return (

@@ -18,6 +18,7 @@ import {
   FileButton,
   Button,
   Image as ManImage,
+  Loader,
 } from "@mantine/core";
 import {
   IconChevronLeft,
@@ -50,6 +51,9 @@ import {
   IconBorderStyle,
   IconLink,
   IconLinkOff,
+  IconBrandGoogle,
+  IconTextSize,
+  IconItalic,
 } from "@tabler/icons";
 import {
   setLayout,
@@ -69,6 +73,7 @@ import {
   setLayerBorder,
   setLayerVarImg,
   setLayer,
+  setLayerFont,
 } from "./drawSlice";
 import React, { useRef } from "react";
 import { showNotification } from "@mantine/notifications";
@@ -77,6 +82,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { QRCodeSVG } from "qrcode.react";
 import { saveAs } from "file-saver";
+import WebFont from "webfontloader";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
 const TYPE = {
@@ -989,7 +995,7 @@ function Tool() {
     </Group>
   );
 }
-function Canvas() {
+export function Canvas() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
@@ -1146,10 +1152,11 @@ function Canvas() {
               userSelect: "none" /* Standard syntax */,
 
               fontFamily: item.font?.family,
-              fontSize:
-                item.font && item.font.size
-                  ? item.font.size * layoutPx.ratio
-                  : null,
+              fontStyle: item.font?.style,
+              fontSize: item.font?.size
+                ? item.font.size * layoutPx.ratio
+                : null,
+              fontWeight: item.font?.weight,
               color: item.font?.color?.value,
             }}
           >
@@ -1509,6 +1516,10 @@ function Detail() {
   const rename = useSelector((state) => state.draw.rename);
 
   const [linkSize, setLinkSize] = useState(true);
+  const [fontLoad, setFontLoad] = useState(false);
+  const [fontError, setFontError] = useState(false);
+  const refFont = useRef(null);
+
   const borderColor =
     selected !== -1 && layer[selected].border?.color
       ? layer[selected].border.color
@@ -1605,7 +1616,7 @@ function Detail() {
               </ActionIcon>
             </Group>
           </Grid.Col>
-          <Grid.Col span={6}>
+          <Grid.Col span={6} pb={1} pr={1}>
             <NumberInput
               size="xs"
               icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
@@ -1629,7 +1640,7 @@ function Detail() {
               }}
             />
           </Grid.Col>
-          <Grid.Col span={6}>
+          <Grid.Col span={6} pb={1} pl={1}>
             <NumberInput
               size="xs"
               icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
@@ -1653,11 +1664,8 @@ function Detail() {
               }}
             />
           </Grid.Col>
-          <Grid.Col>
-            <Group
-              noWrap
-              spacing={layer[selected].type === TYPE.image ? 0 : "md"}
-            >
+          <Grid.Col pt={1}>
+            <Group noWrap spacing={layer[selected].type === TYPE.image ? 0 : 2}>
               <NumberInput
                 size="xs"
                 style={{ flex: 1 }}
@@ -1819,15 +1827,154 @@ function Detail() {
             </Grid.Col>
           )}
           {layer[selected].type === TYPE.text && (
-            <Grid.Col>
-              <CustomColorInput
-                placeholder="Font Color"
-                selected={selected}
-                color={fontColor}
-                action={setLayerFontColor}
-                icon={<IconTypography size={DETAIL_ICON_SIZE} />}
-              />
-            </Grid.Col>
+            <>
+              <Grid.Col pb={1}>
+                <Group noWrap spacing="xs" align="flex-start">
+                  <TextInput
+                    sx={{ flex: 1 }}
+                    size="xs"
+                    ref={refFont}
+                    error={fontError}
+                    disabled={fontLoad}
+                    placeholder="Get Google Font"
+                    icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                    rightSection={
+                      <ActionIcon
+                        variant="transparent"
+                        onClick={() =>
+                          window.open("https://fonts.google.com/", "_blank")
+                        }
+                      >
+                        <IconBrandGoogle
+                          size={DETAIL_ICON_SIZE}
+                          strokeWidth={3}
+                        />
+                      </ActionIcon>
+                    }
+                    onMouseDown={() => setFontError(false)}
+                    onChange={() => setFontError(false)}
+                  />
+                  <ActionIcon
+                    variant=""
+                    size="md"
+                    color={fontError ? "red.6" : "blue.6"}
+                    disabled={fontLoad}
+                    onClick={() => {
+                      WebFont.load({
+                        google: {
+                          families: [refFont.current.value],
+                        },
+                        loading: () => {
+                          setFontLoad(true);
+                          setFontError(false);
+                        },
+                        active: () => {
+                          setFontLoad(false);
+                          dispatch(
+                            setLayerFont({
+                              index: selected,
+                              font: {
+                                ...layer[selected].font,
+                                family: refFont.current.value,
+                              },
+                            })
+                          );
+                        },
+                        inactive: () => {
+                          setFontLoad(false);
+                          setFontError(true);
+                        },
+                      });
+                    }}
+                  >
+                    {fontLoad ? <Loader size={18} /> : <IconCheck size={18} />}
+                  </ActionIcon>
+                </Group>
+              </Grid.Col>
+              <Grid.Col span={6} py={1} pr={1}>
+                <Select
+                  size="xs"
+                  placeholder="Font Weight"
+                  data={[
+                    { value: 100, label: "100" },
+                    { value: 200, label: "200" },
+                    { value: 300, label: "300" },
+                    { value: 400, label: "400 (normal)" },
+                    { value: 500, label: "500" },
+                    { value: 600, label: "600" },
+                    { value: 700, label: "700 (bold)" },
+                    { value: 800, label: "800" },
+                    { value: 900, label: "900" },
+                  ]}
+                  icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+                  onChange={(value) =>
+                    dispatch(
+                      setLayerFont({
+                        index: selected,
+                        font: { ...layer[selected].font, weight: value },
+                      })
+                    )
+                  }
+                />
+              </Grid.Col>
+              <Grid.Col span={6} py={1} pl={1}>
+                <NumberInput
+                  size="xs"
+                  placeholder="Font Size"
+                  icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
+                  min={10}
+                  onChange={(value) => {
+                    if (!value) return;
+
+                    dispatch(
+                      setLayerFont({
+                        index: selected,
+                        font: {
+                          ...layer[selected].font,
+                          size: Math.max(10, value),
+                        },
+                      })
+                    );
+                  }}
+                />
+              </Grid.Col>
+              <Grid.Col pt={1}>
+                <Group noWrap spacing="xs" align="flex-start">
+                  <CustomColorInput
+                    sx={{ flex: 1 }}
+                    placeholder="Font Color"
+                    selected={selected}
+                    color={fontColor}
+                    action={setLayerFontColor}
+                    icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                  />
+                  <ActionIcon
+                    size="md"
+                    variant={
+                      layer[selected].font?.style === "italic"
+                        ? "filled"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      dispatch(
+                        setLayerFont({
+                          index: selected,
+                          font: {
+                            ...layer[selected].font,
+                            style:
+                              layer[selected].font?.style === "italic"
+                                ? ""
+                                : "italic",
+                          },
+                        })
+                      )
+                    }
+                  >
+                    <IconItalic size={DETAIL_ICON_SIZE} />
+                  </ActionIcon>
+                </Group>
+              </Grid.Col>
+            </>
           )}
         </Grid>
       </>
