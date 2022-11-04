@@ -1938,7 +1938,7 @@ function Detail() {
                         index: selected,
                         font: {
                           ...layer[selected].font,
-                          size: Math.max(10, value),
+                          size: value,
                         },
                       })
                     );
