@@ -13,7 +13,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    border: { style: "", width: 0, color: "" }
  *    background: "",
  *    var: { type: "", static: "", format: "" } // text
- *    var: { default: "", img: { [key]: [url] } } // image
+ *    var: { default: "", format:"", img: { [key]: [url] } } // image
  * }, ...]
  *
  * selected: -1

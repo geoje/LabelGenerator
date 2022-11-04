@@ -423,7 +423,7 @@ function QRCodePaper() {
             })
           }
         >
-          <IconDeviceFloppy />
+          <IconClipboard />
         </ActionIcon>
       </Group>
       <Paper shadow="xs" p="md" withBorder>

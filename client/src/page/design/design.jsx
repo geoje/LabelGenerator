@@ -177,6 +177,17 @@ const mimeToExt = {
   "image/tiff": ".tiff",
   "image/webp": ".webp",
 };
+const extToMime = {
+  ".avi": "image/avif",
+  ".bmp": "image/bmp",
+  ".gif": "image/gif",
+  ".ico": "image/vnd.microsoft.icon",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".tiff": "image/tiff",
+  ".webp": "image/webp",
+};
 
 // Left
 function LayoutSize() {
@@ -481,7 +492,7 @@ function Variable() {
                 }}
               />
             </Grid.Col>
-            {layer[selected].var.format && (
+            {layer[selected].var.img && (
               <Grid.Col>
                 <Grid>
                   {Object.keys(layer[selected].var.img)
@@ -654,25 +665,46 @@ function Tool() {
                           await Promise.all(
                             JSON.parse(strLayer).map(async (l, i) => {
                               if (l.type === TYPE.image) {
-                                let key = idxToKey[i]["default"];
+                                const key = idxToKey[String(i)]["default"];
                                 // Default
-                                if (key) {
+                                if (key)
                                   await zip
                                     .file(key)
-                                    .async("arraybuffer")
-                                    .then((content) => {
-                                      var buffer = new Uint8Array(content);
-                                      var blob = new Blob([buffer.buffer]);
-                                      l.var.default = URL.createObjectURL(blob);
-                                      console.log(blob);
+                                    .async("blob")
+                                    .then((blob) => {
+                                      const matches = key.match(/\.\w+/g);
+                                      l.var.default = URL.createObjectURL(
+                                        blob.slice(
+                                          0,
+                                          blob.size,
+                                          extToMime[matches[matches.length - 1]]
+                                        )
+                                      );
                                     });
-                                }
 
                                 // Variable
-                                Object.keys(l.var.img).forEach((v, j) => {
-                                  if (idxToKey[i][j])
-                                    l.var.img[v] = idxToKey[i][j];
-                                });
+                                await Promise.all(
+                                  Object.keys(l.var.img).map(async (v, j) => {
+                                    const key = idxToKey[String(i)][String(j)];
+                                    if (key)
+                                      await zip
+                                        .file(key)
+                                        .async("blob")
+                                        .then((blob) => {
+                                          console.log(key);
+                                          const matches = key.match(/\.\w+/g);
+                                          l.var.img[v] = URL.createObjectURL(
+                                            blob.slice(
+                                              0,
+                                              blob.size,
+                                              extToMime[
+                                                matches[matches.length - 1]
+                                              ]
+                                            )
+                                          );
+                                        });
+                                  })
+                                );
                               }
                               console.log(l);
                               return l;
@@ -728,7 +760,14 @@ function Tool() {
                 if (l.var?.img)
                   Object.keys(l.var.img).forEach((key) => (img[key] = ""));
 
-                return { ...l, var: { default: "", img } };
+                return {
+                  ...l,
+                  var: {
+                    default: "",
+                    format: img.format ? img.format : "",
+                    img,
+                  },
+                };
               });
               zip.file("layer.json", JSON.stringify(copiedLayer));
 
