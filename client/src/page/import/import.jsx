@@ -16,6 +16,8 @@ import {
   Title,
   Popover,
   JsonInput,
+  FileButton,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
@@ -29,12 +31,15 @@ import {
   IconSquareNumber1,
   IconTrash,
   IconClipboard,
+  IconFolder,
+  IconDeviceFloppy,
 } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import { set as setData } from "./dataSlice";
 import { setFormat, setCustom, setSelected } from "./qrSlice";
 import { Pagenation } from "../design/design";
@@ -249,9 +254,11 @@ function FormatMultiSelect() {
           opened={openedImportFormat}
         >
           <Popover.Target>
-            <ActionIcon variant="subtle" onClick={() => toggleImportFormat()}>
-              <IconForms />
-            </ActionIcon>
+            <Tooltip label="Import" withArrow>
+              <ActionIcon variant="subtle" onClick={() => toggleImportFormat()}>
+                <IconForms />
+              </ActionIcon>
+            </Tooltip>
           </Popover.Target>
           <Popover.Dropdown
             sx={(theme) => ({
@@ -289,22 +296,76 @@ function FormatMultiSelect() {
           </Popover.Dropdown>
         </Popover>
 
-        <ActionIcon
-          variant="subtle"
-          onClick={() => {
-            const jsonText = JSON.stringify(format);
-            navigator.clipboard.writeText(jsonText);
-            showNotification({
-              title: "Copied Successfully",
-              message: `${format.length} item${
-                format.length === 1 ? "" : "s"
-              } copied`,
-              color: "green",
-            });
+        <Tooltip label="Copy" withArrow>
+          <ActionIcon
+            variant="subtle"
+            onClick={() => {
+              const jsonText = JSON.stringify(format);
+              navigator.clipboard.writeText(jsonText);
+              showNotification({
+                title: "Copied Successfully",
+                message: `${format.length} item${
+                  format.length === 1 ? "" : "s"
+                } copied`,
+                color: "green",
+              });
+            }}
+          >
+            <IconClipboard />
+          </ActionIcon>
+        </Tooltip>
+
+        <FileButton
+          sx={() => {
+            return { width: 28, height: 28 };
           }}
+          accept="application/zip"
+          onChange={(file) => {}}
         >
-          <IconClipboard />
-        </ActionIcon>
+          {(props) => (
+            <Tooltip label="Load" withArrow>
+              <Button
+                p={0}
+                ml="xs"
+                color="gray"
+                variant="subtle"
+                leftIcon={<IconFolder />}
+                styles={() => ({ leftIcon: { marginRight: 0 } })}
+                {...props}
+              />
+            </Tooltip>
+          )}
+        </FileButton>
+        <Tooltip label="Save" withArrow>
+          <ActionIcon
+            variant="subtle"
+            onClick={() => {
+              if (!format.length) {
+                showNotification({
+                  title: "No QR Format content",
+                  color: "yellow",
+                });
+                return;
+              }
+
+              saveAs(
+                new Blob([JSON.stringify(format)], {
+                  type: "application/json",
+                }),
+                "QR Format.json"
+              );
+              showNotification({
+                title: "Saved QR Format Successfully",
+                message: `${format.length} item${
+                  format.length === 1 ? "" : "s"
+                } saved`,
+                color: "green",
+              });
+            }}
+          >
+            <IconDeviceFloppy />
+          </ActionIcon>
+        </Tooltip>
       </Group>
       <MultiSelect
         placeholder="Select items or create customization with an input"
@@ -412,18 +473,20 @@ function QRCodePaper() {
           QR Code Result
         </Title>
 
-        <ActionIcon
-          variant="subtle"
-          onClick={() =>
-            showNotification({
-              title: "Sorry",
-              message: "This function is developing now...",
-              color: "yellow",
-            })
-          }
-        >
-          <IconClipboard />
-        </ActionIcon>
+        <Tooltip label="Copy" withArrow>
+          <ActionIcon
+            variant="subtle"
+            onClick={() =>
+              showNotification({
+                title: "Sorry",
+                message: "This function is developing now...",
+                color: "yellow",
+              })
+            }
+          >
+            <IconClipboard />
+          </ActionIcon>
+        </Tooltip>
       </Group>
       <Paper shadow="xs" p="md" withBorder>
         <Stack align="center" spacing={0}>
@@ -556,31 +619,33 @@ export default function Import() {
             Import Data
           </Title>
 
-          <ActionIcon
-            variant="subtle"
-            onClick={() => {
-              if (data.length) {
-                dispatch(setData([]));
-                setWorkbook(null);
+          <Tooltip label="Clear" withArrow>
+            <ActionIcon
+              variant="subtle"
+              onClick={() => {
+                if (data.length) {
+                  dispatch(setData([]));
+                  setWorkbook(null);
 
-                showNotification({
-                  title: "Deleted",
-                  message: "Data deleted successfully",
-                  color: "green",
-                });
-              } else if (workbook) {
-                setWorkbook(null);
+                  showNotification({
+                    title: "Deleted",
+                    message: "Data deleted successfully",
+                    color: "green",
+                  });
+                } else if (workbook) {
+                  setWorkbook(null);
 
-                showNotification({
-                  title: "Deleted",
-                  message: "Workbook deleted successfully",
-                  color: "green",
-                });
-              }
-            }}
-          >
-            <IconTrash />
-          </ActionIcon>
+                  showNotification({
+                    title: "Deleted",
+                    message: "Workbook deleted successfully",
+                    color: "green",
+                  });
+                }
+              }}
+            >
+              <IconTrash />
+            </ActionIcon>
+          </Tooltip>
         </Group>
         <Paper shadow="xs" p="md" withBorder>
           {data.length ? (

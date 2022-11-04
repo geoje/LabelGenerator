@@ -94,6 +94,7 @@ const TYPE = {
 };
 const DETAIL_ICON_SIZE = 14;
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
+const DOMAIN = "label.ddsgit.com";
 
 const convertLayout = {
   inch: (layout) => {
@@ -806,11 +807,19 @@ function Tool() {
                   }
                 })
               );
+
+              // Save web shortcut
+              zip.file(
+                `${DOMAIN}.url`,
+                `[InternetShortcut]
+                URL=https://${DOMAIN}/`
+              );
+
               return zip;
             })().then((zip) => {
               zip.generateAsync({ type: "blob" }).then((content) => {
                 // see FileSaver.js
-                saveAs(content, "Design - Label Generator.zip");
+                saveAs(content, "Design.zip");
                 showNotification({
                   title: "Saving design project successfully!",
                   message: `File size is ${content.size}`,
