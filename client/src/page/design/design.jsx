@@ -54,6 +54,7 @@ import {
   IconBrandGoogle,
   IconTextSize,
   IconItalic,
+  IconCopy,
 } from "@tabler/icons";
 import {
   setLayout,
@@ -1333,6 +1334,8 @@ function Layer() {
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
 
+  const [hover, setHover] = useState(-1);
+
   const { classes, cx } = createStyles((theme) => ({
     item: {
       marginBottom: 2,
@@ -1378,8 +1381,10 @@ function Layer() {
           className={cx(classes.item, {
             [classes.itemDragging]: snapshot.isDragging,
           })}
-          onClick={() => dispatch(setSelected(index))}
           ref={provided.innerRef}
+          onClick={() => dispatch(setSelected(index))}
+          onMouseOver={() => setHover(index)}
+          onMouseOut={() => setHover(-1)}
           {...provided.draggableProps}
         >
           <div {...provided.dragHandleProps} className={classes.dragHandle}>
@@ -1388,6 +1393,36 @@ function Layer() {
           <Text size="xs" style={{ cursor: "default" }}>
             {item.name}
           </Text>
+
+          {hover === index && (
+            <ActionIcon
+              size="xs"
+              onClick={(event) => {
+                event.stopPropagation();
+                const existsNames = layer.map((l) => l.name);
+                let name = layer[index].name;
+                let num = 2;
+
+                // Search tail (n)
+                const match = name.match(/ \(\d+\)$/g);
+
+                if (match) {
+                  name = name.substring(0, name.length - match[0].length); // Remove tail (n)
+                  num = Number(match[0].substring(2, match[0] - 1)) + 1; // Get number
+                }
+
+                // Searching duplicate
+                while (existsNames.includes(`${name} (${num})`)) num++;
+
+                // Set layer and layer name
+                dispatch(
+                  addLayer({ ...layer[index], name: `${name} (${num})` })
+                );
+              }}
+            >
+              <IconCopy />
+            </ActionIcon>
+          )}
           <Group
             size="xs"
             sx={(theme) => {
