@@ -460,6 +460,7 @@ function QRCodePaper() {
   return (
     <>
       <Group
+        py={2}
         spacing={0}
         sx={(theme) => ({
           color:
@@ -472,21 +473,6 @@ function QRCodePaper() {
         <Title order={6} mr="sm">
           QR Code Result
         </Title>
-
-        <Tooltip label="Copy" withArrow>
-          <ActionIcon
-            variant="subtle"
-            onClick={() =>
-              showNotification({
-                title: "Sorry",
-                message: "This function is developing now...",
-                color: "yellow",
-              })
-            }
-          >
-            <IconClipboard />
-          </ActionIcon>
-        </Tooltip>
       </Group>
       <Paper shadow="xs" p="md" withBorder>
         <Stack align="center" spacing={0}>
@@ -498,7 +484,7 @@ function QRCodePaper() {
               backgroundColor: "#fff",
             }}
           >
-            <QRCodeSVG value={content} size={100} />
+            <QRCodeSVG id="qr" value={content} size={100} />
           </Paper>
 
           <Text size="xs" align="center">
