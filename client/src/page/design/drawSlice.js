@@ -9,9 +9,9 @@ import { createSlice } from "@reduxjs/toolkit";
  *    name: "",
  *    type: "",
  *    size: { x: 0, y: 0, w: 0, h: 0, nw, nh },
- *    font: { family: "", style: "", size:0 , weight: 0, color:"" }
- *    border: { style: "", width: 0, color: "" }
- *    background: "",
+ *    font: { family: "", style: "", size:0 , weight: 0, color:{ value, format } }
+ *    border: { style: "", width: 0, color: { value, format } }
+ *    background: { value, format },
  *    var: { type: "", static: "", format: "" } // text
  *    var: { default: "", format:"", img: { [key]: [url] } } // image
  * }, ...]
