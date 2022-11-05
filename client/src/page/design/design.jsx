@@ -771,7 +771,7 @@ function Tool() {
                   ...l,
                   var: {
                     default: "",
-                    format: img.format ? img.format : "",
+                    format: l.var.format ? l.var.format : "",
                     img,
                   },
                 };
@@ -1016,7 +1016,7 @@ export function Canvas() {
 
   const refCanvas = useRef();
   const refLayer = useRef({ current: [] });
-  let [move, setMove] = useState({ x: -1, y: -1, ox: 0, oy: 0 });
+  let [move, setMove] = useState({ x: -1, y: -1, ox: 0, oy: 0, sx: 0, sy: 0 });
 
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
@@ -1043,6 +1043,9 @@ export function Canvas() {
   const onMouseMove = (event) => {
     event.preventDefault();
 
+    const vertical =
+      Math.abs(event.pageX - move.sx) < Math.abs(event.pageY - move.sy);
+
     setMove(
       (move = {
         ...move,
@@ -1051,7 +1054,9 @@ export function Canvas() {
             0,
             Math.min(
               (layoutPx.w - selectedLayerSize().w) * layoutPx.ratio,
-              event.pageX - refCanvas.current.offsetLeft - move.ox
+              (vertical && event.shiftKey ? move.sx : event.pageX) -
+                refCanvas.current.offsetLeft -
+                move.ox
             )
           ) / layoutPx.ratio
         ),
@@ -1060,7 +1065,9 @@ export function Canvas() {
             0,
             Math.min(
               (layoutPx.h - selectedLayerSize().h) * layoutPx.ratio,
-              event.pageY - refCanvas.current.offsetTop - move.oy
+              (!vertical && event.shiftKey ? move.sy : event.pageY) -
+                refCanvas.current.offsetTop -
+                move.oy
             )
           ) / layoutPx.ratio
         ),
@@ -1078,6 +1085,8 @@ export function Canvas() {
         y: layer[index].size.y,
         ox: event.nativeEvent.offsetX + 1,
         oy: event.nativeEvent.offsetY + 1,
+        sx: event.pageX,
+        sy: event.pageY,
       })
     );
 
@@ -1846,7 +1855,7 @@ function Detail() {
           </Grid.Col>
           {layer[selected].type !== TYPE.image && (
             <>
-              <Grid.Col span={4} md={12} pb={1}>
+              <Grid.Col span={4} md={6} pb={1} pr={1}>
                 <Select
                   placeholder="Border Style"
                   size="xs"
@@ -1884,7 +1893,7 @@ function Detail() {
                   }
                 />
               </Grid.Col>
-              <Grid.Col span={4} md={12} py={1}>
+              <Grid.Col span={4} md={6} pb={1} pl={1}>
                 <NumberInput
                   placeholder="Border Width"
                   size="xs"
