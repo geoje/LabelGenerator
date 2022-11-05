@@ -1271,8 +1271,10 @@ export function Canvas() {
         return (
           <ManImage
             src={
-              item.var.format &&
+              item.var?.format &&
               item.var.img &&
+              data[page] &&
+              data[page][item.var.format] &&
               item.var.img[data[page][item.var.format]]
                 ? item.var.img[data[page][item.var.format]]
                 : item.var.default
