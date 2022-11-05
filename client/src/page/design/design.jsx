@@ -856,7 +856,7 @@ function Tool() {
                 border: {
                   style: "solid",
                   width: 1,
-                  color: { value: "#000000", format: "hex" },
+                  color: { value: "#000000" },
                 },
               })
             )
@@ -882,7 +882,7 @@ function Tool() {
                 border: {
                   style: "solid",
                   width: 1,
-                  color: { value: "#000000", format: "hex" },
+                  color: { value: "#000000" },
                 },
               })
             )
@@ -908,7 +908,7 @@ function Tool() {
                 font: {
                   size: 10,
                   weight: 400,
-                  color: { value: "#000000", format: "hex" },
+                  color: { value: "#000000" },
                 },
                 var: { type: "static", static: "New Text" },
               })
