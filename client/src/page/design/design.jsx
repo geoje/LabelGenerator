@@ -19,6 +19,7 @@ import {
   Button,
   Image as ManImage,
   Loader,
+  Center,
 } from "@mantine/core";
 import {
   IconChevronLeft,
@@ -55,6 +56,8 @@ import {
   IconTextSize,
   IconItalic,
   IconCopy,
+  IconBorderOuter,
+  IconLayout2,
 } from "@tabler/icons";
 import {
   setLayout,
@@ -1669,13 +1672,12 @@ function Detail() {
 
   return (
     selected !== -1 && (
-      <>
-        <Title order={6} align="center">
-          Detail
-        </Title>
-        <Divider my="sm" />
-        <Grid>
-          <Grid.Col>
+      <Grid sx={{ width: "100%" }} justify="center" mt="xl" gutter="xl">
+        <Grid.Col md={4}>
+          <Center pb="md">
+            <IconLayout2 size={48} color="gray" />
+          </Center>
+          <Stack spacing={2}>
             <Group noWrap spacing="xs" align="flex-start">
               <TextInput
                 placeholder="Layer Name"
@@ -1727,8 +1729,6 @@ function Detail() {
                 <IconCheck size={18} />
               </ActionIcon>
             </Group>
-          </Grid.Col>
-          <Grid.Col span={6} pb={1} pr={1}>
             <NumberInput
               size="xs"
               icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
@@ -1751,8 +1751,6 @@ function Detail() {
                 );
               }}
             />
-          </Grid.Col>
-          <Grid.Col span={6} pb={1} pl={1}>
             <NumberInput
               size="xs"
               icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
@@ -1775,335 +1773,323 @@ function Detail() {
                 );
               }}
             />
-          </Grid.Col>
-          <Grid.Col pt={1}>
-            <Group noWrap spacing={layer[selected].type === TYPE.image ? 0 : 2}>
-              <NumberInput
+            <NumberInput
+              size="xs"
+              icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+              min={layer[selected].type === TYPE.qr ? 18 : 1}
+              value={selectedLayerSize().w}
+              disabled={layer[selected].type === TYPE.text}
+              onChange={(value) => {
+                if (
+                  !value ||
+                  value < (layer[selected].type === TYPE.qr ? 18 : 1)
+                )
+                  return;
+                dispatch(
+                  setLayerSize({
+                    index: selected,
+                    size:
+                      layer[selected].type === TYPE.image && linkSize
+                        ? {
+                            ...layer[selected].size,
+                            w: value,
+                            h: Math.ceil(
+                              (value / layer[selected].size.nw) *
+                                layer[selected].size.nh
+                            ),
+                          }
+                        : { ...layer[selected].size, w: value },
+                  })
+                );
+              }}
+            />
+            {layer[selected].type === TYPE.image && (
+              <ActionIcon
+                variant="subtle"
+                size="md"
+                onClick={() => setLinkSize(!linkSize)}
+              >
+                {linkSize ? (
+                  <IconLink size={DETAIL_ICON_SIZE} />
+                ) : (
+                  <IconLinkOff size={DETAIL_ICON_SIZE} />
+                )}
+              </ActionIcon>
+            )}
+            <NumberInput
+              size="xs"
+              icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
+              min={layer[selected].type === TYPE.qr ? 18 : 1}
+              value={selectedLayerSize().h}
+              disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
+              onChange={(value) => {
+                if (
+                  !value ||
+                  value < (layer[selected].type === TYPE.qr ? 18 : 1)
+                )
+                  return;
+                dispatch(
+                  setLayerSize({
+                    index: selected,
+                    size:
+                      layer[selected].type === TYPE.image && linkSize
+                        ? {
+                            ...layer[selected].size,
+                            w: Math.floor(
+                              (value / layer[selected].size.nh) *
+                                layer[selected].size.nw
+                            ),
+                            h: value,
+                          }
+                        : { ...layer[selected].size, h: value },
+                  })
+                );
+              }}
+            />
+          </Stack>
+        </Grid.Col>
+        {layer[selected].type !== TYPE.image && (
+          <Grid.Col md={4}>
+            <Center pb="md">
+              <IconBorderOuter size={48} color="gray" />
+            </Center>
+            <Stack spacing={2}>
+              <Select
+                placeholder="Border Style"
                 size="xs"
-                style={{ flex: 1 }}
-                icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
-                min={layer[selected].type === TYPE.qr ? 18 : 1}
-                value={selectedLayerSize().w}
-                disabled={layer[selected].type === TYPE.text}
-                onChange={(value) => {
-                  if (
-                    !value ||
-                    value < (layer[selected].type === TYPE.qr ? 18 : 1)
-                  )
-                    return;
+                transitionDuration={100}
+                transition="pop-top-left"
+                transitionTimingFunction="ease"
+                icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
+                clearable
+                data={[
+                  { value: "solid", label: "solid" },
+                  { value: "dashed", label: "dashed" },
+                  { value: "dotted", label: "dotted" },
+                  { value: "double", label: "double" },
+                  { value: "groove", label: "groove" },
+                  { value: "ridge", label: "ridge" },
+                  { value: "inset", label: "inset" },
+                  { value: "outset", label: "outset" },
+                ]}
+                value={layer[selected].border?.style}
+                onChange={(value) =>
                   dispatch(
-                    setLayerSize({
+                    setLayerBorder({
                       index: selected,
-                      size:
-                        layer[selected].type === TYPE.image && linkSize
-                          ? {
-                              ...layer[selected].size,
-                              w: value,
-                              h: Math.ceil(
-                                (value / layer[selected].size.nw) *
-                                  layer[selected].size.nh
-                              ),
-                            }
-                          : { ...layer[selected].size, w: value },
+                      border: value
+                        ? {
+                            style: value,
+                            width: layer[selected].border?.width
+                              ? layer[selected].border?.width
+                              : 1,
+                            color: layer[selected].border?.color,
+                          }
+                        : {},
                     })
-                  );
-                }}
+                  )
+                }
               />
-              {layer[selected].type === TYPE.image && (
-                <ActionIcon
-                  variant="subtle"
-                  size="md"
-                  onClick={() => setLinkSize(!linkSize)}
-                >
-                  {linkSize ? (
-                    <IconLink size={DETAIL_ICON_SIZE} />
-                  ) : (
-                    <IconLinkOff size={DETAIL_ICON_SIZE} />
-                  )}
-                </ActionIcon>
-              )}
               <NumberInput
+                placeholder="Border Width"
                 size="xs"
-                style={{ flex: 1 }}
-                icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
-                min={layer[selected].type === TYPE.qr ? 18 : 1}
-                value={selectedLayerSize().h}
-                disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
-                onChange={(value) => {
-                  if (
-                    !value ||
-                    value < (layer[selected].type === TYPE.qr ? 18 : 1)
-                  )
-                    return;
+                icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
+                min={1}
+                max={
+                  Math.min(selectedLayerSize().w, selectedLayerSize().h) / 2 - 1
+                }
+                value={layer[selected].border?.width}
+                onChange={(value) =>
                   dispatch(
-                    setLayerSize({
+                    setLayerBorder({
                       index: selected,
-                      size:
-                        layer[selected].type === TYPE.image && linkSize
-                          ? {
-                              ...layer[selected].size,
-                              w: Math.floor(
-                                (value / layer[selected].size.nh) *
-                                  layer[selected].size.nw
-                              ),
-                              h: value,
-                            }
-                          : { ...layer[selected].size, h: value },
+                      border: { ...layer[selected].border, width: value },
                     })
-                  );
-                }}
+                  )
+                }
               />
-            </Group>
-          </Grid.Col>
-          {layer[selected].type !== TYPE.image && (
-            <>
-              <Grid.Col span={4} md={6} pb={1} pr={1}>
-                <Select
-                  placeholder="Border Style"
-                  size="xs"
-                  transitionDuration={100}
-                  transition="pop-top-left"
-                  transitionTimingFunction="ease"
-                  icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
-                  clearable
-                  data={[
-                    { value: "solid", label: "solid" },
-                    { value: "dashed", label: "dashed" },
-                    { value: "dotted", label: "dotted" },
-                    { value: "double", label: "double" },
-                    { value: "groove", label: "groove" },
-                    { value: "ridge", label: "ridge" },
-                    { value: "inset", label: "inset" },
-                    { value: "outset", label: "outset" },
-                  ]}
-                  value={layer[selected].border?.style}
-                  onChange={(value) =>
-                    dispatch(
-                      setLayerBorder({
-                        index: selected,
-                        border: value
-                          ? {
-                              style: value,
-                              width: layer[selected].border?.width
-                                ? layer[selected].border?.width
-                                : 1,
-                              color: layer[selected].border?.color,
-                            }
-                          : {},
-                      })
-                    )
-                  }
-                />
-              </Grid.Col>
-              <Grid.Col span={4} md={6} pb={1} pl={1}>
-                <NumberInput
-                  placeholder="Border Width"
-                  size="xs"
-                  icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
-                  min={1}
-                  max={
-                    Math.min(selectedLayerSize().w, selectedLayerSize().h) / 2 -
-                    1
-                  }
-                  value={layer[selected].border?.width}
-                  onChange={(value) =>
-                    dispatch(
-                      setLayerBorder({
-                        index: selected,
-                        border: { ...layer[selected].border, width: value },
-                      })
-                    )
-                  }
-                />
-              </Grid.Col>
-              <Grid.Col span={4} md={12} pt={1}>
-                <CustomColorInput
-                  placeholder="Border Color"
-                  selected={selected}
-                  color={borderColor}
-                  action={setLayerBorderColor}
-                  icon={<IconBrush size={DETAIL_ICON_SIZE} />}
-                />
-              </Grid.Col>
-            </>
-          )}
-          {![TYPE.qr, TYPE.image].includes(layer[selected].type) && (
-            <Grid.Col>
               <CustomColorInput
-                placeholder="Background Color"
+                placeholder="Border Color"
                 selected={selected}
-                color={backColor}
-                action={setLayerBackColor}
-                icon={<IconBucketDroplet size={DETAIL_ICON_SIZE} />}
+                color={borderColor}
+                action={setLayerBorderColor}
+                icon={<IconBrush size={DETAIL_ICON_SIZE} />}
               />
-            </Grid.Col>
-          )}
-          {layer[selected].type === TYPE.text && (
-            <>
-              <Grid.Col pb={1}>
-                <Group noWrap spacing="xs" align="flex-start">
-                  <TextInput
-                    sx={{ flex: 1 }}
-                    size="xs"
-                    error={fontError}
-                    disabled={fontLoad}
-                    placeholder="Get Google Font"
-                    icon={<IconTypography size={DETAIL_ICON_SIZE} />}
-                    rightSection={
-                      <ActionIcon
-                        variant="transparent"
-                        onClick={() =>
-                          window.open("https://fonts.google.com/", "_blank")
-                        }
-                      >
-                        <IconBrandGoogle
-                          size={DETAIL_ICON_SIZE}
-                          strokeWidth={3}
-                        />
-                      </ActionIcon>
-                    }
-                    value={
-                      selected === fontRename.index
-                        ? fontRename.value
-                        : layer[selected].font?.family
-                        ? layer[selected].font.family
-                        : ""
-                    }
-                    onMouseDown={() => setFontError(false)}
-                    onChange={(event) => {
-                      setFontError(false);
-                      setFontRename({
-                        index: selected,
-                        value: event.target.value,
-                      });
-                    }}
-                  />
-                  <ActionIcon
-                    variant=""
-                    size="md"
-                    color={fontError ? "red.6" : "blue.6"}
-                    disabled={fontLoad}
-                    onClick={() => {
-                      WebFont.load({
-                        google: {
-                          families: [fontRename.value],
-                        },
-                        loading: () => {
-                          setFontLoad(true);
-                          setFontError(false);
-                        },
-                        active: () => {
-                          setFontLoad(false);
-                          dispatch(
-                            setLayerFont({
-                              index: selected,
-                              font: {
-                                ...layer[selected].font,
-                                family: fontRename.value,
-                              },
-                            })
-                          );
-                        },
-                        inactive: () => {
-                          setFontLoad(false);
-                          setFontError(true);
-                        },
-                      });
-                    }}
-                  >
-                    {fontLoad ? <Loader size={18} /> : <IconCheck size={18} />}
-                  </ActionIcon>
-                </Group>
-              </Grid.Col>
-              <Grid.Col span={6} py={1} pr={1}>
-                <Select
-                  size="xs"
-                  placeholder="Font Weight"
-                  icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
-                  data={[
-                    { value: 100, label: "100" },
-                    { value: 200, label: "200" },
-                    { value: 300, label: "300" },
-                    { value: 400, label: "400 (normal)" },
-                    { value: 500, label: "500" },
-                    { value: 600, label: "600" },
-                    { value: 700, label: "700 (bold)" },
-                    { value: 800, label: "800" },
-                    { value: 900, label: "900" },
-                  ]}
-                  value={layer[selected].font?.weight}
-                  onChange={(value) =>
-                    dispatch(
-                      setLayerFont({
-                        index: selected,
-                        font: { ...layer[selected].font, weight: value },
-                      })
-                    )
-                  }
-                />
-              </Grid.Col>
-              <Grid.Col span={6} py={1} pl={1}>
-                <NumberInput
-                  size="xs"
-                  placeholder="Font Size"
-                  icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
-                  min={1}
-                  value={layer[selected].font?.size}
-                  onChange={(value) => {
-                    if (!value) return;
 
+              {![TYPE.qr, TYPE.image].includes(layer[selected].type) && (
+                <CustomColorInput
+                  placeholder="Background Color"
+                  selected={selected}
+                  color={backColor}
+                  action={setLayerBackColor}
+                  icon={<IconBucketDroplet size={DETAIL_ICON_SIZE} />}
+                />
+              )}
+            </Stack>
+          </Grid.Col>
+        )}
+        {layer[selected].type === TYPE.text && (
+          <Grid.Col md={4}>
+            <Center pb="md">
+              <IconTypography size={48} color="gray" />
+            </Center>
+            <Stack spacing={2}>
+              <Group noWrap spacing="xs" align="flex-start">
+                <TextInput
+                  sx={{ flex: 1 }}
+                  size="xs"
+                  error={fontError}
+                  disabled={fontLoad}
+                  placeholder="Get Google Font"
+                  icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                  rightSection={
+                    <ActionIcon
+                      variant="transparent"
+                      onClick={() =>
+                        window.open("https://fonts.google.com/", "_blank")
+                      }
+                    >
+                      <IconBrandGoogle
+                        size={DETAIL_ICON_SIZE}
+                        strokeWidth={3}
+                      />
+                    </ActionIcon>
+                  }
+                  value={
+                    selected === fontRename.index
+                      ? fontRename.value
+                      : layer[selected].font?.family
+                      ? layer[selected].font.family
+                      : ""
+                  }
+                  onMouseDown={() => setFontError(false)}
+                  onChange={(event) => {
+                    setFontError(false);
+                    setFontRename({
+                      index: selected,
+                      value: event.target.value,
+                    });
+                  }}
+                />
+                <ActionIcon
+                  variant=""
+                  size="md"
+                  color={fontError ? "red.6" : "blue.6"}
+                  disabled={fontLoad}
+                  onClick={() => {
+                    WebFont.load({
+                      google: {
+                        families: [fontRename.value],
+                      },
+                      loading: () => {
+                        setFontLoad(true);
+                        setFontError(false);
+                      },
+                      active: () => {
+                        setFontLoad(false);
+                        dispatch(
+                          setLayerFont({
+                            index: selected,
+                            font: {
+                              ...layer[selected].font,
+                              family: fontRename.value,
+                            },
+                          })
+                        );
+                      },
+                      inactive: () => {
+                        setFontLoad(false);
+                        setFontError(true);
+                      },
+                    });
+                  }}
+                >
+                  {fontLoad ? <Loader size={18} /> : <IconCheck size={18} />}
+                </ActionIcon>
+              </Group>
+              <Select
+                size="xs"
+                placeholder="Font Weight"
+                icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
+                data={[
+                  { value: 100, label: "100" },
+                  { value: 200, label: "200" },
+                  { value: 300, label: "300" },
+                  { value: 400, label: "400 (normal)" },
+                  { value: 500, label: "500" },
+                  { value: 600, label: "600" },
+                  { value: 700, label: "700 (bold)" },
+                  { value: 800, label: "800" },
+                  { value: 900, label: "900" },
+                ]}
+                value={layer[selected].font?.weight}
+                onChange={(value) =>
+                  dispatch(
+                    setLayerFont({
+                      index: selected,
+                      font: { ...layer[selected].font, weight: value },
+                    })
+                  )
+                }
+              />
+              <NumberInput
+                size="xs"
+                placeholder="Font Size"
+                icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
+                min={1}
+                value={layer[selected].font?.size}
+                onChange={(value) => {
+                  if (!value) return;
+
+                  dispatch(
+                    setLayerFont({
+                      index: selected,
+                      font: {
+                        ...layer[selected].font,
+                        size: value,
+                      },
+                    })
+                  );
+                }}
+              />
+              <Group noWrap spacing="xs" align="flex-start">
+                <CustomColorInput
+                  sx={{ flex: 1 }}
+                  placeholder="Font Color"
+                  selected={selected}
+                  color={fontColor}
+                  action={setLayerFontColor}
+                  icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                />
+                <ActionIcon
+                  size="md"
+                  variant={
+                    layer[selected].font?.style === "italic"
+                      ? "filled"
+                      : "outline"
+                  }
+                  onClick={() =>
                     dispatch(
                       setLayerFont({
                         index: selected,
                         font: {
                           ...layer[selected].font,
-                          size: value,
+                          style:
+                            layer[selected].font?.style === "italic"
+                              ? ""
+                              : "italic",
                         },
                       })
-                    );
-                  }}
-                />
-              </Grid.Col>
-              <Grid.Col pt={1}>
-                <Group noWrap spacing="xs" align="flex-start">
-                  <CustomColorInput
-                    sx={{ flex: 1 }}
-                    placeholder="Font Color"
-                    selected={selected}
-                    color={fontColor}
-                    action={setLayerFontColor}
-                    icon={<IconTypography size={DETAIL_ICON_SIZE} />}
-                  />
-                  <ActionIcon
-                    size="md"
-                    variant={
-                      layer[selected].font?.style === "italic"
-                        ? "filled"
-                        : "outline"
-                    }
-                    onClick={() =>
-                      dispatch(
-                        setLayerFont({
-                          index: selected,
-                          font: {
-                            ...layer[selected].font,
-                            style:
-                              layer[selected].font?.style === "italic"
-                                ? ""
-                                : "italic",
-                          },
-                        })
-                      )
-                    }
-                  >
-                    <IconItalic size={DETAIL_ICON_SIZE} />
-                  </ActionIcon>
-                </Group>
-              </Grid.Col>
-            </>
-          )}
-        </Grid>
-      </>
+                    )
+                  }
+                >
+                  <IconItalic size={DETAIL_ICON_SIZE} />
+                </ActionIcon>
+              </Group>
+            </Stack>
+          </Grid.Col>
+        )}
+      </Grid>
     )
   );
 }
@@ -2128,6 +2114,7 @@ export default function Design() {
           <Tool />
           <Canvas />
           <Pagenation />
+          <Detail />
         </Stack>
       </Grid.Col>
       <Grid.Col md={2} p="sm">
@@ -2137,9 +2124,6 @@ export default function Design() {
           </Title>
           <Divider my="sm" />
           <Layer />
-        </Stack>
-        <Stack spacing={0} mt={48}>
-          <Detail />
         </Stack>
       </Grid.Col>
     </Grid>
