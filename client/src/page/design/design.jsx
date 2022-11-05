@@ -89,7 +89,7 @@ import { saveAs } from "file-saver";
 import WebFont from "webfontloader";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
-const TYPE = {
+export const TYPE = {
   rect: "rect",
   circle: "circle",
   text: "text",
@@ -100,7 +100,7 @@ const DETAIL_ICON_SIZE = 14;
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
 const DOMAIN = "label.ddsgit.com";
 
-const convertLayout = {
+export const convertLayout = {
   inch: (layout) => {
     if (layout.unit === "cm")
       return {
@@ -1018,7 +1018,7 @@ function Tool() {
     </Group>
   );
 }
-export function Canvas(props) {
+export function Canvas() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
@@ -1027,7 +1027,6 @@ export function Canvas(props) {
   const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
   let selected = useSelector((state) => state.draw.selected);
-  if (props.index) selected = props.index;
 
   const refCanvas = useRef();
   const refLayer = useRef({ current: [] });
@@ -1321,7 +1320,6 @@ export function Canvas(props) {
       radius={0}
       withBorder
       onMouseDown={() => dispatch(setSelected(-1))}
-      style={{ ...props.style }}
     >
       {items}
       {selected !== -1 && (

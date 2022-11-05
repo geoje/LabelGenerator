@@ -1,14 +1,161 @@
-import { Grid, Group, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Grid,
+  Group,
+  Text,
+  Paper,
+  Image as ManImage,
+  Badge,
+} from "@mantine/core";
+import { IconPrinter } from "@tabler/icons";
+import { QRCodeSVG } from "qrcode.react";
 import { useSelector } from "react-redux";
-import { Canvas } from "../design/design";
+import { TYPE, convertLayout } from "../design/design";
 
-function Preview(props) {
+function Canvas(props) {
+  // Provider
+  const data = useSelector((state) => state.data.value);
+  const format = useSelector((state) => state.qr.format);
+  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
+  const layer = useSelector((state) => state.draw.layer);
+
+  const items = layer.map((_, i) => {
+    const index = layer.length - 1 - i;
+    const item = layer[index];
+
+    let defaultStyle = {
+      position: "absolute",
+      left: item.size.x,
+      top: item.size.y,
+
+      borderStyle: item.border?.style,
+      borderWidth: item.border?.width ? item.border?.width : null,
+      borderColor: item.border?.color?.value,
+
+      background: item.background?.color?.value,
+    };
+
+    switch (item.type) {
+      case TYPE.rect:
+      case TYPE.circle:
+        return (
+          <div
+            key={`layer-${item.name}`}
+            style={{
+              ...defaultStyle,
+
+              width: item.size.w,
+              height: item.size.h,
+
+              borderRadius: item.type === TYPE.circle ? "50%" : 0,
+            }}
+          ></div>
+        );
+      case TYPE.text:
+        return (
+          <Text
+            id={`layer-${item.name}`}
+            key={`layer-${item.name}`}
+            style={{
+              ...defaultStyle,
+
+              WebkitUserSelect: "none" /* Safari */,
+              msUserSelect: "none" /* IE 10 and IE 11 */,
+              userSelect: "none" /* Standard syntax */,
+
+              fontFamily: item.font?.family,
+              fontStyle: item.font?.style,
+              fontSize: item.font?.size ? item.font.size : 10,
+              fontWeight: item.font?.weight,
+              color: item.font?.color?.value,
+            }}
+          >
+            {item.var.type === "format"
+              ? data.length && Object.keys(data[0]).includes(item.var.format)
+                ? data[props.page][item.var.format]
+                : ""
+              : item.var.static}
+          </Text>
+        );
+      case TYPE.qr:
+        return (
+          <div key={`layer-${item.name}`} style={defaultStyle}>
+            <QRCodeSVG
+              size={item.size.w}
+              value={
+                data.length
+                  ? format
+                      .filter(
+                        (o) =>
+                          o.literal || Object.keys(data[0]).includes(o.value)
+                      )
+                      .map((o) =>
+                        o.literal ? o.value : data[props.page][o.value]
+                      )
+                      .join("")
+                  : ""
+              }
+            />
+          </div>
+        );
+      case TYPE.image:
+        return (
+          <ManImage
+            src={
+              item.var?.format &&
+              item.var.img &&
+              data[props.page] &&
+              data[props.page][item.var.format] &&
+              item.var.img[data[props.page][item.var.format]]
+                ? item.var.img[data[props.page][item.var.format]]
+                : item.var.default
+            }
+            width={item.size.w}
+            height={item.size.h}
+            key={`layer-${item.name}`}
+            style={defaultStyle}
+            fit="contain"
+          />
+        );
+      default:
+        return null;
+    }
+  });
+
   return (
-    <Group position="center" key={`canvas-${props.index}`}>
-      <Text>{props.index}</Text>
-      <Canvas index={props.index} />
-    </Group>
+    <Paper
+      sx={{
+        position: "relative",
+        width: layoutPx.w,
+        height: layoutPx.h,
+        boxSizing: "content-box",
+        background: "#fff",
+      }}
+      radius={0}
+      withBorder
+    >
+      {items}
+    </Paper>
   );
+}
+function Preview() {
+  const previews = [];
+  for (let i = 0; i < 77; i += 22)
+    previews.push(
+      <Group position="center" key={`preview-${i}`} p={1}>
+        <div style={{ width: 40 }}>
+          <Badge variant="filled" color="gray" fullWidth>
+            {i}
+          </Badge>
+        </div>
+        <Canvas page={i} />
+        <ActionIcon>
+          <IconPrinter />
+        </ActionIcon>
+      </Group>
+    );
+
+  return <>{previews}</>;
 }
 
 function Control() {
@@ -16,15 +163,11 @@ function Control() {
 }
 
 export default function Print() {
-  const data = useSelector((state) => state.data.value);
-
-  const previews = [];
-  previews.push(<Preview index={0} />);
-  previews.push(<Preview index={77} />);
-
   return (
-    <Grid>
-      <Grid.Col md={8}>{previews}</Grid.Col>
+    <Grid pt="xl">
+      <Grid.Col md={8}>
+        <Preview />
+      </Grid.Col>
       <Grid.Col md={4}>
         <Control />
       </Grid.Col>
