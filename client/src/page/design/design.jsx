@@ -76,7 +76,7 @@ import {
   setLayer,
   setLayerFont,
 } from "./drawSlice";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -1103,6 +1103,64 @@ export function Canvas() {
     setMove({ x: -1, y: -1, ox: 0, oy: 0 });
   };
 
+  useEffect(() => {
+    // I don't like this duplicated code
+    const selectedLayerSizee = () => {
+      if (layer[selected].type === TYPE.text) {
+        const textElement = document.getElementById(
+          `canvas-${layer[selected].name}`
+        );
+        return {
+          ...layer[selected].size,
+          w: textElement
+            ? Math.ceil(textElement.offsetWidth / layoutPx.ratio)
+            : 0,
+          h: textElement
+            ? Math.ceil(textElement.offsetHeight / layoutPx.ratio)
+            : 0,
+        };
+      } else if (layer[selected].type === TYPE.qr) {
+        return {
+          ...layer[selected].size,
+          h: layer[selected].size.w,
+        };
+      } else return layer[selected].size;
+    };
+
+    const onKeyDown = (event) => {
+      if (selected === -1) return;
+
+      const l = layer[selected];
+      let d = {
+        x: (event.key === "ArrowRight") - (event.key === "ArrowLeft"),
+        y: (event.key === "ArrowDown") - (event.key === "ArrowUp"),
+      };
+      if (d.x === 0 && d.y === 0) return;
+
+      dispatch(
+        setLayerSize({
+          index: selected,
+          size: {
+            ...l.size,
+            x: Math.max(
+              0,
+              Math.min(layoutPx.w - selectedLayerSizee().w, l.size.x + d.x)
+            ),
+            y: Math.max(
+              0,
+              Math.min(layoutPx.h - selectedLayerSizee().h, l.size.y + d.y)
+            ),
+          },
+        })
+      );
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [dispatch, layoutPx, layer, selected]);
+
   const items = layer.map((_, i) => {
     const index = layer.length - 1 - i;
     const item = layer[index];
@@ -1408,7 +1466,7 @@ function Layer() {
 
                 if (match) {
                   name = name.substring(0, name.length - match[0].length); // Remove tail (n)
-                  num = Number(match[0].substring(2, match[0] - 1)) + 1; // Get number
+                  num = Number(match[0].substring(2, match[0].length - 1)) + 1; // Get number
                 }
 
                 // Searching duplicate
