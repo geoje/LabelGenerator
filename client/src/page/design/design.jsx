@@ -670,9 +670,9 @@ function Tool() {
                       idxToKey[idxs[0]][idxs[1]] = k;
                     });
 
-                    let tempLayer = JSON.parse(strLayer);
+                    let jsonLayer = JSON.parse(strLayer);
                     const families = [
-                      ...new Set(tempLayer.map((l) => l.font?.family)),
+                      ...new Set(jsonLayer.map((l) => l.font?.family)),
                     ].filter((font) => font !== undefined);
                     if (families.length) WebFont.load({ google: { families } });
 
@@ -680,7 +680,7 @@ function Tool() {
                       dispatch(
                         setLayer(
                           await Promise.all(
-                            tempLayer.map(async (l, i) => {
+                            jsonLayer.map(async (l, i) => {
                               if (l.type === TYPE.image) {
                                 const key = idxToKey[String(i)]["default"];
                                 // Default
@@ -727,6 +727,12 @@ function Tool() {
                           )
                         )
                       );
+
+                      showNotification({
+                        title: "Imported Successfully",
+                        message: `${jsonLayer.length} layers imported`,
+                        color: "green",
+                      });
                     } catch (err) {
                       console.error(err);
                     }
@@ -1012,7 +1018,7 @@ function Tool() {
     </Group>
   );
 }
-export function Canvas() {
+export function Canvas(props) {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
@@ -1021,6 +1027,7 @@ export function Canvas() {
   const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
   let selected = useSelector((state) => state.draw.selected);
+  if (props.index) selected = props.index;
 
   const refCanvas = useRef();
   const refLayer = useRef({ current: [] });
@@ -1029,7 +1036,7 @@ export function Canvas() {
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
       const textElement = document.getElementById(
-        `canvas-${layer[selected].name}`
+        `layer-${layer[selected].name}`
       );
       return {
         ...layer[selected].size,
@@ -1125,7 +1132,7 @@ export function Canvas() {
     const selectedLayerSizee = () => {
       if (layer[selected].type === TYPE.text) {
         const textElement = document.getElementById(
-          `canvas-${layer[selected].name}`
+          `layer-${layer[selected].name}`
         );
         return {
           ...layer[selected].size,
@@ -1208,7 +1215,7 @@ export function Canvas() {
       case TYPE.circle:
         return (
           <div
-            key={`canvas-${item.name}`}
+            key={`layer-${item.name}`}
             ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
             style={{
@@ -1224,8 +1231,8 @@ export function Canvas() {
       case TYPE.text:
         return (
           <Text
-            id={`canvas-${item.name}`}
-            key={`canvas-${item.name}`}
+            id={`layer-${item.name}`}
+            key={`layer-${item.name}`}
             ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
             style={{
@@ -1254,7 +1261,7 @@ export function Canvas() {
       case TYPE.qr:
         return (
           <div
-            key={`canvas-${item.name}`}
+            key={`layer-${item.name}`}
             ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
             style={defaultStyle}
@@ -1289,7 +1296,7 @@ export function Canvas() {
             }
             width={item.size.w * layoutPx.ratio}
             height={item.size.h * layoutPx.ratio}
-            key={`canvas-${item.name}`}
+            key={`layer-${item.name}`}
             ref={(el) => (refLayer.current[index] = el)}
             onMouseDown={(event) => onMouseDown(event, index)}
             style={defaultStyle}
@@ -1314,6 +1321,7 @@ export function Canvas() {
       radius={0}
       withBorder
       onMouseDown={() => dispatch(setSelected(-1))}
+      style={{ ...props.style }}
     >
       {items}
       {selected !== -1 && (
@@ -1656,7 +1664,7 @@ function Detail() {
   const selectedLayerSize = () => {
     if (layer[selected].type === TYPE.text) {
       const textElement = document.getElementById(
-        `canvas-${layer[selected].name}`
+        `layer-${layer[selected].name}`
       );
       return {
         ...layer[selected].size,
