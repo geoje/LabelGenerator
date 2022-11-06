@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
+import { useRef } from "react";
 import { useSelector } from "react-redux";
 import ReactToPrint from "react-to-print";
 import { TYPE, convertLayout } from "../design/design";
@@ -151,19 +152,19 @@ function Preview() {
   [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
     if (i < data.length)
       previews.push(
-        <Group position="center" key={`preview-${i}`} p={2}>
-          <div style={{ width: 60 }}>
+        <Group className="pv" position="center" key={`preview-${i}`} p={2}>
+          <div className="pv-idx" style={{ width: 60 }}>
             <Badge variant="filled" color="gray" fullWidth>
               {i}
             </Badge>
           </div>
-          <div style={{ border: "1px solid #dee2e6" }}>
+          <div className="pv-wrap" style={{ border: "1px solid #dee2e6" }}>
             <Canvas page={i} innerRef={(el) => (refCanvas[i] = el)} />
           </div>
           <ReactToPrint
             trigger={() => {
               return (
-                <ActionIcon>
+                <ActionIcon className="pv-print">
                   <IconPrinter />
                 </ActionIcon>
               );
@@ -177,35 +178,40 @@ function Preview() {
   return <>{previews}</>;
 }
 
-function Control() {
-  return (
-    <Center pt="xl">
-      <ReactToPrint
-        trigger={() => {
-          return (
-            <ActionIcon
-              size={128}
-              variant="filled"
-              radius="md"
-              onClick={() => {}}
-            >
-              <IconPrinter size={128} />
-            </ActionIcon>
-          );
-        }}
-        content={() => document.getElementById("control")}
-      />
-    </Center>
-  );
-}
-
 export default function Print() {
+  const refPreview = useRef(null);
+  const pageStyle = `
+  @media print {
+    .pvs { padding: 0 !important; }
+    .pv { page-break-before: always; padding: 0 !important; }
+    .pv-idx, .pv-print { display: none !important; }
+    .pv-wrap { border: none !important; }
+  }
+`;
+
   return (
     <Grid m={0} p="sm" pt="xl">
-      <Grid.Col md={4} orderMd={1} id="control">
-        <Control />
+      <Grid.Col md={4} orderMd={1}>
+        <Center pt="xl">
+          <ReactToPrint
+            trigger={() => {
+              return (
+                <ActionIcon
+                  size={128}
+                  variant="filled"
+                  radius="md"
+                  onClick={() => {}}
+                >
+                  <IconPrinter size={128} />
+                </ActionIcon>
+              );
+            }}
+            content={() => refPreview.current}
+            pageStyle={pageStyle}
+          />
+        </Center>
       </Grid.Col>
-      <Grid.Col md={8} orderMd={0}>
+      <Grid.Col md={8} orderMd={0} ref={refPreview} className="pvs">
         <Preview />
       </Grid.Col>
     </Grid>
