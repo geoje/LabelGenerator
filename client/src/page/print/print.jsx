@@ -135,7 +135,6 @@ function Canvas(props) {
       }}
       radius={0}
       ref={props.innerRef}
-      withBorder
     >
       {items}
     </Paper>
@@ -144,73 +143,44 @@ function Canvas(props) {
 function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const layout = useSelector((state) => state.draw.layout);
 
   const refCanvas = [];
   const previews = [];
 
-  const pageStyle = `
-  @page {
-    size: 80mm 50mm;
-  }
-
-  @media all {
-    .pagebreak {
-      display: none;
-    }
-  }
-
-  @media print {
-    .pagebreak {
-      page-break-before: always;
-    }
-  }
-`;
-
-  for (let i = 0; i < data.length; i++)
-    previews.push(
-      <Group position="center" key={`preview-${i}`} p={2}>
-        <div style={{ width: 60 }}>
-          <Badge variant="filled" color="gray" fullWidth>
-            {i}
-          </Badge>
-        </div>
-        <Canvas page={i} innerRef={(el) => (refCanvas[i] = el)} />
-        <ReactToPrint
-          trigger={() => {
-            return (
-              <ActionIcon>
-                <IconPrinter />
-              </ActionIcon>
-            );
-          }}
-          content={() => refCanvas[i]}
-          pageStylexc
-        />
-      </Group>
-    );
+  // for (let i = 0; i < data.length; i++)
+  [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
+    if (i < data.length)
+      previews.push(
+        <Group position="center" key={`preview-${i}`} p={2}>
+          <div style={{ width: 60 }}>
+            <Badge variant="filled" color="gray" fullWidth>
+              {i}
+            </Badge>
+          </div>
+          <div style={{ border: "1px solid #dee2e6" }}>
+            <Canvas page={i} innerRef={(el) => (refCanvas[i] = el)} />
+          </div>
+          <ReactToPrint
+            trigger={() => {
+              return (
+                <ActionIcon>
+                  <IconPrinter />
+                </ActionIcon>
+              );
+            }}
+            content={() => refCanvas[i]}
+          />
+        </Group>
+      );
+  });
 
   return <>{previews}</>;
 }
 
 function Control() {
-  const layout = useSelector((state) => state.draw.layout);
-
   return (
     <Center pt="xl">
-      <ActionIcon
-        size={128}
-        variant="filled"
-        radius="md"
-        onClick={() =>
-          console.log(
-            `@media print { @page { size: ${layout.w}${layout.unit.substring(
-              0,
-              2
-            )} ${layout.h}${layout.unit.substring(0, 2)} } }`
-          )
-        }
-      >
+      <ActionIcon size={128} variant="filled" radius="md" onClick={() => {}}>
         <IconPrinter size={128} />
       </ActionIcon>
     </Center>
@@ -219,7 +189,7 @@ function Control() {
 
 export default function Print() {
   return (
-    <Grid pt="xl">
+    <Grid m={0} p="sm" pt="xl">
       <Grid.Col md={4} orderMd={1}>
         <Control />
       </Grid.Col>
