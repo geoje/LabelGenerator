@@ -180,9 +180,21 @@ function Preview() {
 function Control() {
   return (
     <Center pt="xl">
-      <ActionIcon size={128} variant="filled" radius="md" onClick={() => {}}>
-        <IconPrinter size={128} />
-      </ActionIcon>
+      <ReactToPrint
+        trigger={() => {
+          return (
+            <ActionIcon
+              size={128}
+              variant="filled"
+              radius="md"
+              onClick={() => {}}
+            >
+              <IconPrinter size={128} />
+            </ActionIcon>
+          );
+        }}
+        content={() => document.getElementById("control")}
+      />
     </Center>
   );
 }
@@ -190,7 +202,7 @@ function Control() {
 export default function Print() {
   return (
     <Grid m={0} p="sm" pt="xl">
-      <Grid.Col md={4} orderMd={1}>
+      <Grid.Col md={4} orderMd={1} id="control">
         <Control />
       </Grid.Col>
       <Grid.Col md={8} orderMd={0}>
