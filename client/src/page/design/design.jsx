@@ -52,12 +52,12 @@ import {
   IconBorderStyle,
   IconLink,
   IconLinkOff,
-  IconBrandGoogle,
   IconTextSize,
   IconItalic,
   IconCopy,
   IconBorderOuter,
   IconLayout2,
+  IconExternalLink,
 } from "@tabler/icons";
 import {
   setLayout,
@@ -1960,7 +1960,7 @@ function Detail() {
                         window.open("https://fonts.google.com/", "_blank")
                       }
                     >
-                      <IconBrandGoogle
+                      <IconExternalLink
                         size={DETAIL_ICON_SIZE}
                         strokeWidth={3}
                       />

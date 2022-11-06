@@ -6,11 +6,13 @@ import {
   Paper,
   Image as ManImage,
   Badge,
+  Center,
 } from "@mantine/core";
 import { IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { useSelector } from "react-redux";
 import { TYPE, convertLayout } from "../design/design";
+import { FixedSizeList } from "react-window";
 
 function Canvas(props) {
   // Provider
@@ -139,11 +141,14 @@ function Canvas(props) {
   );
 }
 function Preview() {
+  // Provider
+  const data = useSelector((state) => state.data.value);
+
   const previews = [];
-  for (let i = 0; i < 77; i += 22)
+  for (let i = 0; i < data.length; i++)
     previews.push(
       <Group position="center" key={`preview-${i}`} p={1}>
-        <div style={{ width: 40 }}>
+        <div style={{ width: 60 }}>
           <Badge variant="filled" color="gray" fullWidth>
             {i}
           </Badge>
@@ -159,17 +164,23 @@ function Preview() {
 }
 
 function Control() {
-  return <></>;
+  return (
+    <Center pt="xl">
+      <ActionIcon size={128} variant="filled" radius="md">
+        <IconPrinter size={128} />
+      </ActionIcon>
+    </Center>
+  );
 }
 
 export default function Print() {
   return (
     <Grid pt="xl">
-      <Grid.Col md={8}>
-        <Preview />
-      </Grid.Col>
-      <Grid.Col md={4}>
+      <Grid.Col md={4} orderMd={1}>
         <Control />
+      </Grid.Col>
+      <Grid.Col md={8} orderMd={0}>
+        <Preview />
       </Grid.Col>
     </Grid>
   );
