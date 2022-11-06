@@ -11,8 +11,8 @@ import {
 import { IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { useSelector } from "react-redux";
+import ReactToPrint from "react-to-print";
 import { TYPE, convertLayout } from "../design/design";
-import { FixedSizeList } from "react-window";
 
 function Canvas(props) {
   // Provider
@@ -134,6 +134,7 @@ function Canvas(props) {
         background: "#fff",
       }}
       radius={0}
+      ref={props.innerRef}
       withBorder
     >
       {items}
@@ -143,20 +144,49 @@ function Canvas(props) {
 function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
+  const layout = useSelector((state) => state.draw.layout);
 
+  const refCanvas = [];
   const previews = [];
+
+  const pageStyle = `
+  @page {
+    size: 80mm 50mm;
+  }
+
+  @media all {
+    .pagebreak {
+      display: none;
+    }
+  }
+
+  @media print {
+    .pagebreak {
+      page-break-before: always;
+    }
+  }
+`;
+
   for (let i = 0; i < data.length; i++)
     previews.push(
-      <Group position="center" key={`preview-${i}`} p={1}>
+      <Group position="center" key={`preview-${i}`} p={2}>
         <div style={{ width: 60 }}>
           <Badge variant="filled" color="gray" fullWidth>
             {i}
           </Badge>
         </div>
-        <Canvas page={i} />
-        <ActionIcon>
-          <IconPrinter />
-        </ActionIcon>
+        <Canvas page={i} innerRef={(el) => (refCanvas[i] = el)} />
+        <ReactToPrint
+          trigger={() => {
+            return (
+              <ActionIcon>
+                <IconPrinter />
+              </ActionIcon>
+            );
+          }}
+          content={() => refCanvas[i]}
+          pageStylexc
+        />
       </Group>
     );
 
@@ -164,9 +194,23 @@ function Preview() {
 }
 
 function Control() {
+  const layout = useSelector((state) => state.draw.layout);
+
   return (
     <Center pt="xl">
-      <ActionIcon size={128} variant="filled" radius="md">
+      <ActionIcon
+        size={128}
+        variant="filled"
+        radius="md"
+        onClick={() =>
+          console.log(
+            `@media print { @page { size: ${layout.w}${layout.unit.substring(
+              0,
+              2
+            )} ${layout.h}${layout.unit.substring(0, 2)} } }`
+          )
+        }
+      >
         <IconPrinter size={128} />
       </ActionIcon>
     </Center>
