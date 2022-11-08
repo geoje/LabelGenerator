@@ -148,6 +148,8 @@ function Canvas(props) {
         background: "#fff",
       }}
       radius={0}
+      style={props.style}
+      key={props.key}
     >
       {items}
     </Paper>
@@ -175,9 +177,11 @@ function Preview() {
     const extraCanvas = [];
     for (let j = 1; j < qty; j++)
       extraCanvas.push(
-        <div style={{ display: "none" }} key={`preview-${i}-${j}`}>
-          <Canvas page={i} />
-        </div>
+        <Canvas
+          page={i}
+          style={{ display: "none" }}
+          key={`preview-${i}-${j}`}
+        />
       );
 
     if (i < data.length)
@@ -228,9 +232,9 @@ export default function Print() {
   const refPreview = useRef(null);
   const pageStyle = `
   @media print {
-    .pvs, .pv { padding: 0 !important; }
+    .pvs, .pv { padding: 0 !important; page-break-before: always; }
     .pv-tool { display: none !important; }
-    .pv-wrap { border: none !important; page-break-before: always; }
+    .pv-wrap { border: none !important; }
     .pv-wrap > div { display: block !important; border: none !important; page-break-before: always; }
   }
 `;
