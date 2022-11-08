@@ -1037,14 +1037,16 @@ export function Canvas() {
       const textElement = document.getElementById(
         `layer-${layer[selected].name}`
       );
+
+      let fontScale =
+        layer[selected].font?.size * layoutPx.ratio < 10
+          ? layer[selected].font?.size / 10
+          : 1 / layoutPx.ratio;
+
       return {
         ...layer[selected].size,
-        w: textElement
-          ? Math.ceil(textElement.offsetWidth / layoutPx.ratio)
-          : 0,
-        h: textElement
-          ? Math.ceil(textElement.offsetHeight / layoutPx.ratio)
-          : 0,
+        w: textElement ? Math.ceil(textElement.offsetWidth * fontScale) : 0,
+        h: textElement ? Math.ceil(textElement.offsetHeight * fontScale) : 0,
       };
     } else if (layer[selected].type === TYPE.qr) {
       return {
@@ -1228,6 +1230,16 @@ export function Canvas() {
           ></div>
         );
       case TYPE.text:
+        let fontScale = {};
+        if (item.font?.size) {
+          fontScale.fontSize = item.font.size * layoutPx.ratio;
+          if (fontScale.fontSize < 10) {
+            fontScale.transformOrigin = "top left";
+            fontScale.transform = `scale(${fontScale.fontSize / 10})`;
+            fontScale.fontSize = 10;
+          }
+        } else fontScale.fontSize = 10 * layoutPx.ratio;
+
         return (
           <Text
             id={`layer-${item.name}`}
@@ -1243,9 +1255,8 @@ export function Canvas() {
 
               fontFamily: item.font?.family,
               fontStyle: item.font?.style,
-              fontSize: item.font?.size
-                ? item.font.size * layoutPx.ratio
-                : 10 * layoutPx.ratio,
+              ...fontScale,
+
               fontWeight: item.font?.weight,
               color: item.font?.color?.value,
             }}
