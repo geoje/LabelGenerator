@@ -148,7 +148,6 @@ function Canvas(props) {
         background: "#fff",
       }}
       radius={0}
-      ref={props.innerRef}
     >
       {items}
     </Paper>
@@ -162,8 +161,25 @@ function Preview() {
   const refCanvas = [];
   const previews = [];
 
+  const pageStyle = `
+  @media print {
+    .pv-wrap { border: none !important; }
+    .pv-wrap > div { display: block !important; border: none !important; page-break-before: always; }
+  }
+`;
+
   // for (let i = 0; i < data.length; i++)
   [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
+    const qty = format && Number(data[i][format]) ? Number(data[i][format]) : 1;
+
+    const extraCanvas = [];
+    for (let j = 1; j < qty; j++)
+      extraCanvas.push(
+        <div style={{ display: "none" }} key={`preview-${i}-${j}`}>
+          <Canvas page={i} />
+        </div>
+      );
+
     if (i < data.length)
       previews.push(
         <Group className="pv" position="center" key={`preview-${i}`} p={2}>
@@ -172,12 +188,17 @@ function Preview() {
               {i}
             </Badge>
           </div>
-          <div className="pv-wrap" style={{ border: "1px solid #dee2e6" }}>
-            <Canvas page={i} innerRef={(el) => (refCanvas[i] = el)} />
+          <div
+            ref={(el) => (refCanvas[i] = el)}
+            className="pv-wrap"
+            style={{ border: "1px solid #dee2e6" }}
+          >
+            <Canvas page={i} />
+            {qty >= 2 && extraCanvas}
           </div>
           <Stack className="pv-tool" spacing={0}>
             <Badge variant="outline" color="gray" size="xs">
-              {format && Number(data[i][format]) ? Number(data[i][format]) : 1}
+              {qty}
             </Badge>
             <ReactToPrint
               trigger={() => {
@@ -188,6 +209,7 @@ function Preview() {
                 );
               }}
               content={() => refCanvas[i]}
+              pageStyle={pageStyle}
             />
           </Stack>
         </Group>
@@ -206,10 +228,10 @@ export default function Print() {
   const refPreview = useRef(null);
   const pageStyle = `
   @media print {
-    .pvs { padding: 0 !important; }
-    .pv { page-break-before: always; padding: 0 !important; }
+    .pvs, .pv { padding: 0 !important; }
     .pv-tool { display: none !important; }
-    .pv-wrap { border: none !important; }
+    .pv-wrap { border: none !important; page-break-before: always; }
+    .pv-wrap > div { display: block !important; border: none !important; page-break-before: always; }
   }
 `;
 
