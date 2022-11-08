@@ -6,14 +6,16 @@ import {
   Paper,
   Image as ManImage,
   Badge,
-  Center,
+  Select,
+  Stack,
 } from "@mantine/core";
 import { IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ReactToPrint from "react-to-print";
 import { TYPE, convertLayout } from "../design/design";
+import { setFormat } from "./copySlice";
 
 function Canvas(props) {
   // Provider
@@ -155,6 +157,7 @@ function Canvas(props) {
 function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
+  const format = useSelector((state) => state.copy.format);
 
   const refCanvas = [];
   const previews = [];
@@ -164,7 +167,7 @@ function Preview() {
     if (i < data.length)
       previews.push(
         <Group className="pv" position="center" key={`preview-${i}`} p={2}>
-          <div className="pv-idx" style={{ width: 60 }}>
+          <div className="pv-tool" style={{ width: 50 }}>
             <Badge variant="filled" color="gray" fullWidth>
               {i}
             </Badge>
@@ -172,16 +175,21 @@ function Preview() {
           <div className="pv-wrap" style={{ border: "1px solid #dee2e6" }}>
             <Canvas page={i} innerRef={(el) => (refCanvas[i] = el)} />
           </div>
-          <ReactToPrint
-            trigger={() => {
-              return (
-                <ActionIcon className="pv-print">
-                  <IconPrinter />
-                </ActionIcon>
-              );
-            }}
-            content={() => refCanvas[i]}
-          />
+          <Stack className="pv-tool" spacing={0}>
+            <Badge variant="outline" color="gray" size="xs">
+              {format && Number(data[i][format]) ? Number(data[i][format]) : 1}
+            </Badge>
+            <ReactToPrint
+              trigger={() => {
+                return (
+                  <ActionIcon>
+                    <IconPrinter />
+                  </ActionIcon>
+                );
+              }}
+              content={() => refCanvas[i]}
+            />
+          </Stack>
         </Group>
       );
   });
@@ -190,12 +198,17 @@ function Preview() {
 }
 
 export default function Print() {
+  // Provider
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.data.value);
+  const format = useSelector((state) => state.copy.format);
+
   const refPreview = useRef(null);
   const pageStyle = `
   @media print {
     .pvs { padding: 0 !important; }
     .pv { page-break-before: always; padding: 0 !important; }
-    .pv-idx, .pv-print { display: none !important; }
+    .pv-tool { display: none !important; }
     .pv-wrap { border: none !important; }
   }
 `;
@@ -203,7 +216,17 @@ export default function Print() {
   return (
     <Grid m={0} p="sm" pt="xl">
       <Grid.Col md={4} orderMd={1}>
-        <Center pt="xl">
+        <Stack pt="xl" align="center" spacing="xl">
+          <Select
+            size="xs"
+            placeholder="Copies from column"
+            clearable
+            data={Object.keys(data.length ? data[0] : []).map((s) => {
+              return { value: s, label: s };
+            })}
+            value={format}
+            onChange={(value) => dispatch(setFormat(value))}
+          />
           <ReactToPrint
             trigger={() => {
               return (
@@ -220,7 +243,7 @@ export default function Print() {
             content={() => refPreview.current}
             pageStyle={pageStyle}
           />
-        </Center>
+        </Stack>
       </Grid.Col>
       <Grid.Col md={8} orderMd={0} ref={refPreview} className="pvs">
         <Preview />
