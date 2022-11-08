@@ -1094,13 +1094,24 @@ export function Canvas() {
     event.preventDefault();
     event.stopPropagation();
 
+    const l = layer[index];
     dispatch(setSelected((selected = index)));
     setMove(
       (move = {
-        x: layer[index].size.x,
-        y: layer[index].size.y,
-        ox: event.nativeEvent.offsetX + 1,
-        oy: event.nativeEvent.offsetY + 1,
+        x: l.size.x,
+        y: l.size.y,
+        ox:
+          event.nativeEvent.offsetX *
+            (l.type === TYPE.text && l.font?.size * layoutPx.ratio < 10
+              ? (l.font?.size * layoutPx.ratio) / 10
+              : 1) +
+          1,
+        oy:
+          event.nativeEvent.offsetY *
+            (l.type === TYPE.text && l.font?.size * layoutPx.ratio < 10
+              ? (l.font?.size * layoutPx.ratio) / 10
+              : 1) +
+          1,
         sx: event.pageX,
         sy: event.pageY,
       })
