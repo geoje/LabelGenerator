@@ -39,6 +39,12 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { saveAs } from "file-saver";
 import { set as setData } from "./dataSlice";
 import { setFormat, setCustom, setSelected } from "./qrSlice";
@@ -59,6 +65,19 @@ function DataTable() {
   const keys = [];
   if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
 
+  const columnHelper = createColumnHelper();
+  const columns = keys.map((k) =>
+    columnHelper.accessor(k, {
+      cell: (info) => info.getValue(),
+    })
+  );
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
   return (
     <Table
       fontSize="xs"
@@ -67,17 +86,28 @@ function DataTable() {
       style={{ whiteSpace: "nowrap" }}
     >
       <thead>
-        <tr>
-          {keys.map((key) => (
-            <th key={"th" + key}>{key}</th>
-          ))}
-        </tr>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <tr key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <th key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+              </th>
+            ))}
+          </tr>
+        ))}
       </thead>
       <tbody>
-        {data.map((v, i) => (
-          <tr key={"tr" + i}>
-            {keys.map((key) => (
-              <td key={"td" + i + key}>{v[key]}</td>
+        {table.getRowModel().rows.map((row) => (
+          <tr key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <td key={cell.id}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
             ))}
           </tr>
         ))}
