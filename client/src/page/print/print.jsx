@@ -170,19 +170,13 @@ function Preview() {
   }
 `;
 
-  for (let i = 0; i < data.length; i++) {
-    // [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
+  // for (let i = 0; i < data.length; i++) {
+  [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
     const qty = format && Number(data[i][format]) ? Number(data[i][format]) : 1;
 
-    const extraCanvas = [];
-    for (let j = 1; j < qty; j++)
-      extraCanvas.push(
-        <Canvas
-          page={i}
-          style={{ display: "none" }}
-          key={`preview-${i}-${j}`}
-        />
-      );
+    const extraCanvas = Array.from({ length: qty - 1 }).map((_, j) => (
+      <Canvas page={i} style={{ display: "none" }} key={`preview-${i}-${j}`} />
+    ));
 
     if (i < data.length)
       previews.push(
@@ -218,7 +212,7 @@ function Preview() {
           </Stack>
         </Group>
       );
-  }
+  });
 
   return <>{previews}</>;
 }
