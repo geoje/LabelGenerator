@@ -170,8 +170,8 @@ function Preview() {
   }
 `;
 
-  // for (let i = 0; i < data.length; i++)
-  [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
+  for (let i = 0; i < data.length; i++) {
+    // [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
     const qty = format && Number(data[i][format]) ? Number(data[i][format]) : 1;
 
     const extraCanvas = [];
@@ -218,7 +218,7 @@ function Preview() {
           </Stack>
         </Group>
       );
-  });
+  }
 
   return <>{previews}</>;
 }
