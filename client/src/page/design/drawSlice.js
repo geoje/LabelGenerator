@@ -81,12 +81,6 @@ const slice = createSlice({
         var: { type: "static", static: "Made in Korea" },
       },
       {
-        name: "titleCircle",
-        type: "circle",
-        size: { x: 280, y: 37, w: 6, h: 6 },
-        border: { style: "solid", width: 1, color: { value: "#000000" } },
-      },
-      {
         name: "titleLine",
         type: "rect",
         size: { x: 60, y: 39, w: 220, h: 2 },
@@ -96,7 +90,7 @@ const slice = createSlice({
       {
         name: "titleTextSub",
         type: "text",
-        size: { x: 186, y: 18 },
+        size: { x: 186, y: 20 },
         font: { size: 10, weight: 400, color: { value: "#000000" } },
         var: { type: "static", static: "Sample Sub Title" },
       },
