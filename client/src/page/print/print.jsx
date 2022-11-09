@@ -23,10 +23,10 @@ import {
 import { TYPE, convertLayout } from "../design/design";
 import { setFormat } from "./copySlice";
 
-function LayerItemsForPdf(dataRow, layerItems, qrValue) {
-  return layerItems.map((_, i) => {
-    const index = layerItems.length - 1 - i;
-    const item = layerItems[index];
+function LayerItemsForPdf(layer, dataRow, qrValue) {
+  return layer.map((_, i) => {
+    const index = layer.length - 1 - i;
+    const item = layer[index];
 
     switch (item.type) {
       case TYPE.rect:
@@ -43,7 +43,7 @@ function LayerItemsForPdf(dataRow, layerItems, qrValue) {
           </PdfText>
         );
       case TYPE.qr:
-        return <></>;
+        return <PdfText>{qrValue}</PdfText>;
       case TYPE.image:
         return <></>;
       default:
@@ -193,14 +193,17 @@ function Canvas(props) {
 function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const format = useSelector((state) => state.copy.format);
+  const qrFormat = useSelector((state) => state.qr.format);
+  const copyFormat = useSelector((state) => state.copy.format);
   const layout = useSelector((state) => state.draw.layout);
   const layoutPx = convertLayout.px(layout);
   const layer = useSelector((state) => state.draw.layer);
 
   const Row = ({ index, style }) => {
     const qty =
-      format && Number(data[index][format]) ? Number(data[index][format]) : 1;
+      copyFormat && Number(data[index][copyFormat])
+        ? Number(data[index][copyFormat])
+        : 1;
 
     return (
       <Group position="center" key={`preview-${index}`} style={style}>
@@ -223,20 +226,15 @@ function Preview() {
               >
                 <Page size={[layoutPx.w * 0.75, layoutPx.h * 0.75]}>
                   {LayerItemsForPdf(
-                    index,
-                    layer[index],
-                    data.length
-                      ? format
-                          .filter(
-                            (o) =>
-                              o.literal ||
-                              Object.keys(data[0]).includes(o.value)
-                          )
-                          .map((o) =>
-                            o.literal ? o.value : data[index][o.value]
-                          )
-                          .join("")
-                      : ""
+                    layer,
+                    data[index],
+                    qrFormat
+                      .filter(
+                        (o) =>
+                          o.literal || Object.keys(data[0]).includes(o.value)
+                      )
+                      .map((o) => (o.literal ? o.value : data[index][o.value]))
+                      .join("")
                   )}
                 </Page>
               </Document>
