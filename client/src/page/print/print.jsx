@@ -9,14 +9,48 @@ import {
   Select,
   Stack,
 } from "@mantine/core";
-import { IconFile3d, IconPrinter } from "@tabler/icons";
+import { IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
-import { forwardRef, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
+import {
+  BlobProvider,
+  Document,
+  Page,
+  Text as PdfText,
+} from "@react-pdf/renderer";
 import { TYPE, convertLayout } from "../design/design";
 import { setFormat } from "./copySlice";
 
+function LayerItemsForPdf(dataRow, layerItems, qrValue) {
+  return layerItems.map((_, i) => {
+    const index = layerItems.length - 1 - i;
+    const item = layerItems[index];
+
+    switch (item.type) {
+      case TYPE.rect:
+      case TYPE.circle:
+        return <></>;
+      case TYPE.text:
+        return (
+          <PdfText>
+            {item.var.type === "format"
+              ? Object.keys(dataRow).includes(item.var.format)
+                ? dataRow[item.var.format]
+                : ""
+              : item.var.static}
+          </PdfText>
+        );
+      case TYPE.qr:
+        return <></>;
+      case TYPE.image:
+        return <></>;
+      default:
+        return null;
+    }
+  });
+}
 function Canvas(props) {
   // Provider
   const data = useSelector((state) => state.data.value);
@@ -156,11 +190,13 @@ function Canvas(props) {
     </Paper>
   );
 }
-const Preview = forwardRef((props, ref) => {
+function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.copy.format);
-  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
+  const layout = useSelector((state) => state.draw.layout);
+  const layoutPx = convertLayout.px(layout);
+  const layer = useSelector((state) => state.draw.layer);
 
   const Row = ({ index, style }) => {
     const qty =
@@ -178,10 +214,40 @@ const Preview = forwardRef((props, ref) => {
           <Badge variant="outline" color="gray" size="xs">
             {qty}
           </Badge>
-
-          <ActionIcon onClick={() => {}}>
-            <IconPrinter />
-          </ActionIcon>
+          <BlobProvider
+            document={
+              <Document
+                title="Labels"
+                author="label.ddsgit.com"
+                subject="github.com/geoje"
+              >
+                <Page size={[layoutPx.w * 0.75, layoutPx.h * 0.75]}>
+                  {LayerItemsForPdf(
+                    index,
+                    layer[index],
+                    data.length
+                      ? format
+                          .filter(
+                            (o) =>
+                              o.literal ||
+                              Object.keys(data[0]).includes(o.value)
+                          )
+                          .map((o) =>
+                            o.literal ? o.value : data[index][o.value]
+                          )
+                          .join("")
+                      : ""
+                  )}
+                </Page>
+              </Document>
+            }
+          >
+            {({ url }) => (
+              <ActionIcon onClick={() => window.open(url, "_blank")}>
+                <IconPrinter />
+              </ActionIcon>
+            )}
+          </BlobProvider>
         </Stack>
       </Group>
     );
@@ -189,7 +255,6 @@ const Preview = forwardRef((props, ref) => {
 
   return (
     <FixedSizeList
-      ref={ref}
       width="100%"
       height={800}
       className="List"
@@ -199,7 +264,7 @@ const Preview = forwardRef((props, ref) => {
       {Row}
     </FixedSizeList>
   );
-});
+}
 
 export default function Print() {
   // Provider
@@ -245,7 +310,7 @@ export default function Print() {
             radius="md"
             onClick={() => {}}
           >
-            <IconFile3d size={128} />
+            <IconPrinter size={128} />
           </ActionIcon>
         </Stack>
       </Grid.Col>

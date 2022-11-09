@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 /**
  * size: {w, h, unit, ratio}
  * 1 inch = 2.54 cm
- * 1 inch = 96 px
+ * 1 inch = 96 px (for pdf is 72px)
  *
  * layer: [{
  *    name: "",
