@@ -14,43 +14,9 @@ import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
-import {
-  BlobProvider,
-  Document,
-  Page,
-  Text as PdfText,
-} from "@react-pdf/renderer";
 import { TYPE, convertLayout } from "../design/design";
 import { setFormat } from "./copySlice";
 
-function LayerItemsForPdf(layer, dataRow, qrValue) {
-  return layer.map((_, i) => {
-    const index = layer.length - 1 - i;
-    const item = layer[index];
-
-    switch (item.type) {
-      case TYPE.rect:
-      case TYPE.circle:
-        return <></>;
-      case TYPE.text:
-        return (
-          <PdfText>
-            {item.var.type === "format"
-              ? Object.keys(dataRow).includes(item.var.format)
-                ? dataRow[item.var.format]
-                : ""
-              : item.var.static}
-          </PdfText>
-        );
-      case TYPE.qr:
-        return <PdfText>{qrValue}</PdfText>;
-      case TYPE.image:
-        return <></>;
-      default:
-        return null;
-    }
-  });
-}
 function Canvas(props) {
   // Provider
   const data = useSelector((state) => state.data.value);
@@ -193,11 +159,9 @@ function Canvas(props) {
 function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const qrFormat = useSelector((state) => state.qr.format);
   const copyFormat = useSelector((state) => state.copy.format);
   const layout = useSelector((state) => state.draw.layout);
   const layoutPx = convertLayout.px(layout);
-  const layer = useSelector((state) => state.draw.layer);
 
   const Row = ({ index, style }) => {
     const qty =
@@ -217,35 +181,9 @@ function Preview() {
           <Badge variant="outline" color="gray" size="xs">
             {qty}
           </Badge>
-          <BlobProvider
-            document={
-              <Document
-                title="Labels"
-                author="label.ddsgit.com"
-                subject="github.com/geoje"
-              >
-                <Page size={[layoutPx.w * 0.75, layoutPx.h * 0.75]}>
-                  {LayerItemsForPdf(
-                    layer,
-                    data[index],
-                    qrFormat
-                      .filter(
-                        (o) =>
-                          o.literal || Object.keys(data[0]).includes(o.value)
-                      )
-                      .map((o) => (o.literal ? o.value : data[index][o.value]))
-                      .join("")
-                  )}
-                </Page>
-              </Document>
-            }
-          >
-            {({ url }) => (
-              <ActionIcon onClick={() => window.open(url, "_blank")}>
-                <IconPrinter />
-              </ActionIcon>
-            )}
-          </BlobProvider>
+          <ActionIcon onClick={() => {}}>
+            <IconPrinter />
+          </ActionIcon>
         </Stack>
       </Group>
     );
@@ -268,22 +206,74 @@ export default function Print() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
-  const format = useSelector((state) => state.copy.format);
+  const copyFormat = useSelector((state) => state.copy.format);
 
+  const [filterFormat, setFilterFormat] = useState("");
+  const [filterValue, setFilterValue] = useState(null);
   const [qty, setQty] = useState(data.length);
 
   return (
     <Grid m={0} p="sm" pt="xl">
       <Grid.Col md={4} orderMd={1}>
         <Stack pt="xl" align="center" spacing="xs">
+          <Group>
+            <Select
+              size="xs"
+              placeholder="Filter Column"
+              clearable
+              transitionDuration={100}
+              transition="pop-top-left"
+              transitionTimingFunction="ease"
+              data={Object.keys(data.length ? data[0] : []).map((s) => {
+                return { value: s, label: s };
+              })}
+              value={filterFormat}
+              onChange={(value) => {
+                if (value !== filterFormat) {
+                  setFilterValue(null);
+                  setFilterFormat(value);
+                }
+              }}
+            />
+            <Select
+              size="xs"
+              placeholder="Filter Value"
+              clearable
+              disabled={!filterFormat}
+              transitionDuration={100}
+              transition="pop-top-left"
+              transitionTimingFunction="ease"
+              data={
+                filterFormat
+                  ? [
+                      ...new Set(
+                        new Array(data.length)
+                          .fill(0)
+                          .map((_, i) => data[i][filterFormat])
+                      ),
+                    ]
+                      .map((v) => {
+                        return { value: v, label: v };
+                      })
+                      .sort((a, b) => (a.value < b.value ? -1 : 1))
+                  : []
+              }
+              value={filterValue}
+              onChange={setFilterValue}
+            />
+          </Group>
           <Select
             size="xs"
-            placeholder="Copies from column"
+            mt="md"
+            placeholder="Copies Column"
             clearable
+            transitionDuration={100}
+            transition="pop-top-left"
+            transitionTimingFunction="ease"
             data={Object.keys(data.length ? data[0] : []).map((s) => {
               return { value: s, label: s };
             })}
-            value={format}
+            value={copyFormat}
             onChange={(value) => {
               dispatch(setFormat(value));
 
@@ -299,7 +289,7 @@ export default function Print() {
             }}
           />
 
-          <Badge variant="outline" color="gray" size="xs" mt="md">
+          <Badge variant="outline" color="gray" size="xs">
             {qty}
           </Badge>
           <ActionIcon
