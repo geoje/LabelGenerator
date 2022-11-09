@@ -13,6 +13,7 @@ import { IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { FixedSizeList } from "react-window";
 import ReactToPrint from "react-to-print";
 import { TYPE, convertLayout } from "../design/design";
 import { setFormat } from "./copySlice";
@@ -159,9 +160,9 @@ function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.copy.format);
+  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
 
   const refCanvas = [];
-  const previews = [];
 
   const pageStyle = `
   @media print {
@@ -170,51 +171,69 @@ function Preview() {
   }
 `;
 
-  // for (let i = 0; i < data.length; i++) {
-  [0, 1, 46, 359, 486, 494, 542, 935].forEach((i) => {
-    const qty = format && Number(data[i][format]) ? Number(data[i][format]) : 1;
-
+  const Row = ({ index, style }) => {
+    const qty =
+      format && Number(data[index][format]) ? Number(data[index][format]) : 1;
     const extraCanvas = Array.from({ length: qty - 1 }).map((_, j) => (
-      <Canvas page={i} style={{ display: "none" }} key={`preview-${i}-${j}`} />
+      <Canvas
+        page={index}
+        style={{ display: "none" }}
+        key={`preview-${index}-${j}`}
+      />
     ));
 
-    if (i < data.length)
-      previews.push(
-        <Group className="pv" position="center" key={`preview-${i}`} p={2}>
-          <div className="pv-tool" style={{ width: 50 }}>
-            <Badge variant="filled" color="gray" fullWidth>
-              {i}
-            </Badge>
-          </div>
-          <div
-            ref={(el) => (refCanvas[i] = el)}
-            className="pv-wrap"
-            style={{ border: "1px solid #dee2e6" }}
-          >
-            <Canvas page={i} />
-            {qty >= 2 && extraCanvas}
-          </div>
-          <Stack className="pv-tool" spacing={0}>
-            <Badge variant="outline" color="gray" size="xs">
-              {qty}
-            </Badge>
-            <ReactToPrint
-              trigger={() => {
-                return (
-                  <ActionIcon>
-                    <IconPrinter />
-                  </ActionIcon>
-                );
-              }}
-              content={() => refCanvas[i]}
-              pageStyle={pageStyle}
-            />
-          </Stack>
-        </Group>
-      );
-  });
+    return (
+      <Group
+        className="pv"
+        position="center"
+        key={`preview-${index}`}
+        p={2}
+        style={style}
+      >
+        <div className="pv-tool" style={{ width: 50 }}>
+          <Badge variant="filled" color="gray" fullWidth>
+            {index}
+          </Badge>
+        </div>
+        <div
+          ref={(el) => (refCanvas[index] = el)}
+          className="pv-wrap"
+          style={{ border: "1px solid #dee2e6" }}
+        >
+          <Canvas page={index} />
+          {qty >= 2 && extraCanvas}
+        </div>
+        <Stack className="pv-tool" spacing={0}>
+          <Badge variant="outline" color="gray" size="xs">
+            {qty}
+          </Badge>
+          <ReactToPrint
+            trigger={() => {
+              return (
+                <ActionIcon>
+                  <IconPrinter />
+                </ActionIcon>
+              );
+            }}
+            content={() => refCanvas[index]}
+            pageStyle={pageStyle}
+          />
+        </Stack>
+      </Group>
+    );
+  };
 
-  return <>{previews}</>;
+  return (
+    <FixedSizeList
+      width="100%"
+      height={800}
+      className="List"
+      itemCount={data.length}
+      itemSize={layoutPx.h + 6}
+    >
+      {Row}
+    </FixedSizeList>
+  );
 }
 
 export default function Print() {

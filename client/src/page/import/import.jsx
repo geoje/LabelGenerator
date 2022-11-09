@@ -132,7 +132,7 @@ function DataTable() {
 
   return (
     <VirtualTable
-      height={760}
+      height={800}
       itemCount={data.length}
       itemSize={rowHeight}
       header={
