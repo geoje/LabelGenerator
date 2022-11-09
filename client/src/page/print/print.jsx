@@ -8,14 +8,19 @@ import {
   Badge,
   Select,
   Stack,
+  Tooltip,
 } from "@mantine/core";
 import { IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
+import NewWindow from "react-new-window";
 import { TYPE, convertLayout } from "../design/design";
 import { setFormat } from "./copySlice";
+import { showNotification } from "@mantine/notifications";
+
+const RECOMMENDED_COUNT = 1000;
 
 function Canvas(props) {
   // Provider
@@ -147,9 +152,7 @@ function Canvas(props) {
         boxSizing: "content-box",
         background: "#fff",
       }}
-      withBorder
       radius={0}
-      style={props.style}
       key={props.key}
     >
       {items}
@@ -162,6 +165,8 @@ function Preview() {
   const copyFormat = useSelector((state) => state.copy.format);
   const layout = useSelector((state) => state.draw.layout);
   const layoutPx = convertLayout.px(layout);
+
+  const [reqPrint, setReqPrint] = useState(-1);
 
   const Row = ({ index, style }) => {
     const qty =
@@ -176,15 +181,56 @@ function Preview() {
             {index}
           </Badge>
         </div>
-        <Canvas page={index} />
+        <div style={{ border: "1px solid rgb(222, 226, 230)" }}>
+          <Canvas page={index} />
+        </div>
         <Stack align="center" spacing={0}>
-          <Badge variant="outline" color="gray" size="xs">
+          <Badge
+            variant={qty > RECOMMENDED_COUNT ? "filled" : "outline"}
+            color={qty > RECOMMENDED_COUNT ? "red" : "gray"}
+            size="xs"
+          >
             {qty}
           </Badge>
-          <ActionIcon onClick={() => {}}>
+          <ActionIcon
+            onClick={() => {
+              if (qty > RECOMMENDED_COUNT)
+                showNotification({
+                  title: "Limited print copies",
+                  message: "It will be printed up to 1,000 copies",
+                  color: "yellow",
+                });
+
+              setReqPrint(index);
+            }}
+          >
             <IconPrinter />
           </ActionIcon>
         </Stack>
+        {reqPrint === index && (
+          // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+          // There is CORS problem. But we can ignore it.
+          <NewWindow
+            title="Label Generator Print"
+            onUnload={() => {
+              setReqPrint(-1);
+            }}
+            onBlock={() =>
+              showNotification({
+                title: "New window opening blocked",
+                message: "The browser restricts opening a new window",
+                color: "red",
+              })
+            }
+            onOpen={(w) => {
+              w.moveTo(0, 0);
+              w.resizeTo(window.screen.availWidth, window.screen.availHeight);
+              w.print();
+            }}
+          >
+            {new Array(qty).fill(<Canvas page={index} />)}
+          </NewWindow>
+        )}
       </Group>
     );
   };
@@ -211,6 +257,7 @@ export default function Print() {
   const [filterFormat, setFilterFormat] = useState("");
   const [filterValue, setFilterValue] = useState(null);
   const [qty, setQty] = useState(data.length);
+  const [reqPrint, setReqPrint] = useState(false);
 
   return (
     <Grid m={0} p="sm" pt="xl">
@@ -289,17 +336,57 @@ export default function Print() {
             }}
           />
 
-          <Badge variant="outline" color="gray" size="xs">
+          <Badge
+            variant={qty > RECOMMENDED_COUNT ? "filled" : "outline"}
+            color={qty > RECOMMENDED_COUNT ? "red" : "gray"}
+            size="xs"
+          >
             {qty}
           </Badge>
           <ActionIcon
             size={128}
             variant="filled"
             radius="md"
-            onClick={() => {}}
+            onClick={() => {
+              if (qty > RECOMMENDED_COUNT)
+                showNotification({
+                  title: "Limited print copies",
+                  message: "It will be printed up to 1,000 copies",
+                  color: "yellow",
+                });
+
+              setReqPrint(true);
+            }}
           >
             <IconPrinter size={128} />
           </ActionIcon>
+
+          {reqPrint && (
+            // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+            // There is CORS problem. But we can ignore it.
+            <NewWindow
+              title="Label Generator Print"
+              onUnload={() => {
+                setReqPrint(false);
+              }}
+              onBlock={() =>
+                showNotification({
+                  title: "New window opening blocked",
+                  message: "The browser restricts opening a new window",
+                  color: "red",
+                })
+              }
+              onOpen={(w) => {
+                w.moveTo(0, 0);
+                w.resizeTo(window.screen.availWidth, window.screen.availHeight);
+                w.print();
+              }}
+            >
+              {data.map((v, i) =>
+                new Array(v[copyFormat]).fill(<Canvas page={i} />)
+              )}
+            </NewWindow>
+          )}
         </Stack>
       </Grid.Col>
       <Grid.Col md={8} orderMd={0}>

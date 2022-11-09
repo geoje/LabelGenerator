@@ -23,6 +23,11 @@
           background-position: 0 -8px, 0 0, 100% 0, -8px 100%;
         }
       }
+      @media print {
+        div#new-window-container > div {
+          page-break-before: always;
+        }
+      }
     </style>
   </head>
   <body>
