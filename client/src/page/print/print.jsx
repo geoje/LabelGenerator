@@ -8,9 +8,13 @@ import {
   Badge,
   Select,
   Stack,
-  Tooltip,
+  Modal,
+  useMantineTheme,
+  Button,
+  Title,
 } from "@mantine/core";
-import { IconPrinter } from "@tabler/icons";
+import { useDisclosure } from "@mantine/hooks";
+import { IconAlertTriangle, IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,6 +25,7 @@ import { setFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
 const RECOMMENDED_COUNT = 1000;
+const MAX_COUNT = 10000;
 
 function Canvas(props) {
   // Provider
@@ -153,10 +158,56 @@ function Canvas(props) {
         background: "#fff",
       }}
       radius={0}
-      key={props.key}
     >
       {items}
     </Paper>
+  );
+}
+function PrintModal(props) {
+  const qty = props.qty;
+  const opened = props.opened;
+  const close = props.close;
+  const onAgree = props.onAgree;
+  const onDisagree = props.onDisagree;
+
+  const theme = useMantineTheme();
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={close}
+      size="auto"
+      title={
+        <Group>
+          <IconAlertTriangle size={48} color="#FAB005" />
+          <Title order={4}>Bulk Print Warning</Title>
+        </Group>
+      }
+      overlayColor={
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[9]
+          : theme.colors.gray[2]
+      }
+      overlayOpacity={0.55}
+      overlayBlur={3}
+    >
+      <Text>
+        You tried to print <b>{qty}</b> copies more than {RECOMMENDED_COUNT}{" "}
+        that recommended.
+      </Text>
+      <Text>
+        Although The browser may freeze, you can print after waiting for
+        rendering.
+      </Text>
+      <Text mt="xs">Are you still going to proceed?</Text>
+
+      <Group mt="xl" position="apart">
+        <Button onClick={onDisagree}>No, I will not print</Button>
+        <Button onClick={onAgree} variant="outline">
+          Yes, I will print
+        </Button>
+      </Group>
+    </Modal>
   );
 }
 function Preview() {
@@ -166,7 +217,8 @@ function Preview() {
   const layout = useSelector((state) => state.draw.layout);
   const layoutPx = convertLayout.px(layout);
 
-  const [reqPrint, setReqPrint] = useState(-1);
+  const [reqPrint, setReqPrint] = useState(null);
+  const [opened, { close, open }] = useDisclosure(false);
 
   const Row = ({ index, style }) => {
     const qty =
@@ -194,14 +246,16 @@ function Preview() {
           </Badge>
           <ActionIcon
             onClick={() => {
-              if (qty > RECOMMENDED_COUNT)
+              if (qty > MAX_COUNT)
                 showNotification({
-                  title: "Limited print copies",
-                  message: "It will be printed up to 1,000 copies",
-                  color: "yellow",
+                  title: "Too many quantity",
+                  message: `The system cannot print more than ${MAX_COUNT} copies.`,
+                  color: "red",
                 });
-
-              setReqPrint(index);
+              else if (qty > RECOMMENDED_COUNT) {
+                setReqPrint(-index);
+                open();
+              } else setReqPrint(index);
             }}
           >
             <IconPrinter />
@@ -211,9 +265,9 @@ function Preview() {
           // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
           // There is CORS problem. But we can ignore it.
           <NewWindow
-            title="Label Generator Print"
+            title="Print Labels"
             onUnload={() => {
-              setReqPrint(-1);
+              setReqPrint(null);
             }}
             onBlock={() =>
               showNotification({
@@ -228,7 +282,9 @@ function Preview() {
               w.print();
             }}
           >
-            {new Array(qty).fill(<Canvas page={index} />)}
+            {new Array(qty).fill(0).map((_, j) => (
+              <Canvas page={index} key={`canvas-${index}-${j}`} />
+            ))}
           </NewWindow>
         )}
       </Group>
@@ -236,19 +292,36 @@ function Preview() {
   };
 
   return (
-    <FixedSizeList
-      width="100%"
-      height={800}
-      className="List"
-      itemCount={data.length}
-      itemSize={layoutPx.h + 6}
-    >
-      {Row}
-    </FixedSizeList>
+    <>
+      <FixedSizeList
+        width="100%"
+        height={800}
+        className="List"
+        itemCount={data.length}
+        itemSize={layoutPx.h + 6}
+      >
+        {Row}
+      </FixedSizeList>
+      <PrintModal
+        qty={
+          copyFormat &&
+          reqPrint !== null &&
+          Number(data[Math.abs(reqPrint)][copyFormat])
+            ? Number(data[Math.abs(reqPrint)][copyFormat])
+            : 1
+        }
+        opened={opened}
+        close={close}
+        onAgree={() => {
+          setReqPrint(Math.abs(reqPrint));
+          close();
+        }}
+        onDisagree={close}
+      />
+    </>
   );
 }
-
-export default function Print() {
+function Control() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
@@ -258,136 +331,152 @@ export default function Print() {
   const [filterValue, setFilterValue] = useState(null);
   const [qty, setQty] = useState(data.length);
   const [reqPrint, setReqPrint] = useState(false);
+  const [opened, { close, open }] = useDisclosure(false);
 
+  return (
+    <Stack pt="xl" align="center" spacing="xs">
+      <Group>
+        <Select
+          size="xs"
+          placeholder="Filter Column"
+          clearable
+          transitionDuration={100}
+          transition="pop-top-left"
+          transitionTimingFunction="ease"
+          data={Object.keys(data.length ? data[0] : []).map((s) => {
+            return { value: s, label: s };
+          })}
+          value={filterFormat}
+          onChange={(value) => {
+            if (value !== filterFormat) {
+              setFilterValue(null);
+              setFilterFormat(value);
+            }
+          }}
+        />
+        <Select
+          size="xs"
+          placeholder="Filter Value"
+          clearable
+          disabled={!filterFormat}
+          transitionDuration={100}
+          transition="pop-top-left"
+          transitionTimingFunction="ease"
+          data={
+            filterFormat
+              ? [
+                  ...new Set(
+                    new Array(data.length)
+                      .fill(0)
+                      .map((_, i) => data[i][filterFormat])
+                  ),
+                ]
+                  .map((v) => {
+                    return { value: v, label: v };
+                  })
+                  .sort((a, b) => (a.value < b.value ? -1 : 1))
+              : []
+          }
+          value={filterValue}
+          onChange={setFilterValue}
+        />
+      </Group>
+      <Select
+        size="xs"
+        mt="md"
+        placeholder="Copies Column"
+        clearable
+        transitionDuration={100}
+        transition="pop-top-left"
+        transitionTimingFunction="ease"
+        data={Object.keys(data.length ? data[0] : []).map((s) => {
+          return { value: s, label: s };
+        })}
+        value={copyFormat}
+        onChange={(value) => {
+          dispatch(setFormat(value));
+
+          if (!value) {
+            setQty(data.length);
+            return;
+          }
+          const totalCount = data.reduce((acc, o) => acc + Number(o[value]), 0);
+          setQty(totalCount ? totalCount : 0);
+        }}
+      />
+
+      <Badge
+        variant={qty > RECOMMENDED_COUNT ? "filled" : "outline"}
+        color={qty > RECOMMENDED_COUNT ? "red" : "gray"}
+        size="xs"
+      >
+        {qty}
+      </Badge>
+      <ActionIcon
+        size={128}
+        variant="filled"
+        radius="md"
+        onClick={() => {
+          if (qty > MAX_COUNT)
+            showNotification({
+              title: "Too many quantity",
+              message: `The system cannot print more than ${MAX_COUNT} copies.`,
+              color: "red",
+            });
+          else if (qty > RECOMMENDED_COUNT) open();
+          else setReqPrint(true);
+        }}
+      >
+        <IconPrinter size={128} />
+      </ActionIcon>
+      <PrintModal
+        qty={qty}
+        opened={opened}
+        close={close}
+        onAgree={() => {
+          setReqPrint(true);
+          close();
+        }}
+        onDisagree={close}
+      />
+
+      {reqPrint && (
+        // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+        // There is CORS problem. But we can ignore it.
+        <NewWindow
+          title="Print Labels"
+          onUnload={() => {
+            setReqPrint(false);
+          }}
+          onBlock={() =>
+            showNotification({
+              title: "New window opening blocked",
+              message: "The browser restricts opening a new window",
+              color: "red",
+            })
+          }
+          onOpen={(w) => {
+            w.moveTo(0, 0);
+            w.resizeTo(window.screen.availWidth, window.screen.availHeight);
+            w.print();
+          }}
+        >
+          {data.map((v, i) =>
+            new Array(v[copyFormat])
+              .fill(0)
+              .map((_, j) => <Canvas page={i} key={`canvas-${i}-${j}`} />)
+          )}
+        </NewWindow>
+      )}
+    </Stack>
+  );
+}
+
+export default function Print() {
   return (
     <Grid m={0} p="sm" pt="xl">
       <Grid.Col md={4} orderMd={1}>
-        <Stack pt="xl" align="center" spacing="xs">
-          <Group>
-            <Select
-              size="xs"
-              placeholder="Filter Column"
-              clearable
-              transitionDuration={100}
-              transition="pop-top-left"
-              transitionTimingFunction="ease"
-              data={Object.keys(data.length ? data[0] : []).map((s) => {
-                return { value: s, label: s };
-              })}
-              value={filterFormat}
-              onChange={(value) => {
-                if (value !== filterFormat) {
-                  setFilterValue(null);
-                  setFilterFormat(value);
-                }
-              }}
-            />
-            <Select
-              size="xs"
-              placeholder="Filter Value"
-              clearable
-              disabled={!filterFormat}
-              transitionDuration={100}
-              transition="pop-top-left"
-              transitionTimingFunction="ease"
-              data={
-                filterFormat
-                  ? [
-                      ...new Set(
-                        new Array(data.length)
-                          .fill(0)
-                          .map((_, i) => data[i][filterFormat])
-                      ),
-                    ]
-                      .map((v) => {
-                        return { value: v, label: v };
-                      })
-                      .sort((a, b) => (a.value < b.value ? -1 : 1))
-                  : []
-              }
-              value={filterValue}
-              onChange={setFilterValue}
-            />
-          </Group>
-          <Select
-            size="xs"
-            mt="md"
-            placeholder="Copies Column"
-            clearable
-            transitionDuration={100}
-            transition="pop-top-left"
-            transitionTimingFunction="ease"
-            data={Object.keys(data.length ? data[0] : []).map((s) => {
-              return { value: s, label: s };
-            })}
-            value={copyFormat}
-            onChange={(value) => {
-              dispatch(setFormat(value));
-
-              if (!value) {
-                setQty(data.length);
-                return;
-              }
-              const totalCount = data.reduce(
-                (acc, o) => acc + Number(o[value]),
-                0
-              );
-              setQty(totalCount ? totalCount : 0);
-            }}
-          />
-
-          <Badge
-            variant={qty > RECOMMENDED_COUNT ? "filled" : "outline"}
-            color={qty > RECOMMENDED_COUNT ? "red" : "gray"}
-            size="xs"
-          >
-            {qty}
-          </Badge>
-          <ActionIcon
-            size={128}
-            variant="filled"
-            radius="md"
-            onClick={() => {
-              if (qty > RECOMMENDED_COUNT)
-                showNotification({
-                  title: "Limited print copies",
-                  message: "It will be printed up to 1,000 copies",
-                  color: "yellow",
-                });
-
-              setReqPrint(true);
-            }}
-          >
-            <IconPrinter size={128} />
-          </ActionIcon>
-
-          {reqPrint && (
-            // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
-            // There is CORS problem. But we can ignore it.
-            <NewWindow
-              title="Label Generator Print"
-              onUnload={() => {
-                setReqPrint(false);
-              }}
-              onBlock={() =>
-                showNotification({
-                  title: "New window opening blocked",
-                  message: "The browser restricts opening a new window",
-                  color: "red",
-                })
-              }
-              onOpen={(w) => {
-                w.moveTo(0, 0);
-                w.resizeTo(window.screen.availWidth, window.screen.availHeight);
-                w.print();
-              }}
-            >
-              {data.map((v, i) =>
-                new Array(v[copyFormat]).fill(<Canvas page={i} />)
-              )}
-            </NewWindow>
-          )}
-        </Stack>
+        <Control />
       </Grid.Col>
       <Grid.Col md={8} orderMd={0}>
         <Preview />
