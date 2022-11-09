@@ -12,9 +12,10 @@ import {
   useMantineTheme,
   Button,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconAlertTriangle, IconPrinter } from "@tabler/icons";
+import { IconAlertTriangle, IconInfoCircle, IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -217,11 +218,19 @@ function Preview() {
   const layoutPx = convertLayout.px(layout);
   const qtyFormat = useSelector((state) => state.copy.qtyFormat);
   const filter = useSelector((state) => state.copy.filter);
+  const isFiltered = filter.format && filter.value;
 
   const [reqPrint, setReqPrint] = useState(null);
   const [opened, { close, open }] = useDisclosure(false);
 
+  let filteredIndexMap = [];
+  if (isFiltered)
+    data.forEach((o, i) => {
+      if (o[filter.format] === filter.value) filteredIndexMap.push(i);
+    });
   const Row = ({ index, style }) => {
+    if (isFiltered) index = filteredIndexMap[index];
+
     const qty =
       qtyFormat && Number(data[index][qtyFormat])
         ? Number(data[index][qtyFormat])
@@ -237,6 +246,27 @@ function Preview() {
         <div style={{ border: "1px solid rgb(222, 226, 230)" }}>
           <Canvas page={index} />
         </div>
+        <Tooltip
+          position="left"
+          withArrow
+          multiline
+          label={
+            <>
+              <Title order={6} align="center">
+                {index}
+              </Title>
+              {Object.entries(data[index]).map(([k, v], j) => (
+                <Text size="xs" key={`tooltip-${index}-${j}`}>
+                  {k}: {v}
+                </Text>
+              ))}
+            </>
+          }
+        >
+          <Text color="gray">
+            <IconInfoCircle />
+          </Text>
+        </Tooltip>
         <Stack align="center" spacing={0}>
           <Badge
             variant={qty > RECOMMENDED_COUNT ? "filled" : "outline"}
@@ -298,7 +328,11 @@ function Preview() {
         width="100%"
         height={800}
         className="List"
-        itemCount={data.length}
+        itemCount={
+          isFiltered
+            ? data.filter((o) => o[filter.format] === filter.value).length
+            : data.length
+        }
         itemSize={layoutPx.h + 6}
       >
         {Row}
@@ -328,10 +362,15 @@ function Control() {
   const data = useSelector((state) => state.data.value);
   const qtyFormat = useSelector((state) => state.copy.qtyFormat);
   const filter = useSelector((state) => state.copy.filter);
+  const canFilter = filter.format && filter.value;
 
-  const [qty, setQty] = useState(data.length);
   const [reqPrint, setReqPrint] = useState(false);
   const [opened, { close, open }] = useDisclosure(false);
+
+  let qty = (
+    canFilter ? data.filter((o) => o[filter.format] === filter.value) : data
+  ).reduce((acc, o) => acc + (qtyFormat ? Number(o[qtyFormat]) : 1), 0);
+  if (!qty) qty = 0;
 
   return (
     <Stack pt="xl" align="center" spacing="xs">
@@ -359,7 +398,6 @@ function Control() {
         <Select
           size="xs"
           placeholder="Filter Value"
-          clearable
           disabled={!filter.format}
           transitionDuration={100}
           transition="pop-top-left"
@@ -395,16 +433,7 @@ function Control() {
           return { value: s, label: s };
         })}
         value={qtyFormat}
-        onChange={(value) => {
-          dispatch(setQtyFormat(value));
-
-          if (!value) {
-            setQty(data.length);
-            return;
-          }
-          const totalCount = data.reduce((acc, o) => acc + Number(o[value]), 0);
-          setQty(totalCount ? totalCount : 0);
-        }}
+        onChange={(value) => dispatch(setQtyFormat(value))}
       />
 
       <Badge
