@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
 import { TYPE, convertLayout } from "../design/design";
-import { setFormat } from "./copySlice";
+import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
 const RECOMMENDED_COUNT = 1000;
@@ -213,17 +213,18 @@ function PrintModal(props) {
 function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const copyFormat = useSelector((state) => state.copy.format);
   const layout = useSelector((state) => state.draw.layout);
   const layoutPx = convertLayout.px(layout);
+  const qtyFormat = useSelector((state) => state.copy.qtyFormat);
+  const filter = useSelector((state) => state.copy.filter);
 
   const [reqPrint, setReqPrint] = useState(null);
   const [opened, { close, open }] = useDisclosure(false);
 
   const Row = ({ index, style }) => {
     const qty =
-      copyFormat && Number(data[index][copyFormat])
-        ? Number(data[index][copyFormat])
+      qtyFormat && Number(data[index][qtyFormat])
+        ? Number(data[index][qtyFormat])
         : 1;
 
     return (
@@ -304,10 +305,10 @@ function Preview() {
       </FixedSizeList>
       <PrintModal
         qty={
-          copyFormat &&
+          qtyFormat &&
           reqPrint !== null &&
-          Number(data[Math.abs(reqPrint)][copyFormat])
-            ? Number(data[Math.abs(reqPrint)][copyFormat])
+          Number(data[Math.abs(reqPrint)][qtyFormat])
+            ? Number(data[Math.abs(reqPrint)][qtyFormat])
             : 1
         }
         opened={opened}
@@ -325,10 +326,9 @@ function Control() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
-  const copyFormat = useSelector((state) => state.copy.format);
+  const qtyFormat = useSelector((state) => state.copy.qtyFormat);
+  const filter = useSelector((state) => state.copy.filter);
 
-  const [filterFormat, setFilterFormat] = useState("");
-  const [filterValue, setFilterValue] = useState(null);
   const [qty, setQty] = useState(data.length);
   const [reqPrint, setReqPrint] = useState(false);
   const [opened, { close, open }] = useDisclosure(false);
@@ -346,29 +346,31 @@ function Control() {
           data={Object.keys(data.length ? data[0] : []).map((s) => {
             return { value: s, label: s };
           })}
-          value={filterFormat}
-          onChange={(value) => {
-            if (value !== filterFormat) {
-              setFilterValue(null);
-              setFilterFormat(value);
-            }
-          }}
+          value={filter.format}
+          onChange={(value) =>
+            dispatch(
+              setFilter({
+                format: value,
+                value: value === filter.format ? filter.value : null,
+              })
+            )
+          }
         />
         <Select
           size="xs"
           placeholder="Filter Value"
           clearable
-          disabled={!filterFormat}
+          disabled={!filter.format}
           transitionDuration={100}
           transition="pop-top-left"
           transitionTimingFunction="ease"
           data={
-            filterFormat
+            filter.format
               ? [
                   ...new Set(
                     new Array(data.length)
                       .fill(0)
-                      .map((_, i) => data[i][filterFormat])
+                      .map((_, i) => data[i][filter.format])
                   ),
                 ]
                   .map((v) => {
@@ -377,8 +379,8 @@ function Control() {
                   .sort((a, b) => (a.value < b.value ? -1 : 1))
               : []
           }
-          value={filterValue}
-          onChange={setFilterValue}
+          value={filter.value}
+          onChange={(value) => dispatch(setFilter({ ...filter, value }))}
         />
       </Group>
       <Select
@@ -392,9 +394,9 @@ function Control() {
         data={Object.keys(data.length ? data[0] : []).map((s) => {
           return { value: s, label: s };
         })}
-        value={copyFormat}
+        value={qtyFormat}
         onChange={(value) => {
-          dispatch(setFormat(value));
+          dispatch(setQtyFormat(value));
 
           if (!value) {
             setQty(data.length);
@@ -462,7 +464,7 @@ function Control() {
           }}
         >
           {data.map((v, i) =>
-            new Array(v[copyFormat])
+            new Array(v[qtyFormat])
               .fill(0)
               .map((_, j) => <Canvas page={i} key={`canvas-${i}-${j}`} />)
           )}

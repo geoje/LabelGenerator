@@ -2,13 +2,16 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const slice = createSlice({
   name: "copy",
-  initialState: { format: null },
+  initialState: { qtyFormat: null, filter: { format: null, value: null } },
   reducers: {
-    setFormat: (state, action) => {
-      state.format = action.payload;
+    setQtyFormat: (state, action) => {
+      state.qtyFormat = action.payload;
+    },
+    setFilter: (state, action) => {
+      state.filter = action.payload;
     },
   },
 });
 
-export const { setFormat } = slice.actions;
+export const { setQtyFormat, setFilter } = slice.actions;
 export default slice.reducer;
