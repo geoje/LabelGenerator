@@ -28,19 +28,13 @@ function LayerItemsForPdf(layer, dataRow, qrValue) {
     const index = layer.length - 1 - i;
     const item = layer[index];
 
-    const defaultStyle = {
-      position: "absolute",
-      left: item.size.x,
-      top: item.size.y,
-    };
-
     switch (item.type) {
       case TYPE.rect:
       case TYPE.circle:
         return <></>;
       case TYPE.text:
         return (
-          <PdfText style={defaultStyle}>
+          <PdfText>
             {item.var.type === "format"
               ? Object.keys(dataRow).includes(item.var.format)
                 ? dataRow[item.var.format]
