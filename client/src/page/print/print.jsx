@@ -9,9 +9,9 @@ import {
   Select,
   Stack,
 } from "@mantine/core";
-import { IconPrinter } from "@tabler/icons";
+import { IconFile3d, IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
-import { useRef } from "react";
+import { createRef, forwardRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import ReactToPrint from "react-to-print";
@@ -156,7 +156,7 @@ function Canvas(props) {
     </Paper>
   );
 }
-function Preview() {
+const Preview = forwardRef((props, ref) => {
   // Provider
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.copy.format);
@@ -225,6 +225,7 @@ function Preview() {
 
   return (
     <FixedSizeList
+      ref={ref}
       width="100%"
       height={800}
       className="List"
@@ -234,7 +235,7 @@ function Preview() {
       {Row}
     </FixedSizeList>
   );
-}
+});
 
 export default function Print() {
   // Provider
@@ -242,10 +243,10 @@ export default function Print() {
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.copy.format);
 
-  const refPreview = useRef(null);
+  const refPreview = createRef();
   const pageStyle = `
   @media print {
-    .pvs, .pv { padding: 0 !important; page-break-before: always; }
+    .pv { padding: 0 !important; page-break-before: always; }
     .pv-tool { display: none !important; }
     .pv-wrap { border: none !important; }
     .pv-wrap > div { display: block !important; border: none !important; page-break-before: always; }
@@ -275,7 +276,7 @@ export default function Print() {
                   radius="md"
                   onClick={() => {}}
                 >
-                  <IconPrinter size={128} />
+                  <IconFile3d size={128} />
                 </ActionIcon>
               );
             }}
@@ -284,8 +285,8 @@ export default function Print() {
           />
         </Stack>
       </Grid.Col>
-      <Grid.Col md={8} orderMd={0} ref={refPreview} className="pvs">
-        <Preview />
+      <Grid.Col md={8} orderMd={0}>
+        <Preview ref={refPreview} />
       </Grid.Col>
     </Grid>
   );
