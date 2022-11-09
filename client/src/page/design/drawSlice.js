@@ -132,6 +132,7 @@ const slice = createSlice({
 
     setLayer: (state, action) => {
       state.layer = action.payload;
+      if (!state.layer.length) state.selected = -1;
     },
     addLayer: (state, action) => {
       state.layer.unshift(action.payload);
