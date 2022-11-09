@@ -56,6 +56,7 @@ function StringReplaceAt(str, index, replacement) {
 function DataTable() {
   // Provider
   const data = useSelector((state) => state.data.value);
+  const rowHeight = 32;
   const keys = [];
   if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
 
@@ -98,10 +99,12 @@ function DataTable() {
     return (
       <tr>
         {/** Make sure your table rows are the same height as what you passed into the list... */}
-        <td style={{ height: "36px" }}>Row {index}</td>
-        <td>Col 2</td>
-        <td>Col 3</td>
-        <td>Col 4</td>
+        <td style={{ fontWeight: "bold", color: "#495057" }}>{index}</td>
+        {keys.map((k, j) => (
+          <td style={{ height: rowHeight }} key={`td-${index}-${j}`}>
+            {data[index][k]}
+          </td>
+        ))}
       </tr>
     );
   }
@@ -117,7 +120,6 @@ function DataTable() {
         <Table
           fontSize="xs"
           striped
-          highlightOnHover
           style={{ top, position: "absolute", whiteSpace: "nowrap" }}
         >
           {header}
@@ -132,10 +134,11 @@ function DataTable() {
     <VirtualTable
       height={760}
       itemCount={data.length}
-      itemSize={36}
+      itemSize={rowHeight}
       header={
         <thead>
           <tr>
+            <th></th>
             {keys.map((k, i) => (
               <th key={`th-${i}`}>{k}</th>
             ))}
@@ -706,7 +709,7 @@ export default function Import() {
             </ActionIcon>
           </Tooltip>
         </Group>
-        <Paper shadow="xs" p="md" withBorder>
+        <Paper shadow="xs" p={data.length ? 0 : "md"} withBorder>
           {data.length ? (
             <DataTable />
           ) : (
