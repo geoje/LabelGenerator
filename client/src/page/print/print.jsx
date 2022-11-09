@@ -11,10 +11,9 @@ import {
 } from "@mantine/core";
 import { IconFile3d, IconPrinter } from "@tabler/icons";
 import { QRCodeSVG } from "qrcode.react";
-import { createRef, forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
-import ReactToPrint from "react-to-print";
 import { TYPE, convertLayout } from "../design/design";
 import { setFormat } from "./copySlice";
 
@@ -148,6 +147,7 @@ function Canvas(props) {
         boxSizing: "content-box",
         background: "#fff",
       }}
+      withBorder
       radius={0}
       style={props.style}
       key={props.key}
@@ -162,62 +162,26 @@ const Preview = forwardRef((props, ref) => {
   const format = useSelector((state) => state.copy.format);
   const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
 
-  const refCanvas = [];
-
-  const pageStyle = `
-  @media print {
-    .pv-wrap { border: none !important; }
-    .pv-wrap > div { display: block !important; border: none !important; page-break-before: always; }
-  }
-`;
-
   const Row = ({ index, style }) => {
     const qty =
       format && Number(data[index][format]) ? Number(data[index][format]) : 1;
-    const extraCanvas = Array.from({ length: qty - 1 }).map((_, j) => (
-      <Canvas
-        page={index}
-        style={{ display: "none" }}
-        key={`preview-${index}-${j}`}
-      />
-    ));
 
     return (
-      <Group
-        className="pv"
-        position="center"
-        key={`preview-${index}`}
-        p={2}
-        style={style}
-      >
-        <div className="pv-tool" style={{ width: 50 }}>
+      <Group position="center" key={`preview-${index}`} style={style}>
+        <div style={{ width: 50 }}>
           <Badge variant="filled" color="gray" fullWidth>
             {index}
           </Badge>
         </div>
-        <div
-          ref={(el) => (refCanvas[index] = el)}
-          className="pv-wrap"
-          style={{ border: "1px solid #dee2e6" }}
-        >
-          <Canvas page={index} />
-          {qty >= 2 && extraCanvas}
-        </div>
-        <Stack className="pv-tool" spacing={0}>
+        <Canvas page={index} />
+        <Stack align="center" spacing={0}>
           <Badge variant="outline" color="gray" size="xs">
             {qty}
           </Badge>
-          <ReactToPrint
-            trigger={() => {
-              return (
-                <ActionIcon>
-                  <IconPrinter />
-                </ActionIcon>
-              );
-            }}
-            content={() => refCanvas[index]}
-            pageStyle={pageStyle}
-          />
+
+          <ActionIcon onClick={() => {}}>
+            <IconPrinter />
+          </ActionIcon>
         </Stack>
       </Group>
     );
@@ -243,20 +207,12 @@ export default function Print() {
   const data = useSelector((state) => state.data.value);
   const format = useSelector((state) => state.copy.format);
 
-  const refPreview = createRef();
-  const pageStyle = `
-  @media print {
-    .pv { padding: 0 !important; page-break-before: always; }
-    .pv-tool { display: none !important; }
-    .pv-wrap { border: none !important; }
-    .pv-wrap > div { display: block !important; border: none !important; page-break-before: always; }
-  }
-`;
+  const [qty, setQty] = useState(data.length);
 
   return (
     <Grid m={0} p="sm" pt="xl">
       <Grid.Col md={4} orderMd={1}>
-        <Stack pt="xl" align="center" spacing="xl">
+        <Stack pt="xl" align="center" spacing="xs">
           <Select
             size="xs"
             placeholder="Copies from column"
@@ -265,28 +221,36 @@ export default function Print() {
               return { value: s, label: s };
             })}
             value={format}
-            onChange={(value) => dispatch(setFormat(value))}
-          />
-          <ReactToPrint
-            trigger={() => {
-              return (
-                <ActionIcon
-                  size={128}
-                  variant="filled"
-                  radius="md"
-                  onClick={() => {}}
-                >
-                  <IconFile3d size={128} />
-                </ActionIcon>
+            onChange={(value) => {
+              dispatch(setFormat(value));
+
+              if (!value) {
+                setQty(data.length);
+                return;
+              }
+              const totalCount = data.reduce(
+                (acc, o) => acc + Number(o[value]),
+                0
               );
+              setQty(totalCount ? totalCount : 0);
             }}
-            content={() => refPreview.current}
-            pageStyle={pageStyle}
           />
+
+          <Badge variant="outline" color="gray" size="xs" mt="md">
+            {qty}
+          </Badge>
+          <ActionIcon
+            size={128}
+            variant="filled"
+            radius="md"
+            onClick={() => {}}
+          >
+            <IconFile3d size={128} />
+          </ActionIcon>
         </Stack>
       </Grid.Col>
       <Grid.Col md={8} orderMd={0}>
-        <Preview ref={refPreview} />
+        <Preview />
       </Grid.Col>
     </Grid>
   );
