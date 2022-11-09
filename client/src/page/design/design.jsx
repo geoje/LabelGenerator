@@ -58,6 +58,7 @@ import {
   IconBorderOuter,
   IconLayout2,
   IconExternalLink,
+  IconFile,
 } from "@tabler/icons";
 import {
   setLayout,
@@ -621,6 +622,11 @@ function Tool() {
 
   return (
     <Group position="center" spacing="xs">
+      <Tooltip label="New Canvas" withArrow>
+        <ActionIcon variant="subtle" onClick={() => dispatch(setLayer([]))}>
+          <IconFile />
+        </ActionIcon>
+      </Tooltip>
       <FileButton
         sx={() => {
           return { width: 28, height: 28 };
@@ -1165,6 +1171,11 @@ export function Canvas() {
 
     const onKeyDown = (event) => {
       if (selected === -1) return;
+
+      if (event.key === "Delete") {
+        dispatch(removeLayerByIndex(selected));
+        return;
+      }
 
       const l = layer[selected];
       let d = {
