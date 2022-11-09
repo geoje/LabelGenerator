@@ -6,8 +6,6 @@ import {
   useMantineTheme,
   Button,
   MultiSelect,
-  Table,
-  ScrollArea,
   Box,
   CloseButton,
   Stack,
@@ -18,6 +16,7 @@ import {
   JsonInput,
   FileButton,
   Tooltip,
+  Table,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
@@ -35,17 +34,12 @@ import {
   IconDeviceFloppy,
 } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
-import { useState } from "react";
+import { useState, useRef, forwardRef, createContext, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { QRCodeSVG } from "qrcode.react";
 import * as XLSX from "xlsx";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { saveAs } from "file-saver";
+import { FixedSizeList } from "react-window";
 import { set as setData } from "./dataSlice";
 import { setFormat, setCustom, setSelected } from "./qrSlice";
 import { Pagenation } from "../design/design";
@@ -65,54 +59,92 @@ function DataTable() {
   const keys = [];
   if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
 
-  const columnHelper = createColumnHelper();
-  const columns = keys.map((k) =>
-    columnHelper.accessor(k, {
-      cell: (info) => info.getValue(),
-    })
-  );
+  /** Context for cross component communication */
+  const VirtualTableContext = createContext({
+    top: 0,
+    setTop: (value) => {},
+    header: <></>,
+    footer: <></>,
+  });
+  /** The virtual table. It basically accepts all of the same params as the original FixedSizeList.*/
+  function VirtualTable({ row, header, footer, ...rest }) {
+    const listRef = useRef();
+    const [top, setTop] = useState(0);
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
+    return (
+      <VirtualTableContext.Provider value={{ top, setTop, header, footer }}>
+        <FixedSizeList
+          {...rest}
+          innerElementType={Inner}
+          onItemsRendered={(props) => {
+            const style =
+              listRef.current &&
+              // @ts-ignore private method access
+              listRef.current._getItemStyle(props.overscanStartIndex);
+            setTop((style && style.top) || 0);
+
+            // Call the original callback
+            rest.onItemsRendered && rest.onItemsRendered(props);
+          }}
+          ref={(el) => (listRef.current = el)}
+        >
+          {row}
+        </FixedSizeList>
+      </VirtualTableContext.Provider>
+    );
+  }
+  /** The Row component. This should be a table row, and noted that we don't use the style that regular `react-window` examples pass in.*/
+  function Row({ index }) {
+    return (
+      <tr>
+        {/** Make sure your table rows are the same height as what you passed into the list... */}
+        <td style={{ height: "36px" }}>Row {index}</td>
+        <td>Col 2</td>
+        <td>Col 3</td>
+        <td>Col 4</td>
+      </tr>
+    );
+  }
+  /**
+   * The Inner component of the virtual list. This is the "Magic".
+   * Capture what would have been the top elements position and apply it to the table.
+   * Other than that, render an optional header and footer.
+   **/
+  const Inner = forwardRef(function Inner({ children, ...rest }, ref) {
+    const { header, footer, top } = useContext(VirtualTableContext);
+    return (
+      <div {...rest} ref={ref}>
+        <Table
+          fontSize="xs"
+          striped
+          highlightOnHover
+          style={{ top, position: "absolute", whiteSpace: "nowrap" }}
+        >
+          {header}
+          <tbody>{children}</tbody>
+          {footer}
+        </Table>
+      </div>
+    );
   });
 
   return (
-    <Table
-      fontSize="xs"
-      striped
-      highlightOnHover
-      style={{ whiteSpace: "nowrap" }}
-    >
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-              </th>
+    <VirtualTable
+      height={760}
+      itemCount={data.length}
+      itemSize={36}
+      header={
+        <thead>
+          <tr>
+            {keys.map((k, i) => (
+              <th key={`th-${i}`}>{k}</th>
             ))}
           </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+      }
+      row={Row}
+      footer={<></>}
+    />
   );
 }
 function FormatMultiSelect() {
@@ -676,9 +708,7 @@ export default function Import() {
         </Group>
         <Paper shadow="xs" p="md" withBorder>
           {data.length ? (
-            <ScrollArea style={{ height: 760 }}>
-              <DataTable />
-            </ScrollArea>
+            <DataTable />
           ) : (
             <>
               <Group position="center">
