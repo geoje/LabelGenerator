@@ -1939,9 +1939,7 @@ function Detail() {
                       border: value
                         ? {
                             style: value,
-                            width: layer[selected].border?.width
-                              ? layer[selected].border?.width
-                              : 1,
+                            width: layer[selected].border?.width ?? 1,
                             color: layer[selected].border?.color,
                           }
                         : {},

@@ -248,7 +248,7 @@ function Preview() {
           <Canvas page={index} />
         </div>
         <Tooltip
-          position="left"
+          position="right"
           withArrow
           multiline
           label={
