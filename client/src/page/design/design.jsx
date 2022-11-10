@@ -297,6 +297,7 @@ function Variable() {
   const data = useSelector((state) => state.data.value);
   const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
+  const page = useSelector((state) => state.draw.page);
   const selected = useSelector((state) => state.draw.selected);
 
   if (selected === -1) return <></>;
@@ -358,6 +359,8 @@ function Variable() {
       </div>
     );
   };
+
+  console.log("var", layer[selected].var);
 
   switch (layer[selected].type) {
     case TYPE.text:
@@ -668,6 +671,7 @@ function Variable() {
       );
     case TYPE.bar:
     case TYPE.qr:
+      let createdLabel = {};
       return (
         <>
           <Title order={6} align="center">
@@ -675,8 +679,16 @@ function Variable() {
           </Title>
           <Divider my="sm" />
           <Stack>
-            <Paper px="xs" withBorder>
-              <Text size="xs">Here is sample text</Text>
+            <Paper px="xs" py={4} withBorder>
+              <Text size="xs" sx={{ wordBreak: "break-all" }}>
+                {layer[selected].var?.reduce(
+                  (str, o) =>
+                    `${str}${
+                      o.group === GROUP.DATA ? data[page][o.value] : o.label
+                    }`,
+                  ""
+                )}
+              </Text>
             </Paper>
             <MultiSelect
               size="xs"
@@ -704,44 +716,39 @@ function Variable() {
               valueComponent={valueComponent}
               getCreateLabel={(query) => `+ Create ${query}`}
               onCreate={(query) => {
-                console.log("onCreate", query);
                 const item = {
                   value: Math.random().toString(),
                   label: query,
                   group: GROUP.CONST,
                 };
 
-                dispatch(
-                  setLayerVar({
-                    index: selected,
-                    var: [...(layer[selected].var ?? []), item],
-                  })
-                );
+                // For quick access at onChange event
+                createdLabel[item.value] = item.label;
                 return item;
               }}
               onChange={(value) => {
-                console.log("onChange", value);
-
                 const keys = data ? Object.keys(data[0]) : [];
                 let constVars = layer[selected].var
-                  ? layer[selected].var.filter((v) => v.group === GROUP.CONST)
+                  ? layer[selected].var.filter((o) => o.group === GROUP.CONST)
                   : [];
 
                 dispatch(
                   setLayerVar({
                     index: selected,
                     var: value.map((v) => {
-                      // is Data
-                      if (keys.includes(v))
-                        return {
-                          value: v,
-                          label: v,
-                          group: GROUP.DATA,
-                        };
-
-                      // is Const
-                      const idx = constVars.findIndex((v) => v.label === v);
-                      return { ...constVars.splice(idx, 1)[0] };
+                      return keys.includes(v)
+                        ? { value: v, label: v, group: GROUP.DATA }
+                        : {
+                            value: v,
+                            label: createdLabel[v]
+                              ? createdLabel[v]
+                              : constVars.length
+                              ? constVars[
+                                  constVars.findIndex((o) => o.value === v)
+                                ].label
+                              : "",
+                            group: GROUP.CONST,
+                          };
                     }),
                   })
                 );
