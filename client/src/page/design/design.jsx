@@ -20,6 +20,9 @@ import {
   Image as ManImage,
   Loader,
   Center,
+  Box,
+  MultiSelect,
+  CloseButton,
 } from "@mantine/core";
 import {
   IconChevronLeft,
@@ -89,6 +92,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { QRCodeSVG } from "qrcode.react";
 import { saveAs } from "file-saver";
 import WebFont from "webfontloader";
+import { useDisclosure } from "@mantine/hooks";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
 export const TYPE = {
@@ -98,6 +102,10 @@ export const TYPE = {
   image: "image",
   bar: "bar",
   qr: "qr",
+};
+export const GROUP = {
+  DATA: "Data Header",
+  CONST: "Custom Created",
 };
 const DETAIL_ICON_SIZE = 14;
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
@@ -292,7 +300,72 @@ function Variable() {
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
 
+  const importHook = useDisclosure(false);
+  const openedImportFormat = importHook[0],
+    closeImportFormat = importHook[1].close,
+    toggleImportFormat = importHook[1].toggle;
+
   if (selected === -1) return <></>;
+
+  const valueComponent = ({
+    value,
+    label,
+    group,
+    onRemove,
+    classNames,
+    ...others
+  }) => {
+    return (
+      <div {...others}>
+        <Box
+          sx={(theme) => ({
+            display: "flex",
+            cursor: "default",
+            alignItems: "center",
+            color:
+              group === GROUP.DATA
+                ? theme.colorScheme === "dark"
+                  ? theme.colors.blue[1]
+                  : theme.colors.blue[8]
+                : theme.colorScheme === "dark"
+                ? theme.colors.dark[0]
+                : theme.colors.gray[7],
+            backgroundColor:
+              group === GROUP.DATA
+                ? theme.colorScheme === "dark"
+                  ? "rgba(24, 100, 171, 0.45)"
+                  : theme.colors.blue[0]
+                : theme.colorScheme === "dark"
+                ? theme.colors.dark[7]
+                : theme.colors.gray[1],
+            paddingLeft: 10,
+            borderRadius: 4,
+          })}
+        >
+          <Box sx={{ lineHeight: 1, fontSize: 12 }}>{label}</Box>
+          <CloseButton
+            onMouseDown={onRemove}
+            variant="transparent"
+            size={22}
+            iconSize={14}
+            tabIndex={-1}
+            sx={(theme) => ({
+              color:
+                group === GROUP.DATA
+                  ? theme.colorScheme === "dark"
+                    ? theme.colors.blue[1]
+                    : theme.colors.blue[8]
+                  : theme.colorScheme === "dark"
+                  ? theme.colors.dark[0]
+                  : theme.colors.gray[7],
+            })}
+          />
+        </Box>
+      </div>
+    );
+  };
+
+  console.log(layer[selected].var);
 
   switch (layer[selected].type) {
     case TYPE.text:
@@ -609,34 +682,77 @@ function Variable() {
             Variable
           </Title>
           <Divider my="sm" />
-          <Paper withBorder>Here is sample text</Paper>
-          <Select
-            placeholder="Data Column"
-            size="xs"
-            clearable
-            transitionDuration={100}
-            transition="pop-top-left"
-            transitionTimingFunction="ease"
-            icon={<IconVariable size={DETAIL_ICON_SIZE} />}
-            data={Object.keys(data.length ? data[0] : []).map((s) => {
-              return { value: s, label: s };
-            })}
-            value={layer[selected].var?.format}
-            onChange={(value) => {
-              let img = {};
-              if (value)
-                new Set(data.map((o) => o[value])).forEach(
-                  (v) => (img[v] = "")
-                );
-
-              dispatch(
-                setLayerVar({
-                  index: selected,
-                  var: { ...layer[selected].var, format: value, img },
+          <Stack>
+            <Paper px="xs" withBorder>
+              <Text size="xs">Here is sample text</Text>
+            </Paper>
+            <MultiSelect
+              size="xs"
+              placeholder="Select items or create contstant"
+              searchable
+              creatable
+              clearable
+              maxDropdownHeight={400}
+              transitionDuration={100}
+              transition="pop-top-left"
+              transitionTimingFunction="ease"
+              data={Object.keys(data.length ? data[0] : {})
+                .map((v) => {
+                  return { value: v, label: v, group: GROUP.DATA };
                 })
-              );
-            }}
-          />
+                .concat(
+                  layer[selected].var?.filter((v) => v.group === GROUP.CONST) ??
+                    []
+                )}
+              value={
+                layer[selected].var
+                  ? layer[selected].var.map((v) => v.value)
+                  : []
+              }
+              valueComponent={valueComponent}
+              getCreateLabel={(query) => `+ Create ${query}`}
+              onCreate={(query) => {
+                const item = {
+                  value: Math.random().toString(),
+                  label: query,
+                  group: GROUP.CONST,
+                };
+
+                dispatch(
+                  setLayerVar({
+                    index: selected,
+                    var: [...(layer[selected].var ?? []), item],
+                  })
+                );
+                return item;
+              }}
+              onChange={(value) => {
+                const keys = data ? Object.keys(data[0]) : [];
+                let constVars = layer[selected].var
+                  ? layer[selected].var.filter((v) => v.group === GROUP.CONST)
+                  : [];
+
+                dispatch(
+                  setLayerVar({
+                    index: selected,
+                    var: value.map((v) => {
+                      // is Data
+                      if (keys.includes(v))
+                        return {
+                          value: v,
+                          label: v,
+                          group: GROUP.DATA,
+                        };
+
+                      // is Const
+                      const idx = constVars.findIndex((v) => v.label === v);
+                      return { ...constVars.splice(idx, 1)[0] };
+                    }),
+                  })
+                );
+              }}
+            />
+          </Stack>
         </>
       );
     default:

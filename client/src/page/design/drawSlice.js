@@ -14,7 +14,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    background: { value, format },
  *    var: { type: "", static: "", format: "" } // text
  *    var: { default: "", format:"", img: { [key]: [url] } } // image
- *    var: [ { value: "", const: false }, ... ]
+ *    var: [ { value: "0.3765313557327803", label: "|", group: GROUP.CONST }, ... ] // bar or qr
  * }, ...]
  *
  * selected: -1
