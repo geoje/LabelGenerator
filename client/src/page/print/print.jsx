@@ -492,7 +492,10 @@ function Control() {
             w.print();
           }}
         >
-          {data.map((v, i) =>
+          {(canFilter
+            ? data.filter((o) => o[filter.format] === filter.value)
+            : data
+          ).map((v, i) =>
             new Array(v[qtyFormat])
               .fill(0)
               .map((_, j) => <Canvas page={i} key={`canvas-${i}-${j}`} />)
