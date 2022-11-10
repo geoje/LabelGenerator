@@ -25,7 +25,7 @@ jobs:
           cache: "npm"
 
       - name: 📥 Install client modules
-        run: cd client && npm i --omit=dev
+        run: cd client && npm i --legacy-peer-deps --omit=dev
 
       - name: 🛠️ Build client
         run: cd client && npm run build
