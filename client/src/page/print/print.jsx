@@ -13,6 +13,7 @@ import {
   Button,
   Title,
   Tooltip,
+  Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconAlertTriangle, IconInfoCircle, IconPrinter } from "@tabler/icons";
@@ -252,13 +253,15 @@ function Preview() {
           multiline
           label={
             <>
-              <Title order={6} align="center">
+              <Title order={5} align="center">
                 {index}
               </Title>
+              <Divider my={4} />
               {Object.entries(data[index]).map(([k, v], j) => (
-                <Text size="xs" key={`tooltip-${index}-${j}`}>
-                  {k}: {v}
-                </Text>
+                <Group key={`tooltip-${index}-${j}`} spacing="xs">
+                  <Title order={6}>{k}</Title>
+                  <Text size="xs">{v}</Text>
+                </Group>
               ))}
             </>
           }

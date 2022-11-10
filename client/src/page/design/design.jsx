@@ -59,6 +59,7 @@ import {
   IconLayout2,
   IconExternalLink,
   IconFile,
+  IconBarcode,
 } from "@tabler/icons";
 import {
   setLayout,
@@ -627,6 +628,8 @@ function Tool() {
           <IconFile />
         </ActionIcon>
       </Tooltip>
+
+      <Divider orientation="vertical" />
       <FileButton
         sx={() => {
           return { width: 28, height: 28 };
@@ -930,7 +933,6 @@ function Tool() {
           <IconTypography />
         </ActionIcon>
       </Tooltip>
-
       <FileButton
         sx={() => {
           return { width: 28, height: 28 };
@@ -1000,7 +1002,20 @@ function Tool() {
           </Tooltip>
         )}
       </FileButton>
-
+      <Tooltip label="Bar Code" withArrow>
+        <ActionIcon
+          variant="subtle"
+          onClick={() =>
+            showNotification({
+              title: "Unsupported function",
+              message: "It will be developed soon!",
+              color: "yellow",
+            })
+          }
+        >
+          <IconBarcode />
+        </ActionIcon>
+      </Tooltip>
       <Tooltip label="QR Code" withArrow>
         <ActionIcon
           variant="subtle"
