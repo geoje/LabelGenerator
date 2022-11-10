@@ -92,7 +92,6 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { QRCodeSVG } from "qrcode.react";
 import { saveAs } from "file-saver";
 import WebFont from "webfontloader";
-import { useDisclosure } from "@mantine/hooks";
 
 const UNIT = { inch: "inch", cm: "cm", px: "px" };
 export const TYPE = {
@@ -300,11 +299,6 @@ function Variable() {
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
 
-  const importHook = useDisclosure(false);
-  const openedImportFormat = importHook[0],
-    closeImportFormat = importHook[1].close,
-    toggleImportFormat = importHook[1].toggle;
-
   if (selected === -1) return <></>;
 
   const valueComponent = ({
@@ -364,8 +358,6 @@ function Variable() {
       </div>
     );
   };
-
-  console.log(layer[selected].var);
 
   switch (layer[selected].type) {
     case TYPE.text:
@@ -712,6 +704,7 @@ function Variable() {
               valueComponent={valueComponent}
               getCreateLabel={(query) => `+ Create ${query}`}
               onCreate={(query) => {
+                console.log("onCreate", query);
                 const item = {
                   value: Math.random().toString(),
                   label: query,
@@ -727,6 +720,8 @@ function Variable() {
                 return item;
               }}
               onChange={(value) => {
+                console.log("onChange", value);
+
                 const keys = data ? Object.keys(data[0]) : [];
                 let constVars = layer[selected].var
                   ? layer[selected].var.filter((v) => v.group === GROUP.CONST)
