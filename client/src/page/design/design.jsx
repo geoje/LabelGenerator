@@ -679,13 +679,15 @@ function Variable() {
           <Stack>
             <Paper px="xs" py={4} withBorder>
               <Text size="xs" sx={{ wordBreak: "break-all" }}>
-                {layer[selected].var?.reduce(
-                  (str, o) =>
-                    `${str}${
-                      o.group === GROUP.DATA ? data[page][o.value] : o.label
-                    }`,
-                  ""
-                )}
+                {data && layer[selected].var
+                  ? layer[selected].var.reduce(
+                      (str, o) =>
+                        `${str}${
+                          o.group === GROUP.DATA ? data[page][o.value] : o.label
+                        }`,
+                      ""
+                    )
+                  : ""}
               </Text>
             </Paper>
             <MultiSelect
@@ -1199,7 +1201,6 @@ export function Canvas() {
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
   const page = useSelector((state) => state.draw.page);
-  const format = useSelector((state) => state.qr.format);
   const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
   let selected = useSelector((state) => state.draw.selected);
@@ -1471,14 +1472,14 @@ export function Canvas() {
             <QRCodeSVG
               size={item.size.w * layoutPx.ratio}
               value={
-                data.length
-                  ? format
-                      .filter(
-                        (o) =>
-                          o.literal || Object.keys(data[0]).includes(o.value)
-                      )
-                      .map((o) => (o.literal ? o.value : data[page][o.value]))
-                      .join("")
+                data && item.var
+                  ? item.var.reduce(
+                      (str, o) =>
+                        `${str}${
+                          o.group === GROUP.DATA ? data[page][o.value] : o.label
+                        }`,
+                      ""
+                    )
                   : ""
               }
             />

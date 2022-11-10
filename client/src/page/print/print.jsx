@@ -22,7 +22,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { TYPE, convertLayout } from "../design/design";
+import { TYPE, GROUP, convertLayout } from "../design/design";
 import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
@@ -32,7 +32,6 @@ const MAX_COUNT = 10000;
 function Canvas(props) {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const format = useSelector((state) => state.qr.format);
   const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
   const layer = useSelector((state) => state.draw.layer);
 
@@ -111,16 +110,16 @@ function Canvas(props) {
             <QRCodeSVG
               size={item.size.w}
               value={
-                data.length
-                  ? format
-                      .filter(
-                        (o) =>
-                          o.literal || Object.keys(data[0]).includes(o.value)
-                      )
-                      .map((o) =>
-                        o.literal ? o.value : data[props.page][o.value]
-                      )
-                      .join("")
+                data && item.var
+                  ? item.var.reduce(
+                      (str, o) =>
+                        `${str}${
+                          o.group === GROUP.DATA
+                            ? data[props.page][o.value]
+                            : o.label
+                        }`,
+                      ""
+                    )
                   : ""
               }
             />
