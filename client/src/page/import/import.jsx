@@ -536,9 +536,9 @@ function QRCodePaper() {
   return (
     <>
       <Group
-        py={2}
         spacing={0}
         sx={(theme) => ({
+          height: 28,
           color:
             theme.colorScheme === "dark"
               ? theme.colors.dark[0]
@@ -670,6 +670,7 @@ export default function Import() {
         <Group
           spacing={0}
           sx={(theme) => ({
+            height: 28,
             color:
               theme.colorScheme === "dark"
                 ? theme.colors.dark[0]
@@ -681,33 +682,35 @@ export default function Import() {
             Import Data
           </Title>
 
-          <Tooltip label="Clear" withArrow>
-            <ActionIcon
-              variant="subtle"
-              onClick={() => {
-                if (data.length) {
-                  dispatch(setData([]));
-                  setWorkbook(null);
+          {data.length && (
+            <Tooltip label="Clear" withArrow>
+              <ActionIcon
+                variant="subtle"
+                onClick={() => {
+                  if (data.length) {
+                    dispatch(setData([]));
+                    setWorkbook(null);
 
-                  showNotification({
-                    title: "Deleted",
-                    message: "Data deleted successfully",
-                    color: "green",
-                  });
-                } else if (workbook) {
-                  setWorkbook(null);
+                    showNotification({
+                      title: "Deleted",
+                      message: "Data deleted successfully",
+                      color: "green",
+                    });
+                  } else if (workbook) {
+                    setWorkbook(null);
 
-                  showNotification({
-                    title: "Deleted",
-                    message: "Workbook deleted successfully",
-                    color: "green",
-                  });
-                }
-              }}
-            >
-              <IconTrash />
-            </ActionIcon>
-          </Tooltip>
+                    showNotification({
+                      title: "Deleted",
+                      message: "Workbook deleted successfully",
+                      color: "green",
+                    });
+                  }
+                }}
+              >
+                <IconTrash />
+              </ActionIcon>
+            </Tooltip>
+          )}
         </Group>
         <Paper shadow="xs" p={data.length ? 0 : "md"} withBorder>
           {data.length ? (
