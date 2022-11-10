@@ -197,7 +197,7 @@ function PrintModal(props) {
         that recommended.
       </Text>
       <Text>
-        Although The browser may freeze, you can print after waiting for
+        It causes the browser to freeze, but you can print after waiting for
         rendering.
       </Text>
       <Text mt="xs">Are you still going to proceed?</Text>
