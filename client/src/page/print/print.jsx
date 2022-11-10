@@ -492,14 +492,21 @@ function Control() {
             w.print();
           }}
         >
-          {(canFilter
-            ? data.filter((o) => o[filter.format] === filter.value)
-            : data
-          ).map((v, i) =>
-            new Array(v[qtyFormat])
-              .fill(0)
-              .map((_, j) => <Canvas page={i} key={`canvas-${i}-${j}`} />)
-          )}
+          {canFilter
+            ? data.map((o, i) =>
+                o[filter.format] === filter.value
+                  ? new Array(o[qtyFormat])
+                      .fill(0)
+                      .map((_, j) => (
+                        <Canvas page={i} key={`canvas-${i}-${j}`} />
+                      ))
+                  : []
+              )
+            : data.map((o, i) =>
+                new Array(o[qtyFormat])
+                  .fill(0)
+                  .map((_, j) => <Canvas page={i} key={`canvas-${i}-${j}`} />)
+              )}
         </NewWindow>
       )}
     </Stack>
