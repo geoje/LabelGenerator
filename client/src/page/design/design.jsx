@@ -360,8 +360,6 @@ function Variable() {
     );
   };
 
-  console.log("var", layer[selected].var);
-
   switch (layer[selected].type) {
     case TYPE.text:
       return (
