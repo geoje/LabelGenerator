@@ -14,6 +14,7 @@ import { createSlice } from "@reduxjs/toolkit";
  *    background: { value, format },
  *    var: { type: "", static: "", format: "" } // text
  *    var: { default: "", format:"", img: { [key]: [url] } } // image
+ *    var: [ { value: "", const: false }, ... ]
  * }, ...]
  *
  * selected: -1
