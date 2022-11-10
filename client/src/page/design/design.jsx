@@ -96,6 +96,7 @@ export const TYPE = {
   circle: "circle",
   text: "text",
   image: "image",
+  bar: "bar",
   qr: "qr",
 };
 const DETAIL_ICON_SIZE = 14;
@@ -598,6 +599,44 @@ function Variable() {
               </Grid.Col>
             )}
           </Grid>
+        </>
+      );
+    case TYPE.bar:
+    case TYPE.qr:
+      return (
+        <>
+          <Title order={6} align="center">
+            Variable
+          </Title>
+          <Divider my="sm" />
+          <Paper withBorder>Here is sample text</Paper>
+          <Select
+            placeholder="Data Column"
+            size="xs"
+            clearable
+            transitionDuration={100}
+            transition="pop-top-left"
+            transitionTimingFunction="ease"
+            icon={<IconVariable size={DETAIL_ICON_SIZE} />}
+            data={Object.keys(data.length ? data[0] : []).map((s) => {
+              return { value: s, label: s };
+            })}
+            value={layer[selected].var?.format}
+            onChange={(value) => {
+              let img = {};
+              if (value)
+                new Set(data.map((o) => o[value])).forEach(
+                  (v) => (img[v] = "")
+                );
+
+              dispatch(
+                setLayerVar({
+                  index: selected,
+                  var: { ...layer[selected].var, format: value, img },
+                })
+              );
+            }}
+          />
         </>
       );
     default:
