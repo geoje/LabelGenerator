@@ -273,6 +273,7 @@ function LayoutSize() {
         <Slider
           label={(val) => (1 + val) * 100 + "%"}
           defaultValue={0}
+          value={layout.ratio - 1}
           min={0}
           max={2}
           step={0.5}
@@ -638,14 +639,10 @@ function Variable() {
                       result.findIndex(
                         (o2) => o1.value === o2.value && o1.group === o2.group
                       ) < 0
-                  )
+                  ) ?? []
                 );
               })()}
-              value={
-                layer[selected].var
-                  ? layer[selected].var.map((v) => v.value)
-                  : []
-              }
+              value={layer[selected].var?.map((v) => v.value) ?? []}
               valueComponent={valueComponent}
               getCreateLabel={(query) => `+ Create ${query}`}
               onCreate={(query) => {
@@ -1361,7 +1358,6 @@ export function Canvas() {
 
     // layer.var to string
     const getFormattedValue = () => {
-      console.log(item);
       return item.var
         ? item.var.reduce(
             (str, o) =>

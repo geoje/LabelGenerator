@@ -241,19 +241,26 @@ function Preview() {
     data.forEach((o, i) => {
       if (o[filter.format] === filter.value) filteredIndexMap.push(i);
     });
+  const lastIndex =
+    filteredIndexMap[filteredIndexMap.length - 1] ?? data.length;
+
   const Row = ({ index, style }) => {
     if (isFiltered) index = filteredIndexMap[index];
 
     const qty =
       qtyFormat && Number(data[index][qtyFormat])
-        ? Number(data[index][qtyFormat])
+        ? Math.floor(Number(data[index][qtyFormat]))
         : 1;
 
     return (
       <Group position="center" key={`preview-${index}`} style={style}>
-        <div style={{ width: 50 }}>
+        <div
+          style={{
+            width: 46 + 6 * (String(lastIndex).match(/\d/g) ?? []).length,
+          }}
+        >
           <Badge variant="filled" color="gray" fullWidth>
-            {index}
+            # {index}
           </Badge>
         </div>
         <div style={{ border: "1px solid rgb(222, 226, 230)" }}>
@@ -377,19 +384,25 @@ function Control() {
   const data = useSelector((state) => state.data.value);
   const qtyFormat = useSelector((state) => state.copy.qtyFormat);
   const filter = useSelector((state) => state.copy.filter);
-  const canFilter = filter.format && filter.value;
 
   const [reqPrint, setReqPrint] = useState(false);
   const [opened, { close, open }] = useDisclosure(false);
 
+  const canFilter = filter.format && filter.value;
   let qty = (
     canFilter ? data.filter((o) => o[filter.format] === filter.value) : data
-  ).reduce((acc, o) => acc + (qtyFormat ? Number(o[qtyFormat]) : 1), 0);
-  if (!qty) qty = 0;
+  ).reduce(
+    (acc, o) =>
+      acc +
+      (qtyFormat && Number(o[qtyFormat])
+        ? Math.floor(Number(o[qtyFormat]))
+        : 1),
+    0
+  );
 
   return (
     <Stack pt="xl" align="center" spacing="xs">
-      <Group>
+      <Group noWrap>
         <Select
           size="xs"
           placeholder="Filter Column"
