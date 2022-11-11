@@ -54,11 +54,15 @@ function Canvas(props) {
 
     // layer.var to string
     const getFormattedValue = () => {
-      return data && item.var
+      return item.var
         ? item.var.reduce(
             (str, o) =>
               `${str}${
-                o.group === GROUP.DATA ? data[props.page][o.value] : o.label
+                o.group === GROUP.DATA &&
+                data[props.page] &&
+                o.value in data[props.page]
+                  ? data[props.page][o.value]
+                  : o.label
               }`,
             ""
           )

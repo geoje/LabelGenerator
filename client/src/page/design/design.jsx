@@ -604,7 +604,7 @@ function Variable() {
           <Stack>
             <Paper px="xs" py={4} withBorder>
               <Text size="xs" sx={{ wordBreak: "break-all" }}>
-                {data && layer[selected].var
+                {data.length && layer[selected].var
                   ? layer[selected].var.reduce(
                       (str, o) =>
                         `${str}${
@@ -626,10 +626,14 @@ function Variable() {
               transition="pop-top-left"
               transitionTimingFunction="ease"
               data={Object.keys(data.length ? data[0] : {})
+
                 .map((v) => {
+                  // Add data columns
                   return { value: v, label: v, group: GROUP.DATA };
                 })
+
                 .concat(
+                  // Add const
                   layer[selected].var?.filter((v) => v.group === GROUP.CONST) ??
                     []
                 )}
@@ -1352,10 +1356,14 @@ export function Canvas() {
 
     // layer.var to string
     const getFormattedValue = () => {
-      return data && item.var
+      return item.var
         ? item.var.reduce(
             (str, o) =>
-              `${str}${o.group === GROUP.DATA ? data[page][o.value] : o.label}`,
+              `${str}${
+                o.group === GROUP.DATA && data[page] && o.value in data[page]
+                  ? data[page][o.value]
+                  : o.label
+              }`,
             ""
           )
         : "";
