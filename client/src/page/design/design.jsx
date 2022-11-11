@@ -1176,7 +1176,7 @@ export function Canvas() {
 
       return {
         ...layer[selected].size,
-        w: textElement ? textElement.offsetWidth : 0,
+        w: textElement ? textElement.offsetWidth / layoutPx.ratio : 0,
       };
     } else if (layer[selected].type === TYPE.qr) {
       return {
@@ -1433,11 +1433,12 @@ export function Canvas() {
           >
             <Barcode
               value={value ? value : " "}
-              width={layoutPx.ratio}
               displayValue={false}
-              height={item.size.h}
+              height={item.size.h * layoutPx.ratio}
+              width={(item.border?.width ?? 1) * layoutPx.ratio}
               margin={0}
-              background="transparent"
+              background={item.background?.value ?? "transparent"}
+              lineColor={item.border?.color?.value ?? "#000"}
             />
           </div>
         );
@@ -2120,7 +2121,7 @@ function Detail() {
             </Stack>
           </Grid.Col>
         )}
-        {layer[selected].type === TYPE.text && (
+        {[TYPE.text].includes(layer[selected].type) && (
           <Grid.Col md={4}>
             <Center pb="md">
               <IconTypography size={48} color="gray" />
