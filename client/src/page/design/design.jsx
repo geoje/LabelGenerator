@@ -126,7 +126,7 @@ export function Pagenation() {
         defaultValue={0}
         value={page}
         min={0}
-        max={data.length}
+        max={data.length - 1}
         step={1}
         marks={[
           {

@@ -5,8 +5,15 @@ import {
   Tooltip,
   FileButton,
   Button,
+  Title,
+  Text,
 } from "@mantine/core";
-import { IconDeviceFloppy, IconFolder, IconFile } from "@tabler/icons";
+import {
+  IconDeviceFloppy,
+  IconFolder,
+  IconFile,
+  IconInfoCircle,
+} from "@tabler/icons";
 import {
   TYPE,
   GROUP,
@@ -52,11 +59,15 @@ const extToMime = {
 export function Tool() {
   // Provider
   const dispatch = useDispatch();
+  const data = useSelector((state) => state.data.value);
   const layout = useSelector((state) => state.draw.layout);
   const layoutPx = convertLayout.px(layout);
   const layer = useSelector((state) => state.draw.layer);
+  const page = useSelector((state) => state.draw.page);
 
   let [layerCount, setLayerCount] = useState(1);
+  const [openedInfo, setOpenedInfo] = useState(false);
+
   const prediectLayerName = (o) => o.name === "layer" + layerCount;
   const getNextLayerName = () => {
     while (layer.some(prediectLayerName)) layerCount++;
@@ -489,6 +500,43 @@ export function Tool() {
           }
         >
           {typeToIcon(TYPE.qr)}
+        </ActionIcon>
+      </Tooltip>
+
+      <Divider orientation="vertical" />
+      <Tooltip
+        styles={(theme) => {
+          return {
+            tooltip: {
+              backgroundColor:
+                theme.colorScheme === "dark"
+                  ? "rgba(37, 38, 43, 0.8)"
+                  : "rgba(33, 37, 41, 0.8)",
+            },
+          };
+        }}
+        position="right"
+        withArrow
+        multiline
+        opened={openedInfo}
+        label={
+          <>
+            <Title order={5} align="center">
+              # {page}
+            </Title>
+            <Divider my={4} />
+            {data[page] &&
+              Object.entries(data[page]).map(([k, v], j) => (
+                <Group key={`tooltip-${page}-${j}`} spacing="xs">
+                  <Title order={6}>{k}</Title>
+                  <Text size="xs">{v}</Text>
+                </Group>
+              ))}
+          </>
+        }
+      >
+        <ActionIcon variant="subtle" onClick={() => setOpenedInfo((b) => !b)}>
+          <IconInfoCircle />
         </ActionIcon>
       </Tooltip>
     </Group>

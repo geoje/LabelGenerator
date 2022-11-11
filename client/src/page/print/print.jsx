@@ -267,6 +267,16 @@ function Preview() {
           <Canvas page={index} />
         </div>
         <Tooltip
+          styles={(theme) => {
+            return {
+              tooltip: {
+                backgroundColor:
+                  theme.colorScheme === "dark"
+                    ? "rgba(37, 38, 43, 0.8)"
+                    : "rgba(33, 37, 41, 0.8)",
+              },
+            };
+          }}
           position="right"
           withArrow
           multiline
