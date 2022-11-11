@@ -363,7 +363,110 @@ function Variable() {
   };
 
   switch (layer[selected].type) {
+    case TYPE.text:
+    case TYPE.bar:
+    case TYPE.qr:
+      let createdLabel = {};
+      return (
+        <>
+          <Title order={6} align="center">
+            Variable
+          </Title>
+          <Divider my="sm" />
+          <Stack>
+            <Paper px="xs" py={4} withBorder>
+              <Text size="xs" sx={{ wordBreak: "break-all" }}>
+                {data[page] && layer[selected].var
+                  ? layer[selected].var.reduce(
+                      (str, o) =>
+                        `${str}${
+                          o.group === GROUP.DATA ? data[page][o.value] : o.label
+                        }`,
+                      ""
+                    )
+                  : ""}
+              </Text>
+            </Paper>
+            <MultiSelect
+              size="xs"
+              placeholder="Select items or create contstant"
+              searchable
+              creatable
+              clearable
+              maxDropdownHeight={400}
+              transitionDuration={100}
+              transition="pop-top-left"
+              transitionTimingFunction="ease"
+              data={(() => {
+                const result = Object.keys(data.length ? data[0] : {}).map(
+                  (v) => {
+                    return { value: v, label: v, group: GROUP.DATA };
+                  }
+                );
+
+                return result.concat(
+                  layer[selected].var?.filter(
+                    (o1) =>
+                      result.findIndex(
+                        (o2) => o1.value === o2.value && o1.group === o2.group
+                      ) < 0
+                  ) ?? []
+                );
+              })()}
+              value={layer[selected].var?.map((v) => v.value) ?? []}
+              valueComponent={valueComponent}
+              getCreateLabel={(query) => `+ Create ${query}`}
+              onCreate={(query) => {
+                const item = {
+                  value: Math.random().toString(),
+                  label: query,
+                  group: GROUP.CONST,
+                };
+
+                // For quick access at onChange event
+                createdLabel[item.value] = item.label;
+                return item;
+              }}
+              onChange={(value) => {
+                const keys = data.length ? Object.keys(data[0]) : [];
+                let constVars = layer[selected].var
+                  ? layer[selected].var.filter((o) => o.group === GROUP.CONST)
+                  : [];
+
+                dispatch(
+                  setLayerVar({
+                    index: selected,
+                    var: value.map((v) => {
+                      return keys.includes(v)
+                        ? { value: v, label: v, group: GROUP.DATA }
+                        : {
+                            value: v,
+                            label: createdLabel[v]
+                              ? createdLabel[v]
+                              : constVars.length
+                              ? constVars[
+                                  constVars.findIndex((o) => o.value === v)
+                                ].label
+                              : "",
+                            group: GROUP.CONST,
+                          };
+                    }),
+                  })
+                );
+              }}
+            />
+          </Stack>
+        </>
+      );
     case TYPE.image:
+      let keys = Object.keys(layer[selected].var.img);
+      if (layer[selected].var.format) {
+        const fm = layer[selected].var.format;
+        keys = [...new Set([...keys, ...data.map((o) => o[fm])])].filter(
+          (v) => v.length
+        );
+      }
+
       return (
         <>
           <Title order={6} align="center">
@@ -499,192 +602,92 @@ function Variable() {
             {layer[selected].var.img && (
               <Grid.Col>
                 <Grid>
-                  {Object.keys(layer[selected].var.img)
-                    .filter((k) => k !== "")
-                    .map((k) => (
-                      <Grid.Col key={`variable-${k}`} span={3} md={12} py={0}>
-                        <FileButton
-                          sx={(theme) => {
-                            return {
-                              width: "100%",
-                              background:
-                                theme.colorScheme === "dark"
-                                  ? "#2C2E33"
-                                  : "#fff",
-                            };
-                          }}
-                          accept="image/*"
-                          onChange={(file) => {
-                            // Empty
-                            if (!file) return;
+                  {keys.map((k) => (
+                    <Grid.Col key={`variable-${k}`} span={3} md={12} py={0}>
+                      <FileButton
+                        sx={(theme) => {
+                          return {
+                            width: "100%",
+                            background:
+                              theme.colorScheme === "dark" ? "#2C2E33" : "#fff",
+                          };
+                        }}
+                        accept="image/*"
+                        onChange={(file) => {
+                          // Empty
+                          if (!file) return;
 
-                            // No image type
-                            if (!file.type.startsWith("image/")) {
-                              showNotification({
-                                title: "Unsupported file type",
-                                message:
-                                  "File type must be one of (png, jpg, svg, ...)",
-                                color: "red",
-                              });
-                              return;
+                          // No image type
+                          if (!file.type.startsWith("image/")) {
+                            showNotification({
+                              title: "Unsupported file type",
+                              message:
+                                "File type must be one of (png, jpg, svg, ...)",
+                              color: "red",
+                            });
+                            return;
+                          }
+
+                          // Exceed file size
+                          if (file.size > MAX_FILE_SIZE) {
+                            showNotification({
+                              title: "Too large file",
+                              message: "File size exceed 5mb",
+                              color: "red",
+                            });
+                            return;
+                          }
+
+                          const url = URL.createObjectURL(file);
+                          const img = new Image();
+                          img.onload = () => {
+                            const varImg = { ...layer[selected].var.img };
+                            varImg[k] = url;
+                            dispatch(
+                              setLayerVarImg({
+                                index: selected,
+                                img: varImg,
+                              })
+                            );
+                          };
+                          img.src = url;
+                        }}
+                      >
+                        {(props) => (
+                          <Button
+                            compact
+                            size="xs"
+                            variant="outline"
+                            rightIcon={
+                              layer[selected].var.img[k] ? (
+                                <ManImage
+                                  height={DETAIL_ICON_SIZE}
+                                  src={layer[selected].var.img[k]}
+                                />
+                              ) : (
+                                <IconPhoto size={DETAIL_ICON_SIZE} />
+                              )
                             }
-
-                            // Exceed file size
-                            if (file.size > MAX_FILE_SIZE) {
-                              showNotification({
-                                title: "Too large file",
-                                message: "File size exceed 5mb",
-                                color: "red",
-                              });
-                              return;
-                            }
-
-                            const url = URL.createObjectURL(file);
-                            const img = new Image();
-                            img.onload = () => {
-                              const varImg = { ...layer[selected].var.img };
-                              varImg[k] = url;
-                              dispatch(
-                                setLayerVarImg({
-                                  index: selected,
-                                  img: varImg,
-                                })
-                              );
-                            };
-                            img.src = url;
-                          }}
-                        >
-                          {(props) => (
-                            <Button
-                              compact
-                              size="xs"
-                              variant="outline"
-                              rightIcon={
-                                layer[selected].var.img[k] ? (
-                                  <ManImage
-                                    height={DETAIL_ICON_SIZE}
-                                    src={layer[selected].var.img[k]}
-                                  />
-                                ) : (
-                                  <IconPhoto size={DETAIL_ICON_SIZE} />
-                                )
-                              }
-                              {...props}
-                              styles={() => ({
-                                root: {
-                                  fontWeight: 400,
-                                },
-                                rightIcon: {
-                                  marginLeft: "auto",
-                                },
-                              })}
-                            >
-                              {k}
-                            </Button>
-                          )}
-                        </FileButton>
-                      </Grid.Col>
-                    ))}
+                            {...props}
+                            styles={() => ({
+                              root: {
+                                fontWeight: 400,
+                              },
+                              rightIcon: {
+                                marginLeft: "auto",
+                              },
+                            })}
+                          >
+                            {k}
+                          </Button>
+                        )}
+                      </FileButton>
+                    </Grid.Col>
+                  ))}
                 </Grid>
               </Grid.Col>
             )}
           </Grid>
-        </>
-      );
-
-    case TYPE.text:
-    case TYPE.bar:
-    case TYPE.qr:
-      let createdLabel = {};
-      return (
-        <>
-          <Title order={6} align="center">
-            Variable
-          </Title>
-          <Divider my="sm" />
-          <Stack>
-            <Paper px="xs" py={4} withBorder>
-              <Text size="xs" sx={{ wordBreak: "break-all" }}>
-                {data[page] && layer[selected].var
-                  ? layer[selected].var.reduce(
-                      (str, o) =>
-                        `${str}${
-                          o.group === GROUP.DATA ? data[page][o.value] : o.label
-                        }`,
-                      ""
-                    )
-                  : ""}
-              </Text>
-            </Paper>
-            <MultiSelect
-              size="xs"
-              placeholder="Select items or create contstant"
-              searchable
-              creatable
-              clearable
-              maxDropdownHeight={400}
-              transitionDuration={100}
-              transition="pop-top-left"
-              transitionTimingFunction="ease"
-              data={(() => {
-                const result = Object.keys(data.length ? data[0] : {}).map(
-                  (v) => {
-                    return { value: v, label: v, group: GROUP.DATA };
-                  }
-                );
-
-                return result.concat(
-                  layer[selected].var?.filter(
-                    (o1) =>
-                      result.findIndex(
-                        (o2) => o1.value === o2.value && o1.group === o2.group
-                      ) < 0
-                  ) ?? []
-                );
-              })()}
-              value={layer[selected].var?.map((v) => v.value) ?? []}
-              valueComponent={valueComponent}
-              getCreateLabel={(query) => `+ Create ${query}`}
-              onCreate={(query) => {
-                const item = {
-                  value: Math.random().toString(),
-                  label: query,
-                  group: GROUP.CONST,
-                };
-
-                // For quick access at onChange event
-                createdLabel[item.value] = item.label;
-                return item;
-              }}
-              onChange={(value) => {
-                const keys = data.length ? Object.keys(data[0]) : [];
-                let constVars = layer[selected].var
-                  ? layer[selected].var.filter((o) => o.group === GROUP.CONST)
-                  : [];
-
-                dispatch(
-                  setLayerVar({
-                    index: selected,
-                    var: value.map((v) => {
-                      return keys.includes(v)
-                        ? { value: v, label: v, group: GROUP.DATA }
-                        : {
-                            value: v,
-                            label: createdLabel[v]
-                              ? createdLabel[v]
-                              : constVars.length
-                              ? constVars[
-                                  constVars.findIndex((o) => o.value === v)
-                                ].label
-                              : "",
-                            group: GROUP.CONST,
-                          };
-                    }),
-                  })
-                );
-              }}
-            />
-          </Stack>
         </>
       );
     default:
