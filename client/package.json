@@ -1,7 +1,10 @@
 {
   "name": "client",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@mantine/core": "^5.7.1",
@@ -10,7 +13,7 @@
     "@mantine/hooks": "^5.7.1",
     "@mantine/notifications": "^5.7.1",
     "@reduxjs/toolkit": "^1.9.0",
-    "@tabler/icons": "^1.110.0",
+    "@tabler/icons": "^1.111.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "qrcode.react": "^3.1.0",
@@ -28,10 +31,6 @@
   },
   "devDependencies": {
     "http-proxy-middleware": "^2.0.6"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [
