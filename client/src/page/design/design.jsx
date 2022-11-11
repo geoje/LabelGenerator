@@ -1,15 +1,13 @@
 import {
   Grid,
-  Group,
   NumberInput,
   Stack,
-  ActionIcon,
   Select,
   Divider,
   Title,
   Slider,
 } from "@mantine/core";
-import { IconChevronLeft, IconChevronRight, IconRuler3 } from "@tabler/icons";
+import { IconRuler3 } from "@tabler/icons";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -116,55 +114,37 @@ export function Pagenation() {
   const data = useSelector((state) => state.data.value);
   const page = useSelector((state) => state.draw.page);
 
+  const qLength = data.length / 4;
+
   return (
-    <Group spacing={5} position="center">
-      <ActionIcon
-        size={36}
-        variant="filled"
+    <>
+      <Slider
+        size="xs"
+        style={{ maxWidth: "100%", width: data.length }}
+        label={"# " + page}
         disabled={!data.length}
-        onClick={() =>
-          dispatch(setPage(Math.min(Math.max(0, page - 1), data.length - 1)))
-        }
-      >
-        <IconChevronLeft />
-      </ActionIcon>
-
-      <NumberInput
-        hideControls
+        defaultValue={0}
         value={page}
-        step={1}
-        min={1}
+        min={0}
         max={data.length}
-        disabled={!data.length}
-        styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
-        onChange={(val) =>
-          dispatch(
-            setPage(val ? Math.min(Math.max(0, val), data.length - 1) : 0)
-          )
-        }
-        onWheel={(event) => {
-          const val = Math.min(
-            Math.max(0, page - Math.sign(event.deltaY)),
-            data.length - 1
-          );
-          if (page === val) return;
-
-          dispatch(setPage(val));
-          event.target.blur();
-        }}
+        step={1}
+        marks={[
+          {
+            value: Math.floor(qLength),
+            label: "# " + Math.floor(qLength),
+          },
+          {
+            value: Math.floor(data.length / 2),
+            label: "# " + Math.floor(data.length / 2),
+          },
+          {
+            value: Math.floor(qLength * 3),
+            label: "# " + Math.floor(qLength * 3),
+          },
+        ]}
+        onChange={(value) => dispatch(setPage(value))}
       />
-
-      <ActionIcon
-        size={36}
-        variant="filled"
-        disabled={!data.length}
-        onClick={() =>
-          dispatch(setPage(Math.min(Math.max(0, page + 1), data.length - 1)))
-        }
-      >
-        <IconChevronRight />
-      </ActionIcon>
-    </Group>
+    </>
   );
 }
 

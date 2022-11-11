@@ -40,6 +40,8 @@ function DataTable() {
   const keys = [];
   if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
 
+  const theme = useMantineTheme();
+
   /** Context for cross component communication */
   const VirtualTableContext = createContext({
     top: 0,
@@ -79,7 +81,14 @@ function DataTable() {
     return (
       <tr>
         {/** Make sure your table rows are the same height as what you passed into the list... */}
-        <td style={{ fontWeight: "bold", color: "#495057" }}>{index}</td>
+        <td
+          style={{
+            fontWeight: "bold",
+            color: theme.colors.gray[theme.colorScheme === "dark" ? 7 : 5],
+          }}
+        >
+          {index}
+        </td>
         {keys.map((k, j) => (
           <td style={{ height: rowHeight }} key={`td-${index}-${j}`}>
             {data[index][k]}
@@ -118,7 +127,7 @@ function DataTable() {
       header={
         <thead>
           <tr>
-            <th></th>
+            <th>#</th>
             {keys.map((k, i) => (
               <th key={`th-${i}`}>{k}</th>
             ))}
@@ -182,7 +191,6 @@ export default function Import() {
         : StringReplaceAt(a, i, String.fromCharCode(a.charCodeAt(i) + 1));
 
     // Convert rawData to write refinedData
-    console.log(rawData);
     for (
       let x = range.col[0];
       x !== range.col[1];
@@ -197,7 +205,6 @@ export default function Import() {
       )
         refinedData[i][h] = rawData[x + y]?.v || "";
 
-    console.log(refinedData);
     dispatch(setData(refinedData));
   };
 
