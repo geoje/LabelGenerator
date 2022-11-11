@@ -182,6 +182,7 @@ export default function Import() {
         : StringReplaceAt(a, i, String.fromCharCode(a.charCodeAt(i) + 1));
 
     // Convert rawData to write refinedData
+    console.log(rawData);
     for (
       let x = range.col[0];
       x !== range.col[1];
@@ -190,12 +191,13 @@ export default function Import() {
       for (
         let i = 0,
           y = range.row[0] + 1,
-          h = rawData[x + range.row[0]].v.toString();
+          h = rawData[x + range.row[0]]?.v?.toString() ?? x;
         y <= range.row[1];
         i++, y++
       )
         refinedData[i][h] = rawData[x + y]?.v || "";
 
+    console.log(refinedData);
     dispatch(setData(refinedData));
   };
 
