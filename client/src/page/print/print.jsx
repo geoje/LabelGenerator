@@ -23,7 +23,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { TYPE, GROUP, convertLayout } from "../design/design";
+import { TYPE, GROUP, convertLayout } from "../design/drawSlice";
 import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
