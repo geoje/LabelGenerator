@@ -336,7 +336,7 @@ export function Detail() {
             <NumberInput
               size="xs"
               icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
-              min={layer[selected].type === TYPE.qr ? 18 : 1}
+              min={[TYPE.bar, TYPE.qr].includes(layer[selected].type) ? 18 : 1}
               value={selectedLayerSize().h}
               disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
               onChange={(value) => {
