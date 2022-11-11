@@ -1103,13 +1103,6 @@ function Tool() {
                   y: layoutPx.h / 2 - 10,
                   h: 20,
                 },
-                var: [
-                  {
-                    value: Math.random(),
-                    label: "1234",
-                    group: GROUP.CONST,
-                  },
-                ],
               })
             )
           }
@@ -1438,7 +1431,7 @@ export function Canvas() {
               width={(item.border?.width ?? 1) * layoutPx.ratio}
               margin={0}
               background={item.background?.value ?? "transparent"}
-              lineColor={item.border?.color?.value ?? "#000"}
+              lineColor={item.border?.color?.value}
             />
           </div>
         );

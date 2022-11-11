@@ -117,7 +117,15 @@ function Canvas(props) {
       case TYPE.bar:
         return (
           <div key={`layer-${item.name}`} style={defaultStyle}>
-            <Barcode value={getFormattedValue()} />
+            <Barcode
+              value={getFormattedValue()}
+              displayValue={false}
+              height={item.size.h * layoutPx.ratio}
+              width={(item.border?.width ?? 1) * layoutPx.ratio}
+              margin={0}
+              background={item.background?.value ?? "transparent"}
+              lineColor={item.border?.color?.value}
+            />
           </div>
         );
       case TYPE.qr:
