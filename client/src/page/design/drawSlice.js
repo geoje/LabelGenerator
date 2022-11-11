@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { GROUP } from "./design";
 
 /**
  * size: {w, h, unit, ratio}
@@ -12,9 +13,8 @@ import { createSlice } from "@reduxjs/toolkit";
  *    font: { family: "", style: "", size:0 , weight: 0, color:{ value, format } }
  *    border: { style: "", width: 0, color: { value, format } }
  *    background: { value, format },
- *    var: { type: "", static: "", format: "" } // text
  *    var: { default: "", format:"", img: { [key]: [url] } } // image
- *    var: [ { value: "0.3765313557327803", label: "|", group: GROUP.CONST }, ... ] // bar or qr
+ *    var: [ { value: "0.3765313557327803", label: "|", group: GROUP.CONST }, ... ] // text, bar, qr
  * }, ...]
  *
  * selected: -1
@@ -39,14 +39,14 @@ const slice = createSlice({
         type: "text",
         size: { x: 227, y: 51 },
         font: { size: 10, weight: 400, color: { value: "#000000" } },
-        var: { type: "static", static: "ABCD" },
+        var: [{ value: "0.1234", label: "ABCD", group: GROUP.CONST }],
       },
       {
         name: "refText",
         type: "text",
         size: { x: 200, y: 51 },
         font: { size: 10, weight: 700, color: { value: "#000000" } },
-        var: { type: "static", static: "REF" },
+        var: [{ value: "0.1234", label: "REF", group: GROUP.CONST }],
       },
       {
         name: "refRect",
@@ -59,14 +59,14 @@ const slice = createSlice({
         type: "text",
         size: { x: 227, y: 74 },
         font: { size: 10, weight: 400, color: { value: "#000000" } },
-        var: { type: "static", static: "10010001" },
+        var: [{ value: "0.1234", label: "10010001", group: GROUP.CONST }],
       },
       {
         name: "lotText",
         type: "text",
         size: { x: 200, y: 74 },
         font: { size: 10, weight: 700, color: { value: "#000000" } },
-        var: { type: "static", static: "LOT" },
+        var: [{ value: "0.1234", label: "LOT", group: GROUP.CONST }],
       },
       {
         name: "lotRect",
@@ -79,7 +79,7 @@ const slice = createSlice({
         type: "text",
         size: { x: 9, y: 76 },
         font: { size: 8, weight: 400, color: { value: "#000000" } },
-        var: { type: "static", static: "Made in Korea" },
+        var: [{ value: "0.1234", label: "Made in Korea", group: GROUP.CONST }],
       },
       {
         name: "titleLine",
@@ -93,21 +93,23 @@ const slice = createSlice({
         type: "text",
         size: { x: 186, y: 20 },
         font: { size: 10, weight: 400, color: { value: "#000000" } },
-        var: { type: "static", static: "Sample Sub Title" },
+        var: [
+          { value: "0.1234", label: "Sample Sub Title", group: GROUP.CONST },
+        ],
       },
       {
         name: "titleText",
         type: "text",
         size: { x: 63, y: 7 },
         font: { size: 20, weight: 700, color: { value: "#000000" } },
-        var: { type: "static", static: "Sample Title" },
+        var: [{ value: "0.1234", label: "Sample Title", group: GROUP.CONST }],
       },
       {
         name: "logoText",
         type: "text",
         size: { x: 18, y: 23 },
         font: { size: 9, weight: 400, color: { value: "#000000" } },
-        var: { type: "static", static: "image" },
+        var: [{ value: "0.1234", label: "image", group: GROUP.CONST }],
       },
       {
         name: "logoImage",

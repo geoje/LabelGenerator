@@ -8,7 +8,6 @@ import {
   Title,
   Tooltip,
   Table,
-  Container,
   Box,
 } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
@@ -16,7 +15,6 @@ import {
   IconUpload,
   IconFileSpreadsheet,
   IconX,
-  IconSquareNumber1,
   IconTrash,
 } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";

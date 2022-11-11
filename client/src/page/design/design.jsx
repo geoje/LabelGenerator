@@ -13,7 +13,6 @@ import {
   Text,
   Tooltip,
   TextInput,
-  SegmentedControl,
   ColorInput,
   FileButton,
   Button,
@@ -43,7 +42,6 @@ import {
   IconLetterW,
   IconLetterH,
   IconHash,
-  IconAlphabetLatin,
   IconRuler3,
   IconVariable,
   IconBrush,
@@ -89,6 +87,7 @@ import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Barcode from "react-barcode";
 import { QRCodeSVG } from "qrcode.react";
 import { saveAs } from "file-saver";
 import WebFont from "webfontloader";
@@ -172,6 +171,8 @@ const typeToIcon = (type) => {
     <IconTypography />
   ) : type === TYPE.image ? (
     <IconPhoto />
+  ) : type === TYPE.bar ? (
+    <IconBarcode />
   ) : type === TYPE.qr ? (
     <IconQrcode />
   ) : (
@@ -361,84 +362,6 @@ function Variable() {
   };
 
   switch (layer[selected].type) {
-    case TYPE.text:
-      return (
-        <>
-          <Title order={6} align="center">
-            Variable
-          </Title>
-          <Divider my="sm" />
-          <Grid>
-            <Grid.Col>
-              <SegmentedControl
-                fullWidth
-                color="blue"
-                size="xs"
-                data={[
-                  { value: "static", label: "Static" },
-                  { value: "format", label: "Format" },
-                ]}
-                value={layer[selected].var.type}
-                onChange={(value) =>
-                  dispatch(
-                    setLayerVar({
-                      index: selected,
-                      var: { ...layer[selected].var, type: value },
-                    })
-                  )
-                }
-              />
-            </Grid.Col>
-            <Grid.Col>
-              {layer[selected].var.type === "static" && (
-                <TextInput
-                  placeholder="Static Text"
-                  size="xs"
-                  icon={<IconAlphabetLatin size={DETAIL_ICON_SIZE} />}
-                  value={layer[selected].var.static}
-                  onChange={(event) => {
-                    dispatch(
-                      setLayerVar({
-                        index: selected,
-                        var: {
-                          ...layer[selected].var,
-                          static: event.currentTarget.value,
-                        },
-                      })
-                    );
-                  }}
-                />
-              )}
-              {layer[selected].var.type === "format" && (
-                <Select
-                  placeholder="Data Column"
-                  size="xs"
-                  transitionDuration={100}
-                  transition="pop-top-left"
-                  transitionTimingFunction="ease"
-                  icon={<IconVariable size={DETAIL_ICON_SIZE} />}
-                  data={Object.keys(data.length ? data[0] : []).map((s) => {
-                    return { value: s, label: s };
-                  })}
-                  value={layer[selected].var.format}
-                  onChange={(value) => {
-                    if (value === layer[selected].var.format) return;
-                    dispatch(
-                      setLayerVar({
-                        index: selected,
-                        var: {
-                          ...layer[selected].var,
-                          format: value,
-                        },
-                      })
-                    );
-                  }}
-                />
-              )}
-            </Grid.Col>
-          </Grid>
-        </>
-      );
     case TYPE.image:
       return (
         <>
@@ -667,6 +590,8 @@ function Variable() {
           </Grid>
         </>
       );
+
+    case TYPE.text:
     case TYPE.bar:
     case TYPE.qr:
       let createdLabel = {};
@@ -727,7 +652,7 @@ function Variable() {
                 return item;
               }}
               onChange={(value) => {
-                const keys = data ? Object.keys(data[0]) : [];
+                const keys = data.length ? Object.keys(data[0]) : [];
                 let constVars = layer[selected].var
                   ? layer[selected].var.filter((o) => o.group === GROUP.CONST)
                   : [];
@@ -1034,7 +959,7 @@ function Tool() {
             )
           }
         >
-          <IconSquare />
+          {typeToIcon(TYPE.rect)}
         </ActionIcon>
       </Tooltip>
       <Tooltip label="Circle" withArrow>
@@ -1060,7 +985,7 @@ function Tool() {
             )
           }
         >
-          <IconCircle />
+          {typeToIcon(TYPE.circle)}
         </ActionIcon>
       </Tooltip>
 
@@ -1082,12 +1007,18 @@ function Tool() {
                   weight: 400,
                   color: { value: "#000000" },
                 },
-                var: { type: "static", static: "New Text" },
+                var: [
+                  {
+                    value: Math.random(),
+                    label: "New Text",
+                    group: GROUP.CONST,
+                  },
+                ],
               })
             );
           }}
         >
-          <IconTypography />
+          {typeToIcon(TYPE.text)}
         </ActionIcon>
       </Tooltip>
       <FileButton
@@ -1152,7 +1083,7 @@ function Tool() {
               p={0}
               color="gray"
               variant="subtle"
-              leftIcon={<IconPhoto />}
+              leftIcon={typeToIcon(TYPE.image)}
               styles={() => ({ leftIcon: { marginRight: 0 } })}
               {...props}
             />
@@ -1163,14 +1094,27 @@ function Tool() {
         <ActionIcon
           variant="subtle"
           onClick={() =>
-            showNotification({
-              title: "Unsupported function",
-              message: "It will be developed soon!",
-              color: "yellow",
-            })
+            dispatch(
+              addLayer({
+                name: getNextLayerName(),
+                type: TYPE.bar,
+                size: {
+                  x: layoutPx.w / 2 - 20,
+                  y: layoutPx.h / 2 - 10,
+                  h: 20,
+                },
+                var: [
+                  {
+                    value: Math.random(),
+                    label: "1234",
+                    group: GROUP.CONST,
+                  },
+                ],
+              })
+            )
           }
         >
-          <IconBarcode />
+          {typeToIcon(TYPE.bar)}
         </ActionIcon>
       </Tooltip>
       <Tooltip label="QR Code" withArrow>
@@ -1190,7 +1134,7 @@ function Tool() {
             )
           }
         >
-          <IconQrcode />
+          {typeToIcon(TYPE.qr)}
         </ActionIcon>
       </Tooltip>
     </Group>
@@ -1224,6 +1168,15 @@ export function Canvas() {
         ...layer[selected].size,
         w: textElement ? Math.ceil(textElement.offsetWidth * fontScale) : 0,
         h: textElement ? Math.ceil(textElement.offsetHeight * fontScale) : 0,
+      };
+    } else if (layer[selected].type === TYPE.bar) {
+      const textElement = document.getElementById(
+        `layer-${layer[selected].name}`
+      );
+
+      return {
+        ...layer[selected].size,
+        w: textElement ? textElement.offsetWidth : 0,
       };
     } else if (layer[selected].type === TYPE.qr) {
       return {
@@ -1404,6 +1357,17 @@ export function Canvas() {
         top: move.y * layoutPx.ratio,
       };
 
+    // layer.var to string
+    const getFormattedValue = () => {
+      return data && item.var
+        ? item.var.reduce(
+            (str, o) =>
+              `${str}${o.group === GROUP.DATA ? data[page][o.value] : o.label}`,
+            ""
+          )
+        : "";
+    };
+
     switch (item.type) {
       case TYPE.rect:
       case TYPE.circle:
@@ -1454,12 +1418,28 @@ export function Canvas() {
               color: item.font?.color?.value,
             }}
           >
-            {item.var.type === "format"
-              ? data.length && Object.keys(data[0]).includes(item.var.format)
-                ? data[page][item.var.format]
-                : ""
-              : item.var.static}
+            {getFormattedValue()}
           </Text>
+        );
+      case TYPE.bar:
+        const value = getFormattedValue();
+        return (
+          <div
+            id={`layer-${item.name}`}
+            key={`layer-${item.name}`}
+            ref={(el) => (refLayer.current[index] = el)}
+            onMouseDown={(event) => onMouseDown(event, index)}
+            style={defaultStyle}
+          >
+            <Barcode
+              value={value ? value : " "}
+              width={layoutPx.ratio}
+              displayValue={false}
+              height={item.size.h}
+              margin={0}
+              background="transparent"
+            />
+          </div>
         );
       case TYPE.qr:
         return (
@@ -1471,17 +1451,7 @@ export function Canvas() {
           >
             <QRCodeSVG
               size={item.size.w * layoutPx.ratio}
-              value={
-                data && item.var
-                  ? item.var.reduce(
-                      (str, o) =>
-                        `${str}${
-                          o.group === GROUP.DATA ? data[page][o.value] : o.label
-                        }`,
-                      ""
-                    )
-                  : ""
-              }
+              value={getFormattedValue()}
             />
           </div>
         );
@@ -1877,6 +1847,15 @@ function Detail() {
           ? Math.ceil(textElement.offsetHeight / layoutPx.ratio)
           : 0,
       };
+    } else if (layer[selected].type === TYPE.bar) {
+      const textElement = document.getElementById(
+        `layer-${layer[selected].name}`
+      );
+
+      return {
+        ...layer[selected].size,
+        w: textElement ? textElement.offsetWidth : 0,
+      };
     } else if (layer[selected].type === TYPE.qr) {
       return {
         ...layer[selected].size,
@@ -1993,7 +1972,7 @@ function Detail() {
               icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
               min={layer[selected].type === TYPE.qr ? 18 : 1}
               value={selectedLayerSize().w}
-              disabled={layer[selected].type === TYPE.text}
+              disabled={[TYPE.text, TYPE.bar].includes(layer[selected].type)}
               onChange={(value) => {
                 if (
                   !value ||

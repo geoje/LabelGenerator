@@ -17,6 +17,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconAlertTriangle, IconInfoCircle, IconPrinter } from "@tabler/icons";
+import Barcode from "react-barcode";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -49,6 +50,19 @@ function Canvas(props) {
       borderColor: item.border?.color?.value,
 
       background: item.background?.color?.value,
+    };
+
+    // layer.var to string
+    const getFormattedValue = () => {
+      return data && item.var
+        ? item.var.reduce(
+            (str, o) =>
+              `${str}${
+                o.group === GROUP.DATA ? data[props.page][o.value] : o.label
+              }`,
+            ""
+          )
+        : "";
     };
 
     switch (item.type) {
@@ -97,32 +111,19 @@ function Canvas(props) {
               color: item.font?.color?.value,
             }}
           >
-            {item.var.type === "format"
-              ? data.length && Object.keys(data[0]).includes(item.var.format)
-                ? data[props.page][item.var.format]
-                : ""
-              : item.var.static}
+            {getFormattedValue()}
           </Text>
+        );
+      case TYPE.bar:
+        return (
+          <div key={`layer-${item.name}`} style={defaultStyle}>
+            <Barcode value={getFormattedValue()} />
+          </div>
         );
       case TYPE.qr:
         return (
           <div key={`layer-${item.name}`} style={defaultStyle}>
-            <QRCodeSVG
-              size={item.size.w}
-              value={
-                data && item.var
-                  ? item.var.reduce(
-                      (str, o) =>
-                        `${str}${
-                          o.group === GROUP.DATA
-                            ? data[props.page][o.value]
-                            : o.label
-                        }`,
-                      ""
-                    )
-                  : ""
-              }
-            />
+            <QRCodeSVG size={item.size.w} value={getFormattedValue()} />
           </div>
         );
       case TYPE.image:
