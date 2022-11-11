@@ -256,7 +256,7 @@ function Preview() {
       <Group position="center" key={`preview-${index}`} style={style}>
         <div
           style={{
-            width: 46 + 6 * (String(lastIndex).match(/\d/g) ?? []).length,
+            width: 45 + 5 * (String(lastIndex).match(/\d/g) ?? []).length,
           }}
         >
           <Badge variant="filled" color="gray" fullWidth>
