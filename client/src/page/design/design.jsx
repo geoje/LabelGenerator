@@ -102,8 +102,8 @@ export const TYPE = {
   qr: "qr",
 };
 export const GROUP = {
-  DATA: "Data Header",
-  CONST: "Custom Created",
+  DATA: "Data",
+  CONST: "Constant",
 };
 const DETAIL_ICON_SIZE = 14;
 const MAX_FILE_SIZE = 5 * 1024 ** 2;
@@ -604,7 +604,7 @@ function Variable() {
           <Stack>
             <Paper px="xs" py={4} withBorder>
               <Text size="xs" sx={{ wordBreak: "break-all" }}>
-                {data.length && layer[selected].var
+                {data[page] && layer[selected].var
                   ? layer[selected].var.reduce(
                       (str, o) =>
                         `${str}${
@@ -1361,6 +1361,7 @@ export function Canvas() {
 
     // layer.var to string
     const getFormattedValue = () => {
+      console.log(item);
       return item.var
         ? item.var.reduce(
             (str, o) =>
@@ -1554,7 +1555,7 @@ export function Pagenation() {
 
       <NumberInput
         hideControls
-        value={page + 1}
+        value={page}
         step={1}
         min={1}
         max={data.length}
@@ -1562,7 +1563,7 @@ export function Pagenation() {
         styles={{ input: { width: 54, height: 36, textAlign: "center" } }}
         onChange={(val) =>
           dispatch(
-            setPage(val ? Math.min(Math.max(0, val - 1), data.length - 1) : 0)
+            setPage(val ? Math.min(Math.max(0, val), data.length - 1) : 0)
           )
         }
         onWheel={(event) => {
