@@ -625,18 +625,22 @@ function Variable() {
               transitionDuration={100}
               transition="pop-top-left"
               transitionTimingFunction="ease"
-              data={Object.keys(data.length ? data[0] : {})
+              data={(() => {
+                const result = Object.keys(data.length ? data[0] : {}).map(
+                  (v) => {
+                    return { value: v, label: v, group: GROUP.DATA };
+                  }
+                );
 
-                .map((v) => {
-                  // Add data columns
-                  return { value: v, label: v, group: GROUP.DATA };
-                })
-
-                .concat(
-                  // Add const
-                  layer[selected].var?.filter((v) => v.group === GROUP.CONST) ??
-                    []
-                )}
+                return result.concat(
+                  layer[selected].var?.filter(
+                    (o1) =>
+                      result.findIndex(
+                        (o2) => o1.value === o2.value && o1.group === o2.group
+                      ) < 0
+                  )
+                );
+              })()}
               value={
                 layer[selected].var
                   ? layer[selected].var.map((v) => v.value)
@@ -1253,16 +1257,17 @@ export function Canvas() {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
 
-    dispatch(
-      setLayerSize({
-        index: selected,
-        size: {
-          ...layer[selected].size,
-          x: move.x,
-          y: move.y,
-        },
-      })
-    );
+    if (move.x !== layer[selected].size.x || move.y !== layer[selected].size.y)
+      dispatch(
+        setLayerSize({
+          index: selected,
+          size: {
+            ...layer[selected].size,
+            x: move.x,
+            y: move.y,
+          },
+        })
+      );
     setMove({ x: -1, y: -1, ox: 0, oy: 0 });
   };
 
