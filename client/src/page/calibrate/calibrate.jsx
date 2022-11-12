@@ -1,12 +1,12 @@
-import { Center, Grid, SegmentedControl, Text } from "@mantine/core";
+import { Grid, Group, SegmentedControl, Stack, Text } from "@mantine/core";
 import { IconFileHorizontal, IconLayoutBoardSplit } from "@tabler/icons";
 
 export default function Calibrate() {
   const SegLabel = (icon, content) => (
-    <Center>
+    <Group noWrap>
       {icon}
-      <Text ml={10}>{content}</Text>
-    </Center>
+      <Text>{content}</Text>
+    </Group>
   );
 
   return (
@@ -30,10 +30,19 @@ export default function Calibrate() {
               value: "a4",
               label: SegLabel(<IconLayoutBoardSplit />, "A4"),
             },
+            {
+              value: "custom",
+              label: SegLabel(<IconLayoutBoardSplit />, "Custom"),
+            },
           ]}
         />
       </Grid.Col>
-      <Grid.Col md={10}></Grid.Col>
+      <Grid.Col md={10}>
+        <Stack align="center">
+          <Text size={48}>Just pass this section.</Text>
+          <Text size={48}>Here will be developed later.</Text>
+        </Stack>
+      </Grid.Col>
     </Grid>
   );
 }
