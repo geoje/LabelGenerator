@@ -89,11 +89,6 @@ function Canvas(props) {
         let fontScale = {};
         if (item.font?.size) {
           fontScale.fontSize = item.font.size;
-          if (fontScale.fontSize < 10) {
-            fontScale.transformOrigin = "top left";
-            fontScale.transform = `scale(${fontScale.fontSize / 10})`;
-            fontScale.fontSize = 10;
-          }
         } else fontScale.fontSize = 10;
 
         return (

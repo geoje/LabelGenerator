@@ -265,14 +265,9 @@ export function Canvas() {
         );
       case TYPE.text:
         let fontScale = {};
-        if (item.font?.size) {
+        if (item.font?.size)
           fontScale.fontSize = item.font.size * layoutPx.ratio;
-          if (fontScale.fontSize < 10) {
-            fontScale.transformOrigin = "top left";
-            fontScale.transform = `scale(${fontScale.fontSize / 10})`;
-            fontScale.fontSize = 10;
-          }
-        } else fontScale.fontSize = 10 * layoutPx.ratio;
+        else fontScale.fontSize = 10 * layoutPx.ratio;
 
         return (
           <Text
