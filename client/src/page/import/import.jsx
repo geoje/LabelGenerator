@@ -79,7 +79,18 @@ function DataTable() {
   /** The Row component. This should be a table row, and noted that we don't use the style that regular `react-window` examples pass in.*/
   function Row({ index }) {
     return (
-      <tr>
+      <tr
+        style={
+          index % 2
+            ? {
+                backgroundColor:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[6]
+                    : theme.colors.gray[0],
+              }
+            : null
+        }
+      >
         {/** Make sure your table rows are the same height as what you passed into the list... */}
         <td
           style={{
@@ -108,7 +119,6 @@ function DataTable() {
       <div {...rest} ref={ref}>
         <Table
           fontSize="xs"
-          striped
           style={{ top, position: "absolute", whiteSpace: "nowrap" }}
         >
           {header}
