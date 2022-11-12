@@ -10,6 +10,7 @@ import {
   removeLayerByIndex,
   setLayerSize,
   setSelected,
+  getLayerSize,
 } from "./drawSlice";
 
 export function Canvas() {
@@ -25,44 +26,12 @@ export function Canvas() {
   const refLayer = useRef({ current: [] });
   let [move, setMove] = useState({ x: -1, y: -1, ox: 0, oy: 0, sx: 0, sy: 0 });
 
-  const selectedLayerSize = () => {
-    if (layer[selected].type === TYPE.text) {
-      const textElement = document.getElementById(
-        `layer-${layer[selected].name}`
-      );
-
-      let fontScale =
-        layer[selected].font?.size * layoutPx.ratio < 10
-          ? layer[selected].font?.size / 10
-          : 1 / layoutPx.ratio;
-
-      return {
-        ...layer[selected].size,
-        w: textElement ? Math.ceil(textElement.offsetWidth * fontScale) : 0,
-        h: textElement ? Math.ceil(textElement.offsetHeight * fontScale) : 0,
-      };
-    } else if (layer[selected].type === TYPE.bar) {
-      const textElement = document.getElementById(
-        `layer-${layer[selected].name}`
-      );
-
-      return {
-        ...layer[selected].size,
-        w: textElement ? textElement.offsetWidth / layoutPx.ratio : 0,
-      };
-    } else if (layer[selected].type === TYPE.qr) {
-      return {
-        ...layer[selected].size,
-        h: layer[selected].size.w,
-      };
-    } else return layer[selected].size;
-  };
-
   const onMouseMove = (event) => {
     event.preventDefault();
 
     const vertical =
       Math.abs(event.pageX - move.sx) < Math.abs(event.pageY - move.sy);
+    const layerSize = getLayerSize(layer[selected], layoutPx.ratio);
 
     setMove(
       (move = {
@@ -71,7 +40,7 @@ export function Canvas() {
           Math.max(
             0,
             Math.min(
-              (layoutPx.w - selectedLayerSize().w) * layoutPx.ratio,
+              (layoutPx.w - layerSize.w) * layoutPx.ratio,
               (vertical && event.shiftKey ? move.sx : event.pageX) -
                 refCanvas.current.offsetLeft -
                 move.ox
@@ -82,7 +51,7 @@ export function Canvas() {
           Math.max(
             0,
             Math.min(
-              (layoutPx.h - selectedLayerSize().h) * layoutPx.ratio,
+              (layoutPx.h - layerSize.h) * layoutPx.ratio,
               (!vertical && event.shiftKey ? move.sy : event.pageY) -
                 refCanvas.current.offsetTop -
                 move.oy
@@ -143,29 +112,6 @@ export function Canvas() {
   };
 
   useEffect(() => {
-    // I don't like this duplicated code
-    const selectedLayerSizee = () => {
-      if (layer[selected].type === TYPE.text) {
-        const textElement = document.getElementById(
-          `layer-${layer[selected].name}`
-        );
-        return {
-          ...layer[selected].size,
-          w: textElement
-            ? Math.ceil(textElement.offsetWidth / layoutPx.ratio)
-            : 0,
-          h: textElement
-            ? Math.ceil(textElement.offsetHeight / layoutPx.ratio)
-            : 0,
-        };
-      } else if (layer[selected].type === TYPE.qr) {
-        return {
-          ...layer[selected].size,
-          h: layer[selected].size.w,
-        };
-      } else return layer[selected].size;
-    };
-
     const onKeyDown = (event) => {
       if (selected === -1) return;
 
@@ -174,7 +120,7 @@ export function Canvas() {
         return;
       }
 
-      const l = layer[selected];
+      const layerSize = getLayerSize(layer[selected], layoutPx.ratio);
       let d = {
         x: (event.key === "ArrowRight") - (event.key === "ArrowLeft"),
         y: (event.key === "ArrowDown") - (event.key === "ArrowUp"),
@@ -185,14 +131,14 @@ export function Canvas() {
         setLayerSize({
           index: selected,
           size: {
-            ...l.size,
+            ...layer[selected].size,
             x: Math.max(
               0,
-              Math.min(layoutPx.w - selectedLayerSizee().w, l.size.x + d.x)
+              Math.min(layoutPx.w - layerSize.w, layer[selected].size.x + d.x)
             ),
             y: Math.max(
               0,
-              Math.min(layoutPx.h - selectedLayerSizee().h, l.size.y + d.y)
+              Math.min(layoutPx.h - layerSize.h, layer[selected].size.y + d.y)
             ),
           },
         })
@@ -383,8 +329,13 @@ export function Canvas() {
               move.y === -1
                 ? layer[selected].size.y * layoutPx.ratio - 1
                 : move.y * layoutPx.ratio - 1,
-            width: selectedLayerSize().w * layoutPx.ratio + 2,
-            height: selectedLayerSize().h * layoutPx.ratio + 2,
+            ...(() => {
+              const size = getLayerSize(layer[selected], layoutPx.ratio);
+              return {
+                width: size.w * layoutPx.ratio + 2,
+                height: size.h * layoutPx.ratio + 2,
+              };
+            })(),
 
             backgroundImage:
               "repeating-linear-gradient(0deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(90deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(180deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px), repeating-linear-gradient(270deg, #0000ff, #0000ff 4px, transparent 4px, transparent 8px, #0000ff 8px)",

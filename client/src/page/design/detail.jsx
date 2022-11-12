@@ -45,6 +45,7 @@ import {
   setLayerFontColor,
   setLayerBorder,
   setLayerFont,
+  getLayerSize,
 } from "./drawSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
@@ -156,37 +157,6 @@ export function Detail() {
       ? layer[selected].font.color
       : {};
 
-  const selectedLayerSize = () => {
-    if (layer[selected].type === TYPE.text) {
-      const textElement = document.getElementById(
-        `layer-${layer[selected].name}`
-      );
-      return {
-        ...layer[selected].size,
-        w: textElement
-          ? Math.ceil(textElement.offsetWidth / layoutPx.ratio)
-          : 0,
-        h: textElement
-          ? Math.ceil(textElement.offsetHeight / layoutPx.ratio)
-          : 0,
-      };
-    } else if (layer[selected].type === TYPE.bar) {
-      const textElement = document.getElementById(
-        `layer-${layer[selected].name}`
-      );
-
-      return {
-        ...layer[selected].size,
-        w: textElement ? textElement.offsetWidth : 0,
-      };
-    } else if (layer[selected].type === TYPE.qr) {
-      return {
-        ...layer[selected].size,
-        h: layer[selected].size.w,
-      };
-    } else return layer[selected].size;
-  };
-
   return (
     selected !== -1 && (
       <Grid sx={{ width: "100%" }} justify="center" mt="xl" gutter="xl">
@@ -250,7 +220,7 @@ export function Detail() {
               size="xs"
               icon={<IconLetterX size={DETAIL_ICON_SIZE} />}
               min={0}
-              max={layoutPx.w - selectedLayerSize().w}
+              max={layoutPx.w - getLayerSize(layer[selected], layoutPx.ratio).w}
               value={layer[selected].size.x}
               onChange={(value) => {
                 if (value === null) return;
@@ -261,7 +231,11 @@ export function Detail() {
                       ...layer[selected].size,
                       x: Math.max(
                         0,
-                        Math.min(layoutPx.w - selectedLayerSize().w, value)
+                        Math.min(
+                          layoutPx.w -
+                            getLayerSize(layer[selected], layoutPx.ratio).w,
+                          value
+                        )
                       ),
                     },
                   })
@@ -272,7 +246,7 @@ export function Detail() {
               size="xs"
               icon={<IconLetterY size={DETAIL_ICON_SIZE} />}
               min={0}
-              max={layoutPx.h - selectedLayerSize().h}
+              max={layoutPx.h - getLayerSize(layer[selected], layoutPx.ratio).h}
               value={layer[selected].size.y}
               onChange={(value) => {
                 if (value === null) return;
@@ -283,7 +257,11 @@ export function Detail() {
                       ...layer[selected].size,
                       y: Math.max(
                         0,
-                        Math.min(layoutPx.h - selectedLayerSize().h, value)
+                        Math.min(
+                          layoutPx.h -
+                            getLayerSize(layer[selected], layoutPx.ratio).h,
+                          value
+                        )
                       ),
                     },
                   })
@@ -294,7 +272,7 @@ export function Detail() {
               size="xs"
               icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
               min={layer[selected].type === TYPE.qr ? 18 : 1}
-              value={selectedLayerSize().w}
+              value={getLayerSize(layer[selected], layoutPx.ratio).w}
               disabled={[TYPE.text, TYPE.bar].includes(layer[selected].type)}
               onChange={(value) => {
                 if (
@@ -337,7 +315,7 @@ export function Detail() {
               size="xs"
               icon={<IconLetterH size={DETAIL_ICON_SIZE} />}
               min={[TYPE.bar, TYPE.qr].includes(layer[selected].type) ? 18 : 1}
-              value={selectedLayerSize().h}
+              value={getLayerSize(layer[selected], layoutPx.ratio).h}
               disabled={[TYPE.text, TYPE.qr].includes(layer[selected].type)}
               onChange={(value) => {
                 if (
@@ -410,9 +388,10 @@ export function Detail() {
                 size="xs"
                 icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
                 min={1}
-                max={
-                  Math.min(selectedLayerSize().w, selectedLayerSize().h) / 2 - 1
-                }
+                max={(() => {
+                  const size = getLayerSize(layer[selected], layoutPx.ratio);
+                  return Math.min(size.w, size.h) / 2 - 1;
+                })()}
                 value={layer[selected].border?.width}
                 onChange={(value) =>
                   dispatch(

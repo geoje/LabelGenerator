@@ -79,7 +79,7 @@ export const convertLayout = {
   },
 };
 
-export const typeToIcon = (type) => {
+export function typeToIcon(type) {
   return type === TYPE.rect ? (
     <IconSquare />
   ) : type === TYPE.circle ? (
@@ -95,7 +95,30 @@ export const typeToIcon = (type) => {
   ) : (
     <IconQuestionMark />
   );
-};
+}
+export function getLayerSize(layer, ratio) {
+  if (layer.type === TYPE.text) {
+    const textElement = document.getElementById(`layer-${layer.name}`);
+
+    return {
+      ...layer.size,
+      w: textElement ? Math.ceil(textElement.offsetWidth / ratio) : 0,
+      h: textElement ? Math.ceil(textElement.offsetHeight / ratio) : 0,
+    };
+  } else if (layer.type === TYPE.bar) {
+    const textElement = document.getElementById(`layer-${layer.name}`);
+
+    return {
+      ...layer.size,
+      w: textElement ? textElement.offsetWidth / ratio : 0,
+    };
+  } else if (layer.type === TYPE.qr) {
+    return {
+      ...layer.size,
+      h: layer.size.w,
+    };
+  } else return layer.size;
+}
 
 /**
  * size: {w, h, unit, ratio}
