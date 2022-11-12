@@ -16,14 +16,25 @@ import {
   Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconAlertTriangle, IconInfoCircle, IconPrinter } from "@tabler/icons";
+import {
+  IconAlertTriangle,
+  IconCopy,
+  IconFilter,
+  IconPrinter,
+  IconVariable,
+} from "@tabler/icons";
 import Barcode from "react-barcode";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { TYPE, GROUP, convertLayout } from "../design/drawSlice";
+import {
+  TYPE,
+  GROUP,
+  convertLayout,
+  DETAIL_ICON_SIZE,
+} from "../design/drawSlice";
 import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
@@ -258,9 +269,7 @@ function Preview() {
             # {index}
           </Badge>
         </div>
-        <div style={{ border: "1px solid rgb(222, 226, 230)" }}>
-          <Canvas page={index} />
-        </div>
+
         <Tooltip
           styles={(theme) => {
             return {
@@ -290,9 +299,9 @@ function Preview() {
             </>
           }
         >
-          <Text color="gray">
-            <IconInfoCircle />
-          </Text>
+          <div style={{ border: "1px solid rgb(222, 226, 230)" }}>
+            <Canvas page={index} />
+          </div>
         </Tooltip>
         <Stack align="center" spacing={0}>
           <Badge
@@ -412,6 +421,7 @@ function Control() {
           size="xs"
           placeholder="Filter Column"
           clearable
+          icon={<IconFilter size={DETAIL_ICON_SIZE} />}
           transitionDuration={100}
           transition="pop-top-left"
           transitionTimingFunction="ease"
@@ -432,6 +442,7 @@ function Control() {
           size="xs"
           placeholder="Filter Value"
           disabled={!filter.format}
+          icon={<IconVariable size={DETAIL_ICON_SIZE} />}
           transitionDuration={100}
           transition="pop-top-left"
           transitionTimingFunction="ease"
@@ -459,6 +470,7 @@ function Control() {
         mt="md"
         placeholder="Copies Column"
         clearable
+        icon={<IconCopy size={DETAIL_ICON_SIZE} />}
         transitionDuration={100}
         transition="pop-top-left"
         transitionTimingFunction="ease"
