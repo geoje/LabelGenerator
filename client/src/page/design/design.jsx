@@ -122,7 +122,7 @@ export function Pagenation() {
 
   const qLength = data.length / 4;
 
-  return page ? (
+  return data?.length ? (
     <>
       <Slider
         size="xs"
