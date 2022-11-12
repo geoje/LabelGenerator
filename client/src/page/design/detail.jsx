@@ -162,7 +162,7 @@ export function Detail() {
       <Grid sx={{ width: "100%" }} justify="center" mt="xl" gutter="xl">
         <Grid.Col md={4}>
           <Center pb="md">
-            <IconLayout2 size={48} color="gray" />
+            <IconLayout2 size={DETAIL_ICON_SIZE * 3} />
           </Center>
           <Stack spacing={2}>
             <Group noWrap spacing="xs" align="flex-start">
@@ -346,7 +346,7 @@ export function Detail() {
         {layer[selected].type !== TYPE.image && (
           <Grid.Col md={4}>
             <Center pb="md">
-              <IconBorderOuter size={48} color="gray" />
+              <IconBorderOuter size={DETAIL_ICON_SIZE * 3} />
             </Center>
             <Stack spacing={2}>
               <Select
@@ -425,7 +425,7 @@ export function Detail() {
         {[TYPE.text].includes(layer[selected].type) && (
           <Grid.Col md={4}>
             <Center pb="md">
-              <IconTypography size={48} color="gray" />
+              <IconTypography size={DETAIL_ICON_SIZE * 3} />
             </Center>
             <Stack spacing={2}>
               <Group noWrap spacing="xs" align="flex-start">

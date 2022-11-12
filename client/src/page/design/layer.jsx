@@ -1,5 +1,12 @@
-import { Group, ActionIcon, createStyles, Text } from "@mantine/core";
-import { IconGripVertical, IconX, IconCopy } from "@tabler/icons";
+import {
+  Group,
+  ActionIcon,
+  createStyles,
+  Text,
+  Title,
+  Stack,
+} from "@mantine/core";
+import { IconGripVertical, IconX, IconCopy, IconStack2 } from "@tabler/icons";
 import {
   typeToIcon,
   addLayer,
@@ -139,30 +146,37 @@ export function Layer() {
   ));
 
   return (
-    <DragDropContext
-      onDragEnd={({ destination, source }) => {
-        if (!destination) return;
-        dispatch(
-          changeLayerIndex({ from: source.index, to: destination.index })
-        );
+    <Stack>
+      <Group position="center">
+        <IconStack2 />
+        <Title order={5}>Layer</Title>
+      </Group>
+      <DragDropContext
+        onDragEnd={({ destination, source }) => {
+          if (!destination) return;
+          dispatch(
+            changeLayerIndex({ from: source.index, to: destination.index })
+          );
 
-        // Change selected index when selected element move
-        if (selected === source.index) dispatch(setSelected(destination.index));
-        // Change selected index when other move
-        else if (source.index < selected && destination.index >= selected)
-          dispatch(setSelected(selected - 1));
-        else if (source.index > selected && destination.index <= selected)
-          dispatch(setSelected(selected + 1));
-      }}
-    >
-      <Droppable droppableId="layer" direction="vertical">
-        {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef}>
-            {items}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+          // Change selected index when selected element move
+          if (selected === source.index)
+            dispatch(setSelected(destination.index));
+          // Change selected index when other move
+          else if (source.index < selected && destination.index >= selected)
+            dispatch(setSelected(selected - 1));
+          else if (source.index > selected && destination.index <= selected)
+            dispatch(setSelected(selected + 1));
+        }}
+      >
+        <Droppable droppableId="layer" direction="vertical">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {items}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </Stack>
   );
 }

@@ -3,11 +3,11 @@ import {
   NumberInput,
   Stack,
   Select,
-  Divider,
   Title,
   Slider,
+  Group,
 } from "@mantine/core";
-import { IconRuler3 } from "@tabler/icons";
+import { IconDimensions, IconRuler3 } from "@tabler/icons";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -32,6 +32,12 @@ function LayoutSize() {
 
   return (
     <Grid>
+      <Grid.Col>
+        <Group position="center">
+          <IconDimensions />
+          <Title order={5}>Layout size</Title>
+        </Group>
+      </Grid.Col>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
           value={layout.w}
@@ -154,14 +160,8 @@ export default function Design() {
   return (
     <Grid m={0} p="sm">
       <Grid.Col md={2} p="sm">
-        <Stack spacing={0}>
-          <Title order={6} align="center">
-            Layout size
-          </Title>
-          <Divider my="sm" />
-          <LayoutSize />
-        </Stack>
-        <Stack spacing={0} mt={48}>
+        <LayoutSize />
+        <Stack spacing={0} mt={96}>
           <Variable />
         </Stack>
       </Grid.Col>
@@ -174,13 +174,7 @@ export default function Design() {
         </Stack>
       </Grid.Col>
       <Grid.Col md={2} p="sm">
-        <Stack spacing={0}>
-          <Title order={6} align="center">
-            Layer
-          </Title>
-          <Divider my="sm" />
-          <Layer />
-        </Stack>
+        <Layer />
       </Grid.Col>
     </Grid>
   );

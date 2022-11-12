@@ -3,7 +3,6 @@ import {
   Paper,
   Stack,
   Select,
-  Divider,
   Title,
   Text,
   FileButton,
@@ -12,8 +11,9 @@ import {
   Box,
   MultiSelect,
   CloseButton,
+  Group,
 } from "@mantine/core";
-import { IconPhoto, IconVariable } from "@tabler/icons";
+import { IconCode, IconPhoto, IconVariable } from "@tabler/icons";
 import {
   TYPE,
   GROUP,
@@ -39,6 +39,12 @@ export function Variable() {
 
   if (selected === -1) return <></>;
 
+  const header = (
+    <Group position="center">
+      <IconCode />
+      <Title order={5}>Variable</Title>
+    </Group>
+  );
   const valueComponent = ({
     value,
     label,
@@ -104,11 +110,8 @@ export function Variable() {
       let createdLabel = {};
       return (
         <>
-          <Title order={6} align="center">
-            Variable
-          </Title>
-          <Divider my="sm" />
           <Stack>
+            {header}
             <Paper px="xs" py={4} withBorder>
               <Text size="xs" sx={{ wordBreak: "break-all" }}>
                 {data[page] && layer[selected].var
@@ -204,11 +207,8 @@ export function Variable() {
 
       return (
         <>
-          <Title order={6} align="center">
-            Variable
-          </Title>
-          <Divider my="sm" />
           <Grid>
+            <Grid.Col>{header}</Grid.Col>
             <Grid.Col>
               <FileButton
                 sx={(theme) => {
