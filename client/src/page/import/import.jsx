@@ -253,7 +253,7 @@ export default function Import() {
         })}
       >
         <Title order={6} mr="sm">
-          Import Data
+          Import data
         </Title>
         {data.length && (
           <Tooltip label="Clear" withArrow>

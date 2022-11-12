@@ -77,7 +77,7 @@ export function Tool() {
 
   return (
     <Group position="center" spacing="xs">
-      <Tooltip label="New Canvas" withArrow>
+      <Tooltip label="New canvas" withArrow>
         <ActionIcon variant="subtle" onClick={() => dispatch(setLayer([]))}>
           <IconFile />
         </ActionIcon>
@@ -192,7 +192,7 @@ export function Tool() {
                       );
 
                       showNotification({
-                        title: "Imported Successfully",
+                        title: "Imported successfully",
                         message: `${jsonLayer.length} layers imported`,
                         color: "green",
                       });
@@ -295,7 +295,7 @@ export function Tool() {
                 // see FileSaver.js
                 saveAs(content, "Design.zip");
                 showNotification({
-                  title: "Saving design project successfully!",
+                  title: "Saving design project successfully",
                   message: `File size is ${content.size}`,
                   color: "green",
                 });
@@ -462,7 +462,7 @@ export function Tool() {
           </Tooltip>
         )}
       </FileButton>
-      <Tooltip label="Bar Code" withArrow>
+      <Tooltip label="Bar code" withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -482,7 +482,7 @@ export function Tool() {
           {typeToIcon(TYPE.bar)}
         </ActionIcon>
       </Tooltip>
-      <Tooltip label="QR Code" withArrow>
+      <Tooltip label="QR code" withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>

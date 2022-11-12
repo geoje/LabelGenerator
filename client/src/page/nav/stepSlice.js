@@ -1,11 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+export const MAX_NAV = 3;
+
 const slice = createSlice({
   name: "step",
   initialState: { value: 0 },
   reducers: {
     next: (state) => {
-      if (state.value < 2) state.value++;
+      if (state.value < MAX_NAV) state.value++;
     },
     prev: (state) => {
       if (state.value > 0) state.value--;

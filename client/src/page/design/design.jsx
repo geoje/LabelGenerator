@@ -116,7 +116,7 @@ export function Pagenation() {
 
   const qLength = data.length / 4;
 
-  return (
+  return page ? (
     <>
       <Slider
         size="xs"
@@ -145,6 +145,8 @@ export function Pagenation() {
         onChange={(value) => dispatch(setPage(value))}
       />
     </>
+  ) : (
+    <></>
   );
 }
 
@@ -154,7 +156,7 @@ export default function Design() {
       <Grid.Col md={2} p="sm">
         <Stack spacing={0}>
           <Title order={6} align="center">
-            Layout Size
+            Layout size
           </Title>
           <Divider my="sm" />
           <LayoutSize />

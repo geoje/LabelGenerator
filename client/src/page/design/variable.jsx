@@ -307,7 +307,7 @@ export function Variable() {
             </Grid.Col>
             <Grid.Col>
               <Select
-                placeholder="Data Column"
+                placeholder="Data column"
                 size="xs"
                 clearable
                 transitionDuration={100}

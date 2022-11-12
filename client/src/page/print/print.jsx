@@ -419,7 +419,7 @@ function Control() {
       <Group noWrap>
         <Select
           size="xs"
-          placeholder="Filter Column"
+          placeholder="Filter column"
           clearable
           icon={<IconFilter size={DETAIL_ICON_SIZE} />}
           transitionDuration={100}
@@ -440,7 +440,7 @@ function Control() {
         />
         <Select
           size="xs"
-          placeholder="Filter Value"
+          placeholder="Filter value"
           disabled={!filter.format}
           icon={<IconVariable size={DETAIL_ICON_SIZE} />}
           transitionDuration={100}
@@ -468,7 +468,7 @@ function Control() {
       <Select
         size="xs"
         mt="md"
-        placeholder="Copies Column"
+        placeholder="Copies column"
         clearable
         icon={<IconCopy size={DETAIL_ICON_SIZE} />}
         transitionDuration={100}

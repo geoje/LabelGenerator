@@ -8,8 +8,14 @@ import {
   useMantineColorScheme,
   Paper,
 } from "@mantine/core";
-import { IconSun, IconMoonStars } from "@tabler/icons";
-import { next, prev, set } from "./stepSlice";
+import {
+  IconSun,
+  IconMoonStars,
+  IconFileSpreadsheet,
+  IconPalette,
+  IconDimensions,
+} from "@tabler/icons";
+import { MAX_NAV, next, prev, set } from "./stepSlice";
 
 export default function Nav() {
   // Provider
@@ -36,23 +42,29 @@ export default function Nav() {
         m={0}
         p="xs"
       >
-        <Grid.Col span={6} md={3} lg={4} order={2} orderMd={1}>
+        <Grid.Col span={6} md={3} order={2} orderMd={1}>
           {step > 0 && <Button onClick={() => dispatch(prev())}>Back</Button>}
         </Grid.Col>
-        <Grid.Col span={12} md={6} lg={4} order={1} orderMd={2}>
+        <Grid.Col span={12} md={6} order={1} orderMd={2}>
           <Stepper
             active={step}
             onStepClick={(current) => dispatch(set(current))}
-            breakpoint="xs"
           >
-            <Stepper.Step label="Set Data" description="Load and format" />
             <Stepper.Step
-              label="Design Label"
-              description="Place the elements"
+              label="Set data"
+              icon={<IconFileSpreadsheet size={18} />}
+            />
+            <Stepper.Step
+              label="Design label"
+              icon={<IconPalette size={18} />}
+            />
+            <Stepper.Step
+              label="Set paper"
+              icon={<IconDimensions size={18} />}
             />
           </Stepper>
         </Grid.Col>
-        <Grid.Col span={6} md={3} lg={4} order={3}>
+        <Grid.Col span={6} md={3} order={3}>
           <Group position="right">
             <ActionIcon
               variant="outline"
@@ -63,7 +75,9 @@ export default function Nav() {
             >
               {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
             </ActionIcon>
-            {step < 2 && <Button onClick={() => dispatch(next())}>Next</Button>}
+            {step < MAX_NAV && (
+              <Button onClick={() => dispatch(next())}>Next</Button>
+            )}
           </Group>
         </Grid.Col>
       </Grid>

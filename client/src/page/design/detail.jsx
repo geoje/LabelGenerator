@@ -167,7 +167,7 @@ export function Detail() {
           <Stack spacing={2}>
             <Group noWrap spacing="xs" align="flex-start">
               <TextInput
-                placeholder="Layer Name"
+                placeholder="Layer name"
                 sx={{ flex: 1 }}
                 size="xs"
                 icon={<IconHash size={DETAIL_ICON_SIZE} />}
@@ -350,7 +350,7 @@ export function Detail() {
             </Center>
             <Stack spacing={2}>
               <Select
-                placeholder="Border Style"
+                placeholder="Border style"
                 size="xs"
                 transitionDuration={100}
                 transition="pop-top-left"
@@ -384,7 +384,7 @@ export function Detail() {
                 }
               />
               <NumberInput
-                placeholder="Border Width"
+                placeholder="Border width"
                 size="xs"
                 icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
                 min={1}
@@ -403,7 +403,7 @@ export function Detail() {
                 }
               />
               <CustomColorInput
-                placeholder="Border Color"
+                placeholder="Border color"
                 selected={selected}
                 color={borderColor}
                 action={setLayerBorderColor}
@@ -412,7 +412,7 @@ export function Detail() {
 
               {![TYPE.qr, TYPE.image].includes(layer[selected].type) && (
                 <CustomColorInput
-                  placeholder="Background Color"
+                  placeholder="Background color"
                   selected={selected}
                   color={backColor}
                   action={setLayerBackColor}
@@ -434,7 +434,7 @@ export function Detail() {
                   size="xs"
                   error={fontError}
                   disabled={fontLoad}
-                  placeholder="Get Google Font"
+                  placeholder="Get google font"
                   icon={<IconTypography size={DETAIL_ICON_SIZE} />}
                   rightSection={
                     <ActionIcon
@@ -503,7 +503,7 @@ export function Detail() {
               </Group>
               <Select
                 size="xs"
-                placeholder="Font Weight"
+                placeholder="Font weight"
                 icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
                 data={[
                   { value: 100, label: "100" },
@@ -528,7 +528,7 @@ export function Detail() {
               />
               <NumberInput
                 size="xs"
-                placeholder="Font Size"
+                placeholder="Font size"
                 icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
                 min={1}
                 value={layer[selected].font?.size}
@@ -549,7 +549,7 @@ export function Detail() {
               <Group noWrap spacing="xs" align="flex-start">
                 <CustomColorInput
                   sx={{ flex: 1 }}
-                  placeholder="Font Color"
+                  placeholder="Font color"
                   selected={selected}
                   color={fontColor}
                   action={setLayerFontColor}

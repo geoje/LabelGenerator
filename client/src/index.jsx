@@ -9,6 +9,7 @@ import { store } from "./store";
 import Nav from "./page/nav/nav";
 import Import from "./page/import/import";
 import Design from "./page/design/design";
+import Calibrate from "./page/calibrate/calibrate";
 import Print from "./page/print/print";
 
 function App() {
@@ -33,7 +34,7 @@ function App() {
       >
         <NotificationsProvider>
           <Nav />
-          {step === 0 ? <Import /> : step === 1 ? <Design /> : <Print />}
+          {[<Import />, <Design />, <Calibrate />, <Print />][step]}
         </NotificationsProvider>
       </MantineProvider>
     </ColorSchemeProvider>
