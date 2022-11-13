@@ -20,8 +20,10 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import {
   UNIT,
+  PAPER_TYPE,
   convertSize,
-  setPaperSize,
+  convertGap,
+  setLayout,
   DEFAULT_PAPER_SIZE,
 } from "./paperSlice";
 import { DETAIL_ICON_SIZE } from "../design/drawSlice";
@@ -53,40 +55,41 @@ function PaperSize() {
           fullWidth
           data={[
             {
-              value: "fit",
+              value: PAPER_TYPE.fit,
               label: SegLabel(<IconFileHorizontal />, "Fit content"),
             },
             {
-              value: "letter",
+              value: PAPER_TYPE.letter,
               label: SegLabel(<IconLayoutBoardSplit />, "Letter"),
             },
             {
-              value: "a4",
+              value: PAPER_TYPE.a4,
               label: SegLabel(<IconLayoutBoardSplit />, "A4"),
             },
             {
-              value: "custom",
+              value: PAPER_TYPE.custom,
               label: SegLabel(<IconLayoutBoardSplit />, "Custom"),
             },
           ]}
           value={
             isSameSize(drawLayout, PaperLayout)
-              ? "fit"
+              ? PAPER_TYPE.fit
               : isSameSize(DEFAULT_PAPER_SIZE.letter, PaperLayout)
-              ? "letter"
+              ? PAPER_TYPE.letter
               : isSameSize(DEFAULT_PAPER_SIZE.a4, PaperLayout)
-              ? "a4"
-              : "custom"
+              ? PAPER_TYPE.a4
+              : PAPER_TYPE.custom
           }
           onChange={(value) =>
             dispatch(
-              setPaperSize(
-                Object.keys(DEFAULT_PAPER_SIZE).includes(value)
+              setLayout({
+                ...(Object.keys(DEFAULT_PAPER_SIZE).includes(value)
                   ? DEFAULT_PAPER_SIZE[value]
-                  : value === "custom"
+                  : value === PAPER_TYPE.custom
                   ? { ...drawLayout, w: drawLayout.w * 2 }
-                  : drawLayout
-              )
+                  : drawLayout),
+                type: value,
+              })
             )
           }
         />
@@ -99,7 +102,7 @@ function PaperSize() {
           step={PaperLayout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(
-              setPaperSize({
+              setLayout({
                 ...PaperLayout,
                 w: value,
               })
@@ -115,7 +118,7 @@ function PaperSize() {
           step={PaperLayout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(
-              setPaperSize({
+              setLayout({
                 ...PaperLayout,
                 h: value,
               })
@@ -137,7 +140,7 @@ function PaperSize() {
           value={PaperLayout.unit}
           onChange={(value) => {
             if (value === PaperLayout.unit) return;
-            dispatch(setPaperSize(convertSize(PaperLayout, value)));
+            dispatch(setLayout(convertSize(PaperLayout, value)));
           }}
         />
       </Grid.Col>
@@ -154,7 +157,10 @@ function PaperAdjust() {
     useSelector((state) => state.paper.layout),
     UNIT.px
   );
-  const gap = useSelector((state) => state.paper.gap);
+  const gapPx = convertGap(
+    useSelector((state) => state.paper.gap),
+    UNIT.px
+  );
 
   const containerSize = {
     w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
@@ -182,14 +188,20 @@ function PaperAdjust() {
         shadow="xs"
       >
         <Skeleton
-          width={drawLayoutPx.w * paperRatio}
-          height={drawLayoutPx.h * paperRatio}
+          sx={{
+            position: "absolute",
+            left: gapPx.l * paperRatio,
+            top: gapPx.t * paperRatio,
+            width: drawLayoutPx.w * paperRatio,
+            height: drawLayoutPx.h * paperRatio,
+            opacity: 0.8,
+          }}
         />
         <ActionIcon
           sx={{
             position: "absolute",
-            left: ((gap.l - ADJ_TOOL_SIZE) / 2) * paperRatio,
-            top: (gap.t + (drawLayoutPx.h - ADJ_TOOL_SIZE) / 2) * paperRatio,
+            left: ((gapPx.l - ADJ_TOOL_SIZE) / 2) * paperRatio,
+            top: (gapPx.t + (drawLayoutPx.h - ADJ_TOOL_SIZE) / 2) * paperRatio,
           }}
           size={ADJ_TOOL_SIZE}
           variant="transparent"
@@ -199,14 +211,49 @@ function PaperAdjust() {
         <ActionIcon
           sx={{
             position: "absolute",
-            left: (gap.l + (drawLayoutPx.w - ADJ_TOOL_SIZE) / 2) * paperRatio,
-            top: ((gap.t - ADJ_TOOL_SIZE) / 2) * paperRatio,
+            left: (gapPx.l + (drawLayoutPx.w - ADJ_TOOL_SIZE) / 2) * paperRatio,
+            top: ((gapPx.t - ADJ_TOOL_SIZE) / 2) * paperRatio,
           }}
           size={ADJ_TOOL_SIZE}
           variant="transparent"
         >
           <IconArrowsVertical />
         </ActionIcon>
+
+        {
+          /* Below is test code, So will have to remove */
+          [PAPER_TYPE.letter, PAPER_TYPE.a4].includes(paperLayoutPx.type) && (
+            <>
+              <Skeleton
+                sx={{
+                  position: "absolute",
+                  left: (gapPx.l + drawLayoutPx.w + gapPx.r) * paperRatio,
+                  top: gapPx.t * paperRatio,
+                  width: drawLayoutPx.w * paperRatio,
+                  height: drawLayoutPx.h * paperRatio,
+                }}
+              />
+              <Skeleton
+                sx={{
+                  position: "absolute",
+                  left: gapPx.l * paperRatio,
+                  top: (gapPx.t + drawLayoutPx.h + gapPx.b) * paperRatio,
+                  width: drawLayoutPx.w * paperRatio,
+                  height: drawLayoutPx.h * paperRatio,
+                }}
+              />
+              <Skeleton
+                sx={{
+                  position: "absolute",
+                  left: (gapPx.l + drawLayoutPx.w + gapPx.r) * paperRatio,
+                  top: (gapPx.t + drawLayoutPx.h + gapPx.b) * paperRatio,
+                  width: drawLayoutPx.w * paperRatio,
+                  height: drawLayoutPx.h * paperRatio,
+                }}
+              />
+            </>
+          )
+        }
       </Paper>
     </Center>
   );
