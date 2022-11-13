@@ -58,10 +58,10 @@ export function convertSize(layout, unit) {
 
 const slice = createSlice({
   name: "paper",
-  initialState: { size: { w: 4, h: 1, unit: UNIT.inch }, offset: {} },
+  initialState: { layout: { w: 4, h: 1, unit: UNIT.inch }, offset: {} },
   reducers: {
     setPaperSize: (state, action) => {
-      state.size = action.payload;
+      state.layout = action.payload;
     },
   },
 });

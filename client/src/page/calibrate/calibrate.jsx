@@ -1,7 +1,9 @@
 import {
+  Center,
   Grid,
   Group,
   NumberInput,
+  Paper,
   SegmentedControl,
   Select,
   Text,
@@ -22,8 +24,8 @@ import { DETAIL_ICON_SIZE } from "../design/drawSlice";
 
 function PaperSize() {
   const dispatch = useDispatch();
-  const layout = useSelector((state) => state.draw.layout);
-  const paper = useSelector((state) => state.paper.size);
+  const drawLayout = useSelector((state) => state.draw.layout);
+  const PaperLayout = useSelector((state) => state.paper.layout);
 
   const SegLabel = (icon, content) => (
     <Group noWrap>
@@ -62,11 +64,11 @@ function PaperSize() {
             },
           ]}
           value={
-            isSameSize(layout, paper)
+            isSameSize(drawLayout, PaperLayout)
               ? "fit"
-              : isSameSize(DEFAULT_PAPER_SIZE.letter, paper)
+              : isSameSize(DEFAULT_PAPER_SIZE.letter, PaperLayout)
               ? "letter"
-              : isSameSize(DEFAULT_PAPER_SIZE.a4, paper)
+              : isSameSize(DEFAULT_PAPER_SIZE.a4, PaperLayout)
               ? "a4"
               : "custom"
           }
@@ -76,8 +78,8 @@ function PaperSize() {
                 Object.keys(DEFAULT_PAPER_SIZE).includes(value)
                   ? DEFAULT_PAPER_SIZE[value]
                   : value === "custom"
-                  ? { ...layout, w: layout.w * 2 }
-                  : layout
+                  ? { ...drawLayout, w: drawLayout.w * 2 }
+                  : drawLayout
               )
             )
           }
@@ -85,14 +87,14 @@ function PaperSize() {
       </Grid.Col>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
-          value={paper.w}
+          value={PaperLayout.w}
           size="xs"
-          precision={paper.unit === UNIT.inch ? 2 : 0}
-          step={paper.unit === UNIT.inch ? 0.1 : 1}
+          precision={PaperLayout.unit === UNIT.inch ? 2 : 0}
+          step={PaperLayout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(
               setPaperSize({
-                ...paper,
+                ...PaperLayout,
                 w: value,
               })
             )
@@ -101,14 +103,14 @@ function PaperSize() {
       </Grid.Col>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
-          value={paper.h}
+          value={PaperLayout.h}
           size="xs"
-          precision={paper.unit === UNIT.inch ? 2 : 0}
-          step={paper.unit === UNIT.inch ? 0.1 : 1}
+          precision={PaperLayout.unit === UNIT.inch ? 2 : 0}
+          step={PaperLayout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(
               setPaperSize({
-                ...paper,
+                ...PaperLayout,
                 h: value,
               })
             )
@@ -126,10 +128,10 @@ function PaperSize() {
           data={Object.keys(UNIT).map((s) => {
             return { value: s, label: s };
           })}
-          value={paper.unit}
+          value={PaperLayout.unit}
           onChange={(value) => {
-            if (value === paper.unit) return;
-            dispatch(setPaperSize(convertSize(paper, value)));
+            if (value === PaperLayout.unit) return;
+            dispatch(setPaperSize(convertSize(PaperLayout, value)));
           }}
         />
       </Grid.Col>
@@ -138,7 +140,40 @@ function PaperSize() {
 }
 
 function PaperAdjust() {
-  return <></>;
+  const paperPx = convertSize(
+    useSelector((state) => state.paper.layout),
+    UNIT.px
+  );
+
+  const containerSize = {
+    w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
+    h: window.innerHeight - 140,
+  };
+  const paperRatio =
+    paperPx.w < containerSize.w && paperPx.h < containerSize.h
+      ? 1
+      : containerSize.w / paperPx.w < containerSize.h / paperPx.h
+      ? containerSize.w / paperPx.w
+      : containerSize.h / paperPx.h;
+
+  return (
+    <Center>
+      <Paper
+        sx={{
+          position: "relative",
+          width: paperPx.w * paperRatio,
+          height: paperPx.h * paperRatio,
+          boxSizing: "content-box",
+          background: "#fff",
+        }}
+        radius={0}
+        withBorder
+        shadow="xs"
+      >
+        <Center>Just pass this section. It will be developed later.</Center>
+      </Paper>
+    </Center>
+  );
 }
 
 export default function Calibrate() {
