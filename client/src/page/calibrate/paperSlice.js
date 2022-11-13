@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+export const CONTAINER_HEIGHT = 830;
 export const UNIT = { inch: "inch", mm: "mm", px: "px" };
 export const CONVERT_RATIO = {
   inch: {
@@ -43,7 +44,7 @@ export function convertSize(layout, unit) {
 }
 
 /**
- * layout: { w, h, l, t, r, b, unit, type },
+ * layout: { w, h, l, t, r, b, unit, ratio, type },
  */
 const slice = createSlice({
   name: "paper",
@@ -56,12 +57,25 @@ const slice = createSlice({
       r: 0.1,
       b: 0.1,
       unit: UNIT.inch,
+      ratio: 1,
       type: PAPER_TYPE.fit,
     },
   },
   reducers: {
     setLayout: (state, action) => {
       state.layout = action.payload;
+
+      const con = {
+        w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
+        h: CONTAINER_HEIGHT,
+      };
+      const pap = convertSize(state.layout, UNIT.px);
+      state.layout.ratio =
+        pap.w < con.w && pap.h < con.h
+          ? 1
+          : con.w / pap.w < con.h / pap.h
+          ? con.w / pap.w
+          : con.h / pap.h;
     },
   },
 });

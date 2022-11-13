@@ -174,17 +174,6 @@ function PaperAdjust() {
   const paperLayout = useSelector((state) => state.paper.layout);
   const paperLayoutPx = convertSize(paperLayout, UNIT.px);
 
-  const containerSize = {
-    w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
-    h: window.innerHeight - 140,
-  };
-  const paperRatio =
-    paperLayoutPx.w < containerSize.w && paperLayoutPx.h < containerSize.h
-      ? 1
-      : containerSize.w / paperLayoutPx.w < containerSize.h / paperLayoutPx.h
-      ? containerSize.w / paperLayoutPx.w
-      : containerSize.h / paperLayoutPx.h;
-
   const items = (() => {
     const result = [];
 
@@ -203,10 +192,10 @@ function PaperAdjust() {
             key={"skeleton" + result.length}
             sx={{
               position: "absolute",
-              left: x * paperRatio,
-              top: y * paperRatio,
-              width: drawLayoutPx.w * paperRatio,
-              height: drawLayoutPx.h * paperRatio,
+              left: x * paperLayout.ratio,
+              top: y * paperLayout.ratio,
+              width: drawLayoutPx.w * paperLayout.ratio,
+              height: drawLayoutPx.h * paperLayout.ratio,
               opacity: 0.8,
             }}
           />
@@ -220,8 +209,8 @@ function PaperAdjust() {
       <Paper
         sx={{
           position: "relative",
-          width: paperLayoutPx.w * paperRatio,
-          height: paperLayoutPx.h * paperRatio,
+          width: paperLayoutPx.w * paperLayout.ratio,
+          height: paperLayoutPx.h * paperLayout.ratio,
           boxSizing: "content-box",
           background: "#fff",
         }}
@@ -236,9 +225,9 @@ function PaperAdjust() {
             <ActionIcon
               sx={{
                 position: "absolute",
-                left: paperLayoutPx.l * paperRatio - ADJ_TOOL_SIZE,
+                left: paperLayoutPx.l * paperLayout.ratio - ADJ_TOOL_SIZE,
                 top:
-                  (paperLayoutPx.t + drawLayoutPx.h / 2) * paperRatio -
+                  (paperLayoutPx.t + drawLayoutPx.h / 2) * paperLayout.ratio -
                   ADJ_TOOL_SIZE / 2,
                 borderRight: `2px solid`,
                 borderRadius: 0,
@@ -270,9 +259,9 @@ function PaperAdjust() {
               sx={{
                 position: "absolute",
                 left:
-                  (paperLayoutPx.l + drawLayoutPx.w / 2) * paperRatio -
+                  (paperLayoutPx.l + drawLayoutPx.w / 2) * paperLayout.ratio -
                   ADJ_TOOL_SIZE / 2,
-                top: paperLayoutPx.t * paperRatio - ADJ_TOOL_SIZE,
+                top: paperLayoutPx.t * paperLayout.ratio - ADJ_TOOL_SIZE,
                 borderBottom: `2px solid`,
                 borderRadius: 0,
               }}
@@ -302,9 +291,9 @@ function PaperAdjust() {
             <ActionIcon
               sx={{
                 position: "absolute",
-                left: (paperLayoutPx.l + drawLayoutPx.w) * paperRatio,
+                left: (paperLayoutPx.l + drawLayoutPx.w) * paperLayout.ratio,
                 top:
-                  (paperLayoutPx.t + drawLayoutPx.h / 2) * paperRatio -
+                  (paperLayoutPx.t + drawLayoutPx.h / 2) * paperLayout.ratio -
                   ADJ_TOOL_SIZE / 2,
                 borderLeft: `2px solid`,
                 borderRadius: 0,
@@ -336,9 +325,9 @@ function PaperAdjust() {
               sx={{
                 position: "absolute",
                 left:
-                  (paperLayoutPx.l + drawLayoutPx.w / 2) * paperRatio -
+                  (paperLayoutPx.l + drawLayoutPx.w / 2) * paperLayout.ratio -
                   ADJ_TOOL_SIZE / 2,
-                top: (paperLayoutPx.t + drawLayoutPx.h) * paperRatio,
+                top: (paperLayoutPx.t + drawLayoutPx.h) * paperLayout.ratio,
                 borderTop: `2px solid`,
                 borderRadius: 0,
               }}

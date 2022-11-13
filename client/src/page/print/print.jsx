@@ -35,7 +35,7 @@ import {
   DETAIL_ICON_SIZE,
   convertSize,
 } from "../design/drawSlice";
-import { UNIT } from "../calibrate/paperSlice";
+import { UNIT, CONTAINER_HEIGHT } from "../calibrate/paperSlice";
 import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
@@ -366,7 +366,7 @@ function Preview() {
     <>
       <FixedSizeList
         width="100%"
-        height={800}
+        height={CONTAINER_HEIGHT}
         className="List"
         itemCount={
           isFiltered
