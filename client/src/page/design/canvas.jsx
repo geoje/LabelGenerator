@@ -11,14 +11,14 @@ import {
   setSelected,
   getLayerSize,
 } from "./drawSlice";
-import { UNIT, convertLayout } from "../calibrate/paperSlice";
+import { UNIT, convertSize } from "../calibrate/paperSlice";
 
 export function Canvas() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
   const page = useSelector((state) => state.draw.page);
-  const layoutPx = convertLayout(
+  const layoutPx = convertSize(
     useSelector((state) => state.draw.layout),
     UNIT.px
   );

@@ -23,7 +23,7 @@ import {
   setLayerVar,
   setLayerVarImg,
 } from "./drawSlice";
-import { UNIT, convertLayout } from "../calibrate/paperSlice";
+import { UNIT, convertSize } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,7 +32,7 @@ export function Variable() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
-  const layoutPx = convertLayout(
+  const layoutPx = convertSize(
     useSelector((state) => state.draw.layout),
     UNIT.px
   );

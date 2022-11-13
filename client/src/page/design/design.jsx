@@ -16,7 +16,7 @@ import {
   setLayoutRatio,
   setPage,
 } from "./drawSlice";
-import { UNIT, convertLayout } from "../calibrate/paperSlice";
+import { UNIT, convertSize } from "../calibrate/paperSlice";
 import { Variable } from "./variable";
 import { Tool } from "./tool";
 import { Canvas } from "./canvas";
@@ -28,7 +28,6 @@ function LayoutSize() {
   // Provider
   const dispatch = useDispatch();
   const layout = useSelector((state) => state.draw.layout);
-  console.log(layout);
 
   return (
     <Grid>
@@ -84,7 +83,7 @@ function LayoutSize() {
           value={layout.unit}
           onChange={(value) => {
             if (value === layout.unit) return;
-            dispatch(setLayout(convertLayout(layout, value)));
+            dispatch(setLayout(convertSize(layout, value)));
           }}
         />
       </Grid.Col>
@@ -112,7 +111,6 @@ function LayoutSize() {
     </Grid>
   );
 }
-
 // Middle
 export function Pagenation() {
   // Provider

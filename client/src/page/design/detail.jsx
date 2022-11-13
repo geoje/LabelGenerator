@@ -46,7 +46,7 @@ import {
   setLayerFont,
   getLayerSize,
 } from "./drawSlice";
-import { UNIT, convertLayout } from "../calibrate/paperSlice";
+import { UNIT, convertSize } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
@@ -134,7 +134,7 @@ function CustomColorInput({ placeholder, selected, color, action, icon }) {
 export function Detail() {
   // Provider
   const dispatch = useDispatch();
-  const layoutPx = convertLayout(
+  const layoutPx = convertSize(
     useSelector((state) => state.draw.layout),
     UNIT.px
   );
