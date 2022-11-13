@@ -37,25 +37,24 @@ export function convertSize(layout, unit) {
     unit,
   };
 }
-export function convertGap(gap, unit) {
+export function convertGap(gap, from, to) {
   return {
-    l: gap.l * CONVERT_RATIO[gap.unit][unit],
-    t: gap.t * CONVERT_RATIO[gap.unit][unit],
-    r: gap.r * CONVERT_RATIO[gap.unit][unit],
-    b: gap.b * CONVERT_RATIO[gap.unit][unit],
-    unit,
+    l: gap.l * CONVERT_RATIO[from][to],
+    t: gap.t * CONVERT_RATIO[from][to],
+    r: gap.r * CONVERT_RATIO[from][to],
+    b: gap.b * CONVERT_RATIO[from][to],
   };
 }
 
 /**
  * layout: { w, h, unit },
- * gap: { l, t, r, b, unit },
+ * gap: { l, t, r, b },
  */
 const slice = createSlice({
   name: "paper",
   initialState: {
     layout: { w: 4, h: 1, unit: UNIT.inch, type: PAPER_TYPE.fit },
-    gap: { l: 0, t: 0, r: 0, b: 0, unit: UNIT.inch },
+    gap: { l: 0, t: 0, r: 0, b: 0 },
   },
   reducers: {
     setLayout: (state, action) => {

@@ -5,6 +5,7 @@ import {
   Group,
   NumberInput,
   Paper,
+  Popover,
   SegmentedControl,
   Select,
   Skeleton,
@@ -27,6 +28,7 @@ import {
   convertGap,
   setLayout,
   DEFAULT_PAPER_SIZE,
+  setGap,
 } from "./paperSlice";
 import { DETAIL_ICON_SIZE } from "../design/drawSlice";
 
@@ -35,7 +37,7 @@ const ADJ_TOOL_SIZE = 21;
 function PaperSize() {
   const dispatch = useDispatch();
   const drawLayout = useSelector((state) => state.draw.layout);
-  const PaperLayout = useSelector((state) => state.paper.layout);
+  const paperLayout = useSelector((state) => state.paper.layout);
 
   const SegLabel = (icon, content) => (
     <Group noWrap>
@@ -74,11 +76,11 @@ function PaperSize() {
             },
           ]}
           value={
-            isSameSize(drawLayout, PaperLayout)
+            isSameSize(drawLayout, paperLayout)
               ? PAPER_TYPE.fit
-              : isSameSize(DEFAULT_PAPER_SIZE.letter, PaperLayout)
+              : isSameSize(DEFAULT_PAPER_SIZE.letter, paperLayout)
               ? PAPER_TYPE.letter
-              : isSameSize(DEFAULT_PAPER_SIZE.a4, PaperLayout)
+              : isSameSize(DEFAULT_PAPER_SIZE.a4, paperLayout)
               ? PAPER_TYPE.a4
               : PAPER_TYPE.custom
           }
@@ -98,14 +100,15 @@ function PaperSize() {
       </Grid.Col>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
-          value={PaperLayout.w}
           size="xs"
-          precision={PaperLayout.unit === UNIT.inch ? 2 : 0}
-          step={PaperLayout.unit === UNIT.inch ? 0.1 : 1}
+          min={0}
+          precision={paperLayout.unit === UNIT.inch ? 2 : 0}
+          step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+          value={paperLayout.w}
           onChange={(value) =>
             dispatch(
               setLayout({
-                ...PaperLayout,
+                ...paperLayout,
                 w: value,
               })
             )
@@ -114,14 +117,15 @@ function PaperSize() {
       </Grid.Col>
       <Grid.Col span={4} md={6} xl={4}>
         <NumberInput
-          value={PaperLayout.h}
           size="xs"
-          precision={PaperLayout.unit === UNIT.inch ? 2 : 0}
-          step={PaperLayout.unit === UNIT.inch ? 0.1 : 1}
+          min={0}
+          precision={paperLayout.unit === UNIT.inch ? 2 : 0}
+          step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+          value={paperLayout.h}
           onChange={(value) =>
             dispatch(
               setLayout({
-                ...PaperLayout,
+                ...paperLayout,
                 h: value,
               })
             )
@@ -139,10 +143,10 @@ function PaperSize() {
           data={Object.keys(UNIT).map((s) => {
             return { value: s, label: s };
           })}
-          value={PaperLayout.unit}
+          value={paperLayout.unit}
           onChange={(value) => {
-            if (value === PaperLayout.unit) return;
-            dispatch(setLayout(convertSize(PaperLayout, value)));
+            if (value === paperLayout.unit) return;
+            dispatch(setLayout(convertSize(paperLayout, value)));
           }}
         />
       </Grid.Col>
@@ -151,18 +155,15 @@ function PaperSize() {
 }
 
 function PaperAdjust() {
+  const dispatch = useDispatch();
   const drawLayoutPx = convertSize(
     useSelector((state) => state.draw.layout),
     UNIT.px
   );
-  const paperLayoutPx = convertSize(
-    useSelector((state) => state.paper.layout),
-    UNIT.px
-  );
-  const gapPx = convertGap(
-    useSelector((state) => state.paper.gap),
-    UNIT.px
-  );
+  const paperLayout = useSelector((state) => state.paper.layout);
+  const paperLayoutPx = convertSize(paperLayout, UNIT.px);
+  const gap = useSelector((state) => state.paper.gap);
+  const gapPx = convertGap(gap, paperLayout.unit, UNIT.px);
 
   const containerSize = {
     w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
@@ -237,66 +238,130 @@ function PaperAdjust() {
           )
         }
 
-        <ActionIcon
-          sx={{
-            position: "absolute",
-            left: gapPx.l * paperRatio - ADJ_TOOL_SIZE,
-            top:
-              (gapPx.t + drawLayoutPx.h / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
-            borderRight: `2px solid`,
-            borderRadius: 0,
-          }}
-          size={ADJ_TOOL_SIZE}
-          variant="transparent"
-          color="blue.6"
-        >
-          <IconArrowBigRight />
-        </ActionIcon>
-        <ActionIcon
-          sx={{
-            position: "absolute",
-            left:
-              (gapPx.l + drawLayoutPx.w / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
-            top: gapPx.t * paperRatio - ADJ_TOOL_SIZE,
-            borderBottom: `2px solid`,
-            borderRadius: 0,
-          }}
-          size={ADJ_TOOL_SIZE}
-          variant="transparent"
-          color="blue.6"
-        >
-          <IconArrowBigDown />
-        </ActionIcon>
-        <ActionIcon
-          sx={{
-            position: "absolute",
-            left: (gapPx.l + drawLayoutPx.w) * paperRatio,
-            top:
-              (gapPx.t + drawLayoutPx.h / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
-            borderLeft: `2px solid`,
-            borderRadius: 0,
-          }}
-          size={ADJ_TOOL_SIZE}
-          variant="transparent"
-          color="blue.6"
-        >
-          <IconArrowBigRightLines />
-        </ActionIcon>
-        <ActionIcon
-          sx={{
-            position: "absolute",
-            left:
-              (gapPx.l + drawLayoutPx.w / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
-            top: (gapPx.t + drawLayoutPx.h) * paperRatio,
-            borderTop: `2px solid`,
-            borderRadius: 0,
-          }}
-          size={ADJ_TOOL_SIZE}
-          variant="transparent"
-          color="blue.6"
-        >
-          <IconArrowBigDownLines />
-        </ActionIcon>
+        <Popover width={140} position="bottom" withArrow shadow="md">
+          <Popover.Target>
+            <ActionIcon
+              sx={{
+                position: "absolute",
+                left: gapPx.l * paperRatio - ADJ_TOOL_SIZE,
+                top:
+                  (gapPx.t + drawLayoutPx.h / 2) * paperRatio -
+                  ADJ_TOOL_SIZE / 2,
+                borderRight: `2px solid`,
+                borderRadius: 0,
+              }}
+              size={ADJ_TOOL_SIZE}
+              variant="transparent"
+              color="blue.6"
+            >
+              <IconArrowBigRight />
+            </ActionIcon>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <NumberInput
+              size="xs"
+              min={0}
+              description={paperLayout.unit}
+              precision={paperLayout.unit === UNIT.inch ? 2 : 0}
+              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              value={gap.l}
+              onChange={(value) => dispatch(setGap({ ...gap, l: value }))}
+            />
+          </Popover.Dropdown>
+        </Popover>
+        <Popover width={140} position="bottom" withArrow shadow="md">
+          <Popover.Target>
+            <ActionIcon
+              sx={{
+                position: "absolute",
+                left:
+                  (gapPx.l + drawLayoutPx.w / 2) * paperRatio -
+                  ADJ_TOOL_SIZE / 2,
+                top: gapPx.t * paperRatio - ADJ_TOOL_SIZE,
+                borderBottom: `2px solid`,
+                borderRadius: 0,
+              }}
+              size={ADJ_TOOL_SIZE}
+              variant="transparent"
+              color="blue.6"
+            >
+              <IconArrowBigDown />
+            </ActionIcon>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <NumberInput
+              size="xs"
+              min={0}
+              description={paperLayout.unit}
+              precision={paperLayout.unit === UNIT.inch ? 2 : 0}
+              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              value={gap.t}
+              onChange={(value) => dispatch(setGap({ ...gap, t: value }))}
+            />
+          </Popover.Dropdown>
+        </Popover>
+        <Popover width={140} position="bottom" withArrow shadow="md">
+          <Popover.Target>
+            <ActionIcon
+              sx={{
+                position: "absolute",
+                left: (gapPx.l + drawLayoutPx.w) * paperRatio,
+                top:
+                  (gapPx.t + drawLayoutPx.h / 2) * paperRatio -
+                  ADJ_TOOL_SIZE / 2,
+                borderLeft: `2px solid`,
+                borderRadius: 0,
+              }}
+              size={ADJ_TOOL_SIZE}
+              variant="transparent"
+              color="blue.6"
+            >
+              <IconArrowBigRightLines />
+            </ActionIcon>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <NumberInput
+              size="xs"
+              min={0}
+              description={paperLayout.unit}
+              precision={paperLayout.unit === UNIT.inch ? 2 : 0}
+              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              value={gap.r}
+              onChange={(value) => dispatch(setGap({ ...gap, r: value }))}
+            />
+          </Popover.Dropdown>
+        </Popover>
+        <Popover width={140} position="bottom" withArrow shadow="md">
+          <Popover.Target>
+            <ActionIcon
+              sx={{
+                position: "absolute",
+                left:
+                  (gapPx.l + drawLayoutPx.w / 2) * paperRatio -
+                  ADJ_TOOL_SIZE / 2,
+                top: (gapPx.t + drawLayoutPx.h) * paperRatio,
+                borderTop: `2px solid`,
+                borderRadius: 0,
+              }}
+              size={ADJ_TOOL_SIZE}
+              variant="transparent"
+              color="blue.6"
+            >
+              <IconArrowBigDownLines />
+            </ActionIcon>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <NumberInput
+              size="xs"
+              min={0}
+              description={paperLayout.unit}
+              precision={paperLayout.unit === UNIT.inch ? 2 : 0}
+              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              value={gap.b}
+              onChange={(value) => dispatch(setGap({ ...gap, b: value }))}
+            />
+          </Popover.Dropdown>
+        </Popover>
       </Paper>
     </Center>
   );
