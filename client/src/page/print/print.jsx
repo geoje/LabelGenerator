@@ -383,7 +383,9 @@ function Preview() {
             </>
           }
         >
-          <IconInfoCircle color="gray" />
+          <Text color="gray">
+            <IconInfoCircle />
+          </Text>
         </Tooltip>
         <Stack align="center" spacing={0}>
           <Badge
