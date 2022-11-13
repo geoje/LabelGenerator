@@ -29,8 +29,13 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
-import { UNIT, convertSize } from "../calibrate/paperSlice";
+import {
+  TYPE,
+  GROUP,
+  DETAIL_ICON_SIZE,
+  convertSize,
+} from "../design/drawSlice";
+import { UNIT } from "../calibrate/paperSlice";
 import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 

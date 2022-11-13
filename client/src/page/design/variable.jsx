@@ -19,11 +19,12 @@ import {
   GROUP,
   MAX_FILE_SIZE,
   DETAIL_ICON_SIZE,
+  convertSize,
   setLayerSize,
   setLayerVar,
   setLayerVarImg,
 } from "./drawSlice";
-import { UNIT, convertSize } from "../calibrate/paperSlice";
+import { UNIT } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useDispatch, useSelector } from "react-redux";

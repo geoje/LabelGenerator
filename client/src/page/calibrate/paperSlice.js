@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const UNIT = { inch: "inch", mm: "mm", px: "px" };
-const CONVERT_RATIO = {
+export const CONVERT_RATIO = {
   inch: {
     inch: 1,
     mm: 25.4,
@@ -34,37 +34,37 @@ export function convertSize(layout, unit) {
     ...layout,
     w: layout.w * CONVERT_RATIO[layout.unit][unit],
     h: layout.h * CONVERT_RATIO[layout.unit][unit],
+    l: layout.l * CONVERT_RATIO[layout.unit][unit],
+    t: layout.t * CONVERT_RATIO[layout.unit][unit],
+    r: layout.r * CONVERT_RATIO[layout.unit][unit],
+    b: layout.b * CONVERT_RATIO[layout.unit][unit],
     unit,
-  };
-}
-export function convertGap(gap, from, to) {
-  return {
-    l: gap.l * CONVERT_RATIO[from][to],
-    t: gap.t * CONVERT_RATIO[from][to],
-    r: gap.r * CONVERT_RATIO[from][to],
-    b: gap.b * CONVERT_RATIO[from][to],
   };
 }
 
 /**
- * layout: { w, h, unit },
- * gap: { l, t, r, b },
+ * layout: { w, h, l, t, r, b, unit, type },
  */
 const slice = createSlice({
   name: "paper",
   initialState: {
-    layout: { w: 4, h: 1, unit: UNIT.inch, type: PAPER_TYPE.fit },
-    gap: { l: 0, t: 0, r: 0, b: 0 },
+    layout: {
+      w: 4,
+      h: 1,
+      l: 0,
+      t: 0,
+      r: 0.1,
+      b: 0.1,
+      unit: UNIT.inch,
+      type: PAPER_TYPE.fit,
+    },
   },
   reducers: {
     setLayout: (state, action) => {
       state.layout = action.payload;
     },
-    setGap: (state, action) => {
-      state.gap = action.payload;
-    },
   },
 });
 
-export const { setLayout, setGap } = slice.actions;
+export const { setLayout } = slice.actions;
 export default slice.reducer;

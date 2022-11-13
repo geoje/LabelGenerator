@@ -12,11 +12,12 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DETAIL_ICON_SIZE,
+  convertSize,
   setLayout,
   setLayoutRatio,
   setPage,
 } from "./drawSlice";
-import { UNIT, convertSize } from "../calibrate/paperSlice";
+import { UNIT } from "../calibrate/paperSlice";
 import { Variable } from "./variable";
 import { Tool } from "./tool";
 import { Canvas } from "./canvas";
@@ -41,7 +42,7 @@ function LayoutSize() {
         <NumberInput
           value={layout.w}
           size="xs"
-          precision={layout.unit === UNIT.inch ? 2 : 0}
+          precision={2}
           step={layout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(
@@ -57,7 +58,7 @@ function LayoutSize() {
         <NumberInput
           value={layout.h}
           size="xs"
-          precision={layout.unit === UNIT.inch ? 2 : 0}
+          precision={2}
           step={layout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(

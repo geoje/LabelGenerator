@@ -58,7 +58,11 @@ export default function Nav() {
               label="Design label"
               icon={<IconPalette size={18} />}
             />
-            <Stepper.Step label="Set paper" icon={<IconRuler3 size={18} />} />
+            <Stepper.Step
+              label="Set paper"
+              description="developing"
+              icon={<IconRuler3 size={18} />}
+            />
           </Stepper>
         </Grid.Col>
         <Grid.Col span={6} md={3} order={3}>

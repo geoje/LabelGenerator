@@ -6,12 +6,13 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   TYPE,
   GROUP,
+  convertSize,
   removeLayerByIndex,
   setLayerSize,
   setSelected,
   getLayerSize,
 } from "./drawSlice";
-import { UNIT, convertSize } from "../calibrate/paperSlice";
+import { UNIT } from "../calibrate/paperSlice";
 
 export function Canvas() {
   // Provider

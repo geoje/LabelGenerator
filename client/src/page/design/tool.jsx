@@ -18,12 +18,13 @@ import {
   TYPE,
   GROUP,
   MAX_FILE_SIZE,
+  convertSize,
   typeToIcon,
   setLayout,
   addLayer,
   setLayer,
 } from "./drawSlice";
-import { UNIT, convertSize } from "../calibrate/paperSlice";
+import { UNIT } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";

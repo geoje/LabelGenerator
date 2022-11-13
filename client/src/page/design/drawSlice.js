@@ -8,6 +8,7 @@ import {
   IconSquare,
   IconTypography,
 } from "@tabler/icons";
+import { CONVERT_RATIO } from "../calibrate/paperSlice";
 
 export const TYPE = {
   rect: "rect",
@@ -24,6 +25,14 @@ export const GROUP = {
 export const DETAIL_ICON_SIZE = 14;
 export const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
+export function convertSize(layout, unit) {
+  return {
+    ...layout,
+    w: layout.w * CONVERT_RATIO[layout.unit][unit],
+    h: layout.h * CONVERT_RATIO[layout.unit][unit],
+    unit,
+  };
+}
 export function typeToIcon(type) {
   return type === TYPE.rect ? (
     <IconSquare />
