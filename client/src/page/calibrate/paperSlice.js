@@ -55,7 +55,7 @@ const slice = createSlice({
   name: "paper",
   initialState: {
     layout: { w: 4, h: 1, unit: UNIT.inch, type: PAPER_TYPE.fit },
-    gap: { l: 0.1, t: 0.1, r: 0.1, b: 0.1, unit: UNIT.inch },
+    gap: { l: 0, t: 0, r: 0, b: 0, unit: UNIT.inch },
   },
   reducers: {
     setLayout: (state, action) => {

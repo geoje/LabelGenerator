@@ -11,8 +11,10 @@ import {
   Text,
 } from "@mantine/core";
 import {
-  IconArrowsHorizontal,
-  IconArrowsVertical,
+  IconArrowBigDown,
+  IconArrowBigDownLines,
+  IconArrowBigRight,
+  IconArrowBigRightLines,
   IconFileHorizontal,
   IconLayoutBoardSplit,
   IconRuler3,
@@ -197,29 +199,6 @@ function PaperAdjust() {
             opacity: 0.8,
           }}
         />
-        <ActionIcon
-          sx={{
-            position: "absolute",
-            left: ((gapPx.l - ADJ_TOOL_SIZE) / 2) * paperRatio,
-            top: (gapPx.t + (drawLayoutPx.h - ADJ_TOOL_SIZE) / 2) * paperRatio,
-          }}
-          size={ADJ_TOOL_SIZE}
-          variant="transparent"
-        >
-          <IconArrowsHorizontal />
-        </ActionIcon>
-        <ActionIcon
-          sx={{
-            position: "absolute",
-            left: (gapPx.l + (drawLayoutPx.w - ADJ_TOOL_SIZE) / 2) * paperRatio,
-            top: ((gapPx.t - ADJ_TOOL_SIZE) / 2) * paperRatio,
-          }}
-          size={ADJ_TOOL_SIZE}
-          variant="transparent"
-        >
-          <IconArrowsVertical />
-        </ActionIcon>
-
         {
           /* Below is test code, So will have to remove */
           [PAPER_TYPE.letter, PAPER_TYPE.a4].includes(paperLayoutPx.type) && (
@@ -231,6 +210,7 @@ function PaperAdjust() {
                   top: gapPx.t * paperRatio,
                   width: drawLayoutPx.w * paperRatio,
                   height: drawLayoutPx.h * paperRatio,
+                  opacity: 0.8,
                 }}
               />
               <Skeleton
@@ -240,6 +220,7 @@ function PaperAdjust() {
                   top: (gapPx.t + drawLayoutPx.h + gapPx.b) * paperRatio,
                   width: drawLayoutPx.w * paperRatio,
                   height: drawLayoutPx.h * paperRatio,
+                  opacity: 0.8,
                 }}
               />
               <Skeleton
@@ -249,11 +230,73 @@ function PaperAdjust() {
                   top: (gapPx.t + drawLayoutPx.h + gapPx.b) * paperRatio,
                   width: drawLayoutPx.w * paperRatio,
                   height: drawLayoutPx.h * paperRatio,
+                  opacity: 0.8,
                 }}
               />
             </>
           )
         }
+
+        <ActionIcon
+          sx={{
+            position: "absolute",
+            left: gapPx.l * paperRatio - ADJ_TOOL_SIZE,
+            top:
+              (gapPx.t + drawLayoutPx.h / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
+            borderRight: `2px solid`,
+            borderRadius: 0,
+          }}
+          size={ADJ_TOOL_SIZE}
+          variant="transparent"
+          color="blue.6"
+        >
+          <IconArrowBigRight />
+        </ActionIcon>
+        <ActionIcon
+          sx={{
+            position: "absolute",
+            left:
+              (gapPx.l + drawLayoutPx.w / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
+            top: gapPx.t * paperRatio - ADJ_TOOL_SIZE,
+            borderBottom: `2px solid`,
+            borderRadius: 0,
+          }}
+          size={ADJ_TOOL_SIZE}
+          variant="transparent"
+          color="blue.6"
+        >
+          <IconArrowBigDown />
+        </ActionIcon>
+        <ActionIcon
+          sx={{
+            position: "absolute",
+            left: (gapPx.l + drawLayoutPx.w) * paperRatio,
+            top:
+              (gapPx.t + drawLayoutPx.h / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
+            borderLeft: `2px solid`,
+            borderRadius: 0,
+          }}
+          size={ADJ_TOOL_SIZE}
+          variant="transparent"
+          color="blue.6"
+        >
+          <IconArrowBigRightLines />
+        </ActionIcon>
+        <ActionIcon
+          sx={{
+            position: "absolute",
+            left:
+              (gapPx.l + drawLayoutPx.w / 2) * paperRatio - ADJ_TOOL_SIZE / 2,
+            top: (gapPx.t + drawLayoutPx.h) * paperRatio,
+            borderTop: `2px solid`,
+            borderRadius: 0,
+          }}
+          size={ADJ_TOOL_SIZE}
+          variant="transparent"
+          color="blue.6"
+        >
+          <IconArrowBigDownLines />
+        </ActionIcon>
       </Paper>
     </Center>
   );
