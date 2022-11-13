@@ -6,6 +6,7 @@ import {
   Paper,
   SegmentedControl,
   Select,
+  Skeleton,
   Text,
 } from "@mantine/core";
 import {
@@ -140,7 +141,11 @@ function PaperSize() {
 }
 
 function PaperAdjust() {
-  const paperPx = convertSize(
+  const drawLayoutPx = convertSize(
+    useSelector((state) => state.draw.layout),
+    UNIT.px
+  );
+  const paperLayoutPx = convertSize(
     useSelector((state) => state.paper.layout),
     UNIT.px
   );
@@ -150,19 +155,19 @@ function PaperAdjust() {
     h: window.innerHeight - 140,
   };
   const paperRatio =
-    paperPx.w < containerSize.w && paperPx.h < containerSize.h
+    paperLayoutPx.w < containerSize.w && paperLayoutPx.h < containerSize.h
       ? 1
-      : containerSize.w / paperPx.w < containerSize.h / paperPx.h
-      ? containerSize.w / paperPx.w
-      : containerSize.h / paperPx.h;
+      : containerSize.w / paperLayoutPx.w < containerSize.h / paperLayoutPx.h
+      ? containerSize.w / paperLayoutPx.w
+      : containerSize.h / paperLayoutPx.h;
 
   return (
     <Center>
       <Paper
         sx={{
           position: "relative",
-          width: paperPx.w * paperRatio,
-          height: paperPx.h * paperRatio,
+          width: paperLayoutPx.w * paperRatio,
+          height: paperLayoutPx.h * paperRatio,
           boxSizing: "content-box",
           background: "#fff",
         }}
@@ -170,7 +175,10 @@ function PaperAdjust() {
         withBorder
         shadow="xs"
       >
-        <Center>Just pass this section. It will be developed later.</Center>
+        <Skeleton
+          width={drawLayoutPx.w * paperRatio}
+          height={drawLayoutPx.h * paperRatio}
+        />
       </Paper>
     </Center>
   );
