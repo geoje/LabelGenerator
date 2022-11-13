@@ -44,8 +44,9 @@ function PaperSize() {
     </Group>
   );
   const isSameSize = (size1, size2) =>
-    convertSize(size1, size2.unit).w === size2.w &&
-    convertSize(size1, size2.unit).h === size2.h;
+    Math.abs(convertSize(size1, size2.unit).w - size2.w) +
+      Math.abs(convertSize(size1, size2.unit).h - size2.h) <
+    0.01;
 
   return (
     <Grid>

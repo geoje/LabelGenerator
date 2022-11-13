@@ -30,16 +30,16 @@ export const DEFAULT_PAPER_SIZE = {
 };
 
 export function convertSize(layout, unit) {
-  return {
-    ...layout,
-    w: layout.w * CONVERT_RATIO[layout.unit][unit],
-    h: layout.h * CONVERT_RATIO[layout.unit][unit],
-    l: layout.l * CONVERT_RATIO[layout.unit][unit],
-    t: layout.t * CONVERT_RATIO[layout.unit][unit],
-    r: layout.r * CONVERT_RATIO[layout.unit][unit],
-    b: layout.b * CONVERT_RATIO[layout.unit][unit],
-    unit,
-  };
+  let result = { ...layout, unit };
+  ["w", "h", "l", "t", "r", "b"].forEach(
+    (k) => (result[k] = result[k] * CONVERT_RATIO[layout.unit][unit])
+  );
+
+  ["w", "h", "l", "t", "r", "b"]
+    .filter((k) => String(result[k]).match(/\.\d+(0{6}|9{6})/g))
+    .forEach((k) => (result[k] = Math.round(result[k] * 10000) / 10000));
+
+  return result;
 }
 
 /**
