@@ -36,7 +36,6 @@ import {
 import {
   TYPE,
   DETAIL_ICON_SIZE,
-  convertLayout,
   setLayerSize,
   setRename,
   renameLayer,
@@ -47,6 +46,7 @@ import {
   setLayerFont,
   getLayerSize,
 } from "./drawSlice";
+import { UNIT, convertLayout } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
@@ -134,7 +134,10 @@ function CustomColorInput({ placeholder, selected, color, action, icon }) {
 export function Detail() {
   // Provider
   const dispatch = useDispatch();
-  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
+  const layoutPx = convertLayout(
+    useSelector((state) => state.draw.layout),
+    UNIT.px
+  );
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
   const rename = useSelector((state) => state.draw.rename);

@@ -11,13 +11,12 @@ import { IconDimensions, IconRuler3 } from "@tabler/icons";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  UNIT,
   DETAIL_ICON_SIZE,
-  convertLayout,
   setLayout,
   setLayoutRatio,
   setPage,
 } from "./drawSlice";
+import { UNIT, convertLayout } from "../calibrate/paperSlice";
 import { Variable } from "./variable";
 import { Tool } from "./tool";
 import { Canvas } from "./canvas";
@@ -29,6 +28,7 @@ function LayoutSize() {
   // Provider
   const dispatch = useDispatch();
   const layout = useSelector((state) => state.draw.layout);
+  console.log(layout);
 
   return (
     <Grid>
@@ -42,8 +42,8 @@ function LayoutSize() {
         <NumberInput
           value={layout.w}
           size="xs"
-          precision={layout.unit === "px" ? 0 : 2}
-          step={layout.unit === "px" ? 1 : 0.1}
+          precision={layout.unit === UNIT.inch ? 2 : 0}
+          step={layout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(
               setLayout({
@@ -58,8 +58,8 @@ function LayoutSize() {
         <NumberInput
           value={layout.h}
           size="xs"
-          precision={layout.unit === "px" ? 0 : 2}
-          step={layout.unit === "px" ? 1 : 0.1}
+          precision={layout.unit === UNIT.inch ? 2 : 0}
+          step={layout.unit === UNIT.inch ? 0.1 : 1}
           onChange={(value) =>
             dispatch(
               setLayout({
@@ -84,7 +84,7 @@ function LayoutSize() {
           value={layout.unit}
           onChange={(value) => {
             if (value === layout.unit) return;
-            dispatch(setLayout(convertLayout[value](layout)));
+            dispatch(setLayout(convertLayout(layout, value)));
           }}
         />
       </Grid.Col>

@@ -6,19 +6,22 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   TYPE,
   GROUP,
-  convertLayout,
   removeLayerByIndex,
   setLayerSize,
   setSelected,
   getLayerSize,
 } from "./drawSlice";
+import { UNIT, convertLayout } from "../calibrate/paperSlice";
 
 export function Canvas() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
   const page = useSelector((state) => state.draw.page);
-  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
+  const layoutPx = convertLayout(
+    useSelector((state) => state.draw.layout),
+    UNIT.px
+  );
   const layer = useSelector((state) => state.draw.layer);
   let selected = useSelector((state) => state.draw.selected);
 

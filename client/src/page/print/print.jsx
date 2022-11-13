@@ -29,12 +29,8 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import {
-  TYPE,
-  GROUP,
-  convertLayout,
-  DETAIL_ICON_SIZE,
-} from "../design/drawSlice";
+import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
+import { UNIT, convertLayout } from "../calibrate/paperSlice";
 import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
@@ -44,7 +40,10 @@ const MAX_COUNT = 10000;
 function Canvas(props) {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const layoutPx = convertLayout.px(useSelector((state) => state.draw.layout));
+  const layoutPx = convertLayout(
+    useSelector((state) => state.draw.layout),
+    UNIT.px
+  );
   const layer = useSelector((state) => state.draw.layer);
 
   const items = layer.map((_, i) => {
@@ -234,7 +233,7 @@ function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
   const layout = useSelector((state) => state.draw.layout);
-  const layoutPx = convertLayout.px(layout);
+  const layoutPx = convertLayout(layout, UNIT.px);
   const qtyFormat = useSelector((state) => state.copy.qtyFormat);
   const filter = useSelector((state) => state.copy.filter);
   const isFiltered = filter.format && filter.value;

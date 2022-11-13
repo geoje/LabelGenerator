@@ -9,7 +9,6 @@ import {
   IconTypography,
 } from "@tabler/icons";
 
-export const UNIT = { inch: "inch", cm: "cm", px: "px" };
 export const TYPE = {
   rect: "rect",
   circle: "circle",
@@ -24,60 +23,6 @@ export const GROUP = {
 };
 export const DETAIL_ICON_SIZE = 14;
 export const MAX_FILE_SIZE = 5 * 1024 ** 2;
-
-export const convertLayout = {
-  inch: (layout) => {
-    if (layout.unit === "cm")
-      return {
-        w: layout.w / 2.54,
-        h: layout.h / 2.54,
-        unit: "inch",
-        ratio: layout.ratio,
-      };
-    else if (layout.unit === "px")
-      return {
-        w: layout.w / 96,
-        h: layout.h / 96,
-        unit: "inch",
-        ratio: layout.ratio,
-      };
-    else return layout;
-  },
-  cm: (layout) => {
-    if (layout.unit === "inch")
-      return {
-        w: layout.w * 2.54,
-        h: layout.h * 2.54,
-        unit: "cm",
-        ratio: layout.ratio,
-      };
-    else if (layout.unit === "px")
-      return {
-        w: (layout.w / 96) * 2.54,
-        h: (layout.h / 96) * 2.54,
-        unit: "cm",
-        ratio: layout.ratio,
-      };
-    else return layout;
-  },
-  px: (layout) => {
-    if (layout.unit === "inch")
-      return {
-        w: Math.round(layout.w * 96),
-        h: Math.round(layout.h * 96),
-        unit: "px",
-        ratio: layout.ratio,
-      };
-    else if (layout.unit === "cm")
-      return {
-        w: Math.round((layout.w / 2.54) * 96),
-        h: Math.round((layout.h / 2.54) * 96),
-        unit: "px",
-        ratio: layout.ratio,
-      };
-    else return layout;
-  },
-};
 
 export function typeToIcon(type) {
   return type === TYPE.rect ? (
@@ -122,7 +67,7 @@ export function getLayerSize(layer, ratio) {
 
 /**
  * size: {w, h, unit, ratio}
- * 1 inch = 2.54 cm
+ * 1 inch = 25.4 mm
  * 1 inch = 96 px (for pdf is 72px)
  *
  * layer: [{

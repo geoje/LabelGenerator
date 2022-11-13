@@ -18,12 +18,12 @@ import {
   TYPE,
   GROUP,
   MAX_FILE_SIZE,
-  convertLayout,
   typeToIcon,
   setLayout,
   addLayer,
   setLayer,
 } from "./drawSlice";
+import { UNIT, convertLayout } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
@@ -61,7 +61,7 @@ export function Tool() {
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
   const layout = useSelector((state) => state.draw.layout);
-  const layoutPx = convertLayout.px(layout);
+  const layoutPx = convertLayout(layout, UNIT.px);
   const layer = useSelector((state) => state.draw.layer);
   const page = useSelector((state) => state.draw.page);
 
