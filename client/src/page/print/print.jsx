@@ -20,6 +20,7 @@ import {
   IconAlertTriangle,
   IconCopy,
   IconFilter,
+  IconInfoCircle,
   IconPrinter,
   IconVariable,
 } from "@tabler/icons";
@@ -29,13 +30,13 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
+import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
 import {
-  TYPE,
-  GROUP,
-  DETAIL_ICON_SIZE,
+  UNIT,
+  CONTAINER_HEIGHT,
   convertSize,
-} from "../design/drawSlice";
-import { UNIT, CONTAINER_HEIGHT } from "../calibrate/paperSlice";
+  PAPER_TYPE,
+} from "../calibrate/paperSlice";
 import { setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
@@ -187,6 +188,51 @@ function Canvas(props) {
     </Paper>
   );
 }
+function LabelPaper(props) {
+  const drawLayoutPx = convertSize(
+    useSelector((state) => state.draw.layout),
+    UNIT.px
+  );
+  const paperLayoutPx = convertSize(
+    useSelector((state) => state.paper.layout),
+    UNIT.px
+  );
+  let x = paperLayoutPx.l,
+    y = paperLayoutPx.t;
+
+  return (
+    <Paper
+      sx={{
+        position: "relative",
+        width: paperLayoutPx.w,
+        height: paperLayoutPx.h,
+        boxSizing: "content-box",
+        background: "#fff",
+      }}
+      radius={0}
+    >
+      {props.pages.map((page) => {
+        const item = (
+          <div
+            key={`paper-entry-${page}`}
+            style={{ position: "absolute", left: x, top: y }}
+          >
+            <Canvas page={page} />
+          </div>
+        );
+
+        x += drawLayoutPx.w + paperLayoutPx.r;
+        // if item overflow from paper
+        if (x >= paperLayoutPx.w - drawLayoutPx.w) {
+          x = paperLayoutPx.l;
+          y += drawLayoutPx.h + paperLayoutPx.b;
+        }
+
+        return item;
+      })}
+    </Paper>
+  );
+}
 function PrintModal(props) {
   const qty = props.qty;
   const opened = props.opened;
@@ -237,8 +283,12 @@ function PrintModal(props) {
 function Preview() {
   // Provider
   const data = useSelector((state) => state.data.value);
-  const layout = useSelector((state) => state.draw.layout);
-  const layoutPx = convertSize(layout, UNIT.px);
+  const drawLayoutPx = convertSize(
+    useSelector((state) => state.draw.layout),
+    UNIT.px
+  );
+  const paperLayout = useSelector((state) => state.paper.layout);
+  const paperLayoutPx = convertSize(paperLayout, UNIT.px);
   const qtyFormat = useSelector((state) => state.copy.qtyFormat);
   const filter = useSelector((state) => state.copy.filter);
   const isFiltered = filter.format && filter.value;
@@ -251,8 +301,22 @@ function Preview() {
     data.forEach((o, i) => {
       if (o[filter.format] === filter.value) filteredIndexMap.push(i);
     });
+
+  // For index badge size
   const lastIndex =
     filteredIndexMap[filteredIndexMap.length - 1] ?? data.length;
+
+  const qtyPerPaper =
+    Math.floor(
+      1 +
+        (paperLayoutPx.w - paperLayoutPx.l - drawLayoutPx.w) /
+          (drawLayoutPx.w + paperLayoutPx.r)
+    ) *
+    Math.floor(
+      1 +
+        (paperLayoutPx.h - paperLayoutPx.t - drawLayoutPx.h) /
+          (drawLayoutPx.h + paperLayoutPx.b)
+    );
 
   const Row = ({ index, style }) => {
     if (isFiltered) index = filteredIndexMap[index];
@@ -263,7 +327,12 @@ function Preview() {
         : 1;
 
     return (
-      <Group position="center" key={`preview-${index}`} style={style}>
+      <Group
+        noWrap
+        position={paperLayout.type === PAPER_TYPE.fit ? "center" : "left"}
+        key={`preview-${index}`}
+        style={style}
+      >
         <div
           style={{
             width: 45 + 5 * (String(lastIndex).match(/\d/g) ?? []).length,
@@ -274,6 +343,17 @@ function Preview() {
           </Badge>
         </div>
 
+        <div
+          style={{
+            border: "1px solid rgb(222, 226, 230)",
+          }}
+        >
+          <LabelPaper
+            pages={new Array(qtyPerPaper)
+              .fill(0)
+              .map((_, j) => index * qtyPerPaper + j)}
+          />
+        </div>
         <Tooltip
           styles={(theme) => {
             return {
@@ -303,9 +383,7 @@ function Preview() {
             </>
           }
         >
-          <div style={{ border: "1px solid rgb(222, 226, 230)" }}>
-            <Canvas page={index} />
-          </div>
+          <IconInfoCircle color="gray" />
         </Tooltip>
         <Stack align="center" spacing={0}>
           <Badge
@@ -368,12 +446,12 @@ function Preview() {
         width="100%"
         height={CONTAINER_HEIGHT}
         className="List"
-        itemCount={
-          isFiltered
+        itemCount={Math.ceil(
+          (isFiltered
             ? data.filter((o) => o[filter.format] === filter.value).length
-            : data.length
-        }
-        itemSize={layoutPx.h + 6}
+            : data.length) / qtyPerPaper
+        )}
+        itemSize={paperLayoutPx.h + 10}
       >
         {Row}
       </FixedSizeList>
@@ -565,10 +643,10 @@ function Control() {
 export default function Print() {
   return (
     <Grid m={0} p="sm" pt="xl">
-      <Grid.Col md={4} orderMd={1}>
+      <Grid.Col md={3} orderMd={1}>
         <Control />
       </Grid.Col>
-      <Grid.Col md={8} orderMd={0}>
+      <Grid.Col md={9} orderMd={0}>
         <Preview />
       </Grid.Col>
     </Grid>

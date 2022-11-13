@@ -102,6 +102,8 @@ function PaperSize() {
                   : {
                       ...convertSize(paperLayout, drawLayout.unit),
                       ...drawLayout,
+                      l: 0,
+                      t: 0,
                     }),
                 type: value,
               })
