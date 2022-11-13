@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Center,
   Grid,
   Group,
@@ -10,6 +11,8 @@ import {
   Text,
 } from "@mantine/core";
 import {
+  IconArrowsHorizontal,
+  IconArrowsVertical,
   IconFileHorizontal,
   IconLayoutBoardSplit,
   IconRuler3,
@@ -22,6 +25,8 @@ import {
   DEFAULT_PAPER_SIZE,
 } from "./paperSlice";
 import { DETAIL_ICON_SIZE } from "../design/drawSlice";
+
+const ADJ_TOOL_SIZE = 21;
 
 function PaperSize() {
   const dispatch = useDispatch();
@@ -149,6 +154,7 @@ function PaperAdjust() {
     useSelector((state) => state.paper.layout),
     UNIT.px
   );
+  const gap = useSelector((state) => state.paper.gap);
 
   const containerSize = {
     w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
@@ -179,6 +185,28 @@ function PaperAdjust() {
           width={drawLayoutPx.w * paperRatio}
           height={drawLayoutPx.h * paperRatio}
         />
+        <ActionIcon
+          sx={{
+            position: "absolute",
+            left: ((gap.l - ADJ_TOOL_SIZE) / 2) * paperRatio,
+            top: (gap.t + (drawLayoutPx.h - ADJ_TOOL_SIZE) / 2) * paperRatio,
+          }}
+          size={ADJ_TOOL_SIZE}
+          variant="transparent"
+        >
+          <IconArrowsHorizontal />
+        </ActionIcon>
+        <ActionIcon
+          sx={{
+            position: "absolute",
+            left: (gap.l + (drawLayoutPx.w - ADJ_TOOL_SIZE) / 2) * paperRatio,
+            top: ((gap.t - ADJ_TOOL_SIZE) / 2) * paperRatio,
+          }}
+          size={ADJ_TOOL_SIZE}
+          variant="transparent"
+        >
+          <IconArrowsVertical />
+        </ActionIcon>
       </Paper>
     </Center>
   );

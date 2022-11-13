@@ -1,6 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const UNIT = { inch: "inch", mm: "mm", px: "px" };
+const CONVERT_RATIO = {
+  inch: {
+    inch: 1,
+    mm: 25.4,
+    px: 96,
+  },
+  mm: {
+    inch: 1 / 25.4,
+    mm: 1,
+    px: 96 / 25.4,
+  },
+  px: {
+    inch: 1 / 96,
+    mm: 25.4 / 96,
+    px: 1,
+  },
+};
 export const DEFAULT_PAPER_SIZE = {
   letter: { w: 8.5, h: 11, unit: UNIT.inch },
   a4: { w: 210, h: 296, unit: UNIT.mm },
@@ -58,13 +75,19 @@ export function convertSize(layout, unit) {
 
 const slice = createSlice({
   name: "paper",
-  initialState: { layout: { w: 4, h: 1, unit: UNIT.inch }, offset: {} },
+  initialState: {
+    layout: { w: 4, h: 1, unit: UNIT.inch },
+    gap: { l: 0.1, t: 0.1, r: 0.1, b: 0.1, unit: UNIT.inch },
+  },
   reducers: {
     setPaperSize: (state, action) => {
       state.layout = action.payload;
     },
+    setGap: (state, action) => {
+      state.gap = action.payload;
+    },
   },
 });
 
-export const { setPaperSize } = slice.actions;
+export const { setPaperSize, setGap } = slice.actions;
 export default slice.reducer;

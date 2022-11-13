@@ -68,7 +68,7 @@ export function getLayerSize(layer, ratio) {
 /**
  * size: {w, h, unit, ratio}
  * 1 inch = 25.4 mm
- * 1 inch = 96 px (for pdf is 72px)
+ * 1 inch = 96 px
  *
  * layer: [{
  *    name: "",
