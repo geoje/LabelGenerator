@@ -21,10 +21,18 @@ import { MAX_NAV, next, prev, set } from "./stepSlice";
 
 const ICON_SIZE = 18;
 
+function LoadFile(file, dispatch) {}
+function SaveFile(data, layer, drawLayout, paperLayout) {}
 export default function Nav() {
   // Provider
   const dispatch = useDispatch();
   const step = useSelector((state) => state.step.value);
+
+  // For load and save file
+  const data = useSelector((state) => state.data.value);
+  const layer = useSelector((state) => state.draw.layer);
+  const drawLayout = useSelector((state) => state.draw.layout);
+  const paperLayout = useSelector((state) => state.paper.layout);
 
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === "dark";
@@ -53,7 +61,7 @@ export default function Nav() {
             <ActionIcon
               variant="outline"
               color={"blue"}
-              onClick={() => {}}
+              onClick={(file) => LoadFile(file, dispatch)}
               title="Load project"
               size="lg"
             >
@@ -62,7 +70,7 @@ export default function Nav() {
             <ActionIcon
               variant="outline"
               color={"blue"}
-              onClick={() => {}}
+              onClick={() => SaveFile(data, layer, drawLayout, paperLayout)}
               title="Save project"
               size="lg"
             >
