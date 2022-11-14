@@ -212,14 +212,15 @@ function LabelPaper(props) {
       radius={0}
     >
       {props.pages.map((page) => {
-        const item = (
-          <div
-            key={`paper-entry-${page}`}
-            style={{ position: "absolute", left: x, top: y }}
-          >
-            <Canvas page={page} />
-          </div>
-        );
+        const item =
+          page === -1 ? null : (
+            <div
+              key={`paper-entry-${page}`}
+              style={{ position: "absolute", left: x, top: y }}
+            >
+              <Canvas page={page} />
+            </div>
+          );
 
         x += drawLayoutPx.w + paperLayoutPx.r;
         // if item overflow from paper
@@ -349,9 +350,10 @@ function Preview() {
           }}
         >
           <LabelPaper
-            pages={new Array(qtyPerPaper)
-              .fill(0)
-              .map((_, j) => index * qtyPerPaper + j)}
+            pages={new Array(qtyPerPaper).fill(0).map((_, j) => {
+              const n = index * qtyPerPaper + j;
+              return n >= data.length ? -1 : n;
+            })}
           />
         </div>
         <Tooltip
@@ -369,18 +371,32 @@ function Preview() {
           withArrow
           multiline
           label={
-            <>
-              <Title order={5} align="center">
-                # {index}
-              </Title>
-              <Divider my={4} />
-              {Object.entries(data[index]).map(([k, v], j) => (
-                <Group key={`tooltip-${index}-${j}`} spacing="xs">
-                  <Title order={6}>{k}</Title>
-                  <Text size="xs">{v}</Text>
-                </Group>
-              ))}
-            </>
+            qtyPerPaper > 2 ? (
+              <>
+                <Title order={5} align="center">
+                  #xxx
+                </Title>
+                <Title order={5} align="center">
+                  #yyy
+                </Title>
+                <Title order={5} align="center">
+                  #zzz
+                </Title>
+              </>
+            ) : (
+              <>
+                <Title order={5} align="center">
+                  # {index}
+                </Title>
+                <Divider my={4} />
+                {Object.entries(data[index]).map(([k, v], j) => (
+                  <Group key={`tooltip-${index}-${j}`} spacing="xs">
+                    <Title order={6}>{k}</Title>
+                    <Text size="xs">{v}</Text>
+                  </Group>
+                ))}
+              </>
+            )
           }
         >
           <Text color="gray">
