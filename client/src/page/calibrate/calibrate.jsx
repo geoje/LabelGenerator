@@ -182,18 +182,19 @@ function PaperAdjust() {
     const result = [];
 
     for (
-      let y = paperLayoutPx.t;
+      let y = paperLayoutPx.t, i = 1;
       y <= paperLayoutPx.h - drawLayoutPx.h;
       y += drawLayoutPx.h + paperLayoutPx.b
     )
       for (
         let x = paperLayoutPx.l;
         x <= paperLayoutPx.w - drawLayoutPx.w;
-        x += drawLayoutPx.w + paperLayoutPx.r
+        x += drawLayoutPx.w + paperLayoutPx.r, i++
       )
         result.push(
           <Skeleton
             key={"skeleton" + result.length}
+            radius="lg"
             sx={{
               position: "absolute",
               left: x * paperLayout.ratio,
