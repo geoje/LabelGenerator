@@ -383,7 +383,6 @@ export default function Nav() {
             />
             <Stepper.Step
               label="Set paper"
-              description="developing"
               icon={<IconRuler3 size={ICON_SIZE} />}
             />
           </Stepper>

@@ -12,15 +12,12 @@ import {
   useMantineTheme,
   Button,
   Title,
-  Tooltip,
-  Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconAlertTriangle,
   IconCopy,
   IconFilter,
-  IconInfoCircle,
   IconPrinter,
   IconVariable,
 } from "@tabler/icons";
@@ -31,13 +28,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
 import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
-import {
-  UNIT,
-  CONTAINER_HEIGHT,
-  convertSize,
-  PAPER_TYPE,
-} from "../calibrate/paperSlice";
-import { setFilter, setQtyFormat } from "./copySlice";
+import { UNIT, CONTAINER_HEIGHT, convertSize } from "../calibrate/paperSlice";
+import { calculatePageMap, setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
 const RECOMMENDED_COUNT = 1000;
@@ -211,11 +203,11 @@ function LabelPaper(props) {
       }}
       radius={0}
     >
-      {props.pages.map((page) => {
+      {props.pages.map((page, i) => {
         const item =
           page === -1 ? null : (
             <div
-              key={`paper-entry-${page}`}
+              key={`paper-entry-${i}`}
               style={{ position: "absolute", left: x, top: y }}
             >
               <Canvas page={page} />
@@ -290,173 +282,70 @@ function Preview() {
   );
   const paperLayout = useSelector((state) => state.paper.layout);
   const paperLayoutPx = convertSize(paperLayout, UNIT.px);
-  const qtyFormat = useSelector((state) => state.copy.qtyFormat);
   const filter = useSelector((state) => state.copy.filter);
-  const isFiltered = filter.format && filter.value;
+  const qtyFormat = useSelector((state) => state.copy.qtyFormat);
 
   const [reqPrint, setReqPrint] = useState(null);
-  const [opened, { close, open }] = useDisclosure(false);
 
-  let filteredIndexMap = [];
-  if (isFiltered)
-    data.forEach((o, i) => {
-      if (o[filter.format] === filter.value) filteredIndexMap.push(i);
-    });
+  const pageMap = calculatePageMap(
+    data,
+    paperLayoutPx,
+    drawLayoutPx,
+    filter,
+    qtyFormat
+  );
 
-  // For index badge size
-  const lastIndex =
-    filteredIndexMap[filteredIndexMap.length - 1] ?? data.length;
-
-  const qtyPerPaper =
-    Math.floor(
-      1 +
-        (paperLayoutPx.w - paperLayoutPx.l - drawLayoutPx.w) /
-          (drawLayoutPx.w + paperLayoutPx.r)
-    ) *
-    Math.floor(
-      1 +
-        (paperLayoutPx.h - paperLayoutPx.t - drawLayoutPx.h) /
-          (drawLayoutPx.h + paperLayoutPx.b)
-    );
-
-  const Row = ({ index, style }) => {
-    if (isFiltered) index = filteredIndexMap[index];
-
-    const qty =
-      qtyFormat && Number(data[index][qtyFormat])
-        ? Math.floor(Number(data[index][qtyFormat]))
-        : 1;
-
-    return (
+  const Row = ({ index, style }) => (
+    <Stack key={`preview-${index}`} align="center" spacing={1} style={style}>
       <Group
-        noWrap
-        position={paperLayout.type === PAPER_TYPE.fit ? "center" : "left"}
-        key={`preview-${index}`}
-        style={style}
+        style={{
+          width: paperLayoutPx.w,
+        }}
+        spacing="xs"
+        align="flex-end"
       >
-        <div
-          style={{
-            width: 45 + 5 * (String(lastIndex).match(/\d/g) ?? []).length,
-          }}
-        >
-          <Badge variant="filled" color="gray" fullWidth>
-            # {index}
-          </Badge>
-        </div>
-
-        <div
-          style={{
-            border: "1px solid rgb(222, 226, 230)",
-          }}
-        >
-          <LabelPaper
-            pages={new Array(qtyPerPaper).fill(0).map((_, j) => {
-              const n = index * qtyPerPaper + j;
-              return n >= data.length ? -1 : n;
-            })}
-          />
-        </div>
-        <Tooltip
-          styles={(theme) => {
-            return {
-              tooltip: {
-                backgroundColor:
-                  theme.colorScheme === "dark"
-                    ? "rgba(37, 38, 43, 0.8)"
-                    : "rgba(33, 37, 41, 0.8)",
-              },
-            };
-          }}
-          position="right"
-          withArrow
-          multiline
-          label={
-            qtyPerPaper > 2 ? (
-              <>
-                <Title order={5} align="center">
-                  #xxx
-                </Title>
-                <Title order={5} align="center">
-                  #yyy
-                </Title>
-                <Title order={5} align="center">
-                  #zzz
-                </Title>
-              </>
-            ) : (
-              <>
-                <Title order={5} align="center">
-                  # {index}
-                </Title>
-                <Divider my={4} />
-                {Object.entries(data[index]).map(([k, v], j) => (
-                  <Group key={`tooltip-${index}-${j}`} spacing="xs">
-                    <Title order={6}>{k}</Title>
-                    <Text size="xs">{v}</Text>
-                  </Group>
-                ))}
-              </>
-            )
-          }
-        >
-          <Text color="gray">
-            <IconInfoCircle />
-          </Text>
-        </Tooltip>
-        <Stack align="center" spacing={0}>
-          <Badge
-            variant={qty > RECOMMENDED_COUNT ? "filled" : "outline"}
-            color={qty > RECOMMENDED_COUNT ? "red" : "gray"}
-            size="xs"
-          >
-            {qty}
-          </Badge>
-          <ActionIcon
-            onClick={() => {
-              if (qty > MAX_COUNT)
-                showNotification({
-                  title: "Too many quantity",
-                  message: `The system cannot print more than ${MAX_COUNT} copies.`,
-                  color: "red",
-                });
-              else if (qty > RECOMMENDED_COUNT) {
-                setReqPrint(-index);
-                open();
-              } else setReqPrint(index);
-            }}
-          >
-            <IconPrinter />
-          </ActionIcon>
-        </Stack>
-        {reqPrint === index && (
-          // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
-          // There is CORS problem. But we can ignore it.
-          <NewWindow
-            title="Print Labels"
-            onUnload={() => {
-              setReqPrint(null);
-            }}
-            onBlock={() =>
-              showNotification({
-                title: "New window opening blocked",
-                message: "The browser restricts opening a new window",
-                color: "red",
-              })
-            }
-            onOpen={(w) => {
-              w.moveTo(0, 0);
-              w.resizeTo(window.screen.availWidth, window.screen.availHeight);
-              w.print();
-            }}
-          >
-            {new Array(qty).fill(0).map((_, j) => (
-              <Canvas page={index} key={`canvas-${index}-${j}`} />
-            ))}
-          </NewWindow>
-        )}
+        <Title order={6} color="gray">
+          {index + 1}p
+        </Title>
+        <Text size="xs" color="gray">
+          #{pageMap[index].join(" #")}
+        </Text>
       </Group>
-    );
-  };
+      <div
+        style={{
+          border: "1px solid rgb(222, 226, 230)",
+          cursor: "pointer",
+        }}
+        onClick={() => setReqPrint(index)}
+      >
+        <LabelPaper pages={pageMap[index]} preview />
+      </div>
+      {reqPrint === index && (
+        // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+        // There is CORS problem. But we can ignore it.
+        <NewWindow
+          title="Print Labels"
+          onUnload={() => {
+            setReqPrint(null);
+          }}
+          onBlock={() =>
+            showNotification({
+              title: "New window opening blocked",
+              message: "The browser restricts opening a new window",
+              color: "red",
+            })
+          }
+          onOpen={(w) => {
+            w.moveTo(0, 0);
+            w.resizeTo(window.screen.availWidth, window.screen.availHeight);
+            w.print();
+          }}
+        >
+          <LabelPaper pages={pageMap[index]} />
+        </NewWindow>
+      )}
+    </Stack>
+  );
 
   return (
     <>
@@ -464,31 +353,11 @@ function Preview() {
         width="100%"
         height={CONTAINER_HEIGHT}
         className="List"
-        itemCount={Math.ceil(
-          (isFiltered
-            ? data.filter((o) => o[filter.format] === filter.value).length
-            : data.length) / qtyPerPaper
-        )}
-        itemSize={paperLayoutPx.h + 10}
+        itemCount={pageMap.length}
+        itemSize={paperLayoutPx.h + 30}
       >
         {Row}
       </FixedSizeList>
-      <PrintModal
-        qty={
-          qtyFormat &&
-          reqPrint !== null &&
-          Number(data[Math.abs(reqPrint)][qtyFormat])
-            ? Number(data[Math.abs(reqPrint)][qtyFormat])
-            : 1
-        }
-        opened={opened}
-        close={close}
-        onAgree={() => {
-          setReqPrint(Math.abs(reqPrint));
-          close();
-        }}
-        onDisagree={close}
-      />
     </>
   );
 }
@@ -496,23 +365,26 @@ function Control() {
   // Provider
   const dispatch = useDispatch();
   const data = useSelector((state) => state.data.value);
+  const drawLayoutPx = convertSize(
+    useSelector((state) => state.draw.layout),
+    UNIT.px
+  );
+  const paperLayoutPx = convertSize(
+    useSelector((state) => state.paper.layout),
+    UNIT.px
+  );
   const qtyFormat = useSelector((state) => state.copy.qtyFormat);
   const filter = useSelector((state) => state.copy.filter);
+  const pageMap = calculatePageMap(
+    data,
+    paperLayoutPx,
+    drawLayoutPx,
+    filter,
+    qtyFormat
+  );
 
   const [reqPrint, setReqPrint] = useState(false);
   const [opened, { close, open }] = useDisclosure(false);
-
-  const canFilter = filter.format && filter.value;
-  let qty = (
-    canFilter ? data.filter((o) => o[filter.format] === filter.value) : data
-  ).reduce(
-    (acc, o) =>
-      acc +
-      (qtyFormat && Number(o[qtyFormat])
-        ? Math.floor(Number(o[qtyFormat]))
-        : 1),
-    0
-  );
 
   return (
     <Stack pt="xl" align="center" spacing="xs">
@@ -582,31 +454,31 @@ function Control() {
       />
 
       <Badge
-        variant={qty > RECOMMENDED_COUNT ? "filled" : "outline"}
-        color={qty > RECOMMENDED_COUNT ? "red" : "gray"}
+        variant={pageMap.length > RECOMMENDED_COUNT ? "filled" : "outline"}
+        color={pageMap.length > RECOMMENDED_COUNT ? "red" : "gray"}
         size="xs"
       >
-        {qty}
+        {pageMap.length}
       </Badge>
       <ActionIcon
         size={128}
         variant="filled"
         radius="md"
         onClick={() => {
-          if (qty > MAX_COUNT)
+          if (pageMap.length > MAX_COUNT)
             showNotification({
               title: "Too many quantity",
               message: `The system cannot print more than ${MAX_COUNT} copies.`,
               color: "red",
             });
-          else if (qty > RECOMMENDED_COUNT) open();
+          else if (pageMap.length > RECOMMENDED_COUNT) open();
           else setReqPrint(true);
         }}
       >
         <IconPrinter size={128} />
       </ActionIcon>
       <PrintModal
-        qty={qty}
+        qty={pageMap.length}
         opened={opened}
         close={close}
         onAgree={() => {
@@ -637,21 +509,15 @@ function Control() {
             w.print();
           }}
         >
-          {canFilter
-            ? data.map((o, i) =>
-                o[filter.format] === filter.value
-                  ? new Array(o[qtyFormat])
-                      .fill(0)
-                      .map((_, j) => (
-                        <Canvas page={i} key={`canvas-${i}-${j}`} />
-                      ))
-                  : []
-              )
-            : data.map((o, i) =>
-                new Array(o[qtyFormat])
-                  .fill(0)
-                  .map((_, j) => <Canvas page={i} key={`canvas-${i}-${j}`} />)
-              )}
+          {calculatePageMap(
+            data,
+            paperLayoutPx,
+            drawLayoutPx,
+            filter,
+            qtyFormat
+          ).map((pages) => (
+            <LabelPaper pages={pages} />
+          ))}
         </NewWindow>
       )}
     </Stack>
