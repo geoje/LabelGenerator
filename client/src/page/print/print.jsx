@@ -297,7 +297,7 @@ function Preview() {
 
   const Row = ({ index, style }) => (
     <Stack
-      key={`preview-${index}`}
+      key={"preview-" + index}
       align="flex-start"
       spacing={1}
       style={style}
@@ -309,13 +309,19 @@ function Preview() {
         }}
         spacing="xs"
         align="flex-end"
+        noWrap
       >
         <Title order={6} color="gray">
           {index + 1}p
         </Title>
-        <Text size="xs" color="gray">
-          #{pageMap[index].join(" #")}
-        </Text>
+        {[...new Set(pageMap[index])].map((page, i) => {
+          const count = pageMap[index].filter((p) => p === page).length;
+          return (
+            <Text size="xs" color="gray" key={"preview-subtitle-" + i}>
+              {`#${page}${count > 1 ? `(${count})` : ""}`}
+            </Text>
+          );
+        })}
       </Group>
       <div
         style={{

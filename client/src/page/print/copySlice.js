@@ -44,6 +44,7 @@ const slice = createSlice({
   initialState: {
     qtyFormat: null,
     filter: { format: null, value: null },
+    exclue: {},
   },
   reducers: {
     setQtyFormat: (state, action) => {
@@ -52,8 +53,11 @@ const slice = createSlice({
     setFilter: (state, action) => {
       state.filter = action.payload;
     },
+    setExclude: (state, action) => {
+      state.filter = action.payload;
+    },
   },
 });
 
-export const { setQtyFormat, setFilter } = slice.actions;
+export const { setQtyFormat, setFilter, setExclude } = slice.actions;
 export default slice.reducer;
