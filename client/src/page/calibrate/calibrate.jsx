@@ -27,6 +27,8 @@ import {
   DEFAULT_PAPER_SIZE,
   convertSize,
   setLayout,
+  MAX_PRECISION,
+  STEP_BY_UNIT,
 } from "./paperSlice";
 import { DETAIL_ICON_SIZE } from "../design/drawSlice";
 
@@ -115,8 +117,8 @@ function PaperSize() {
         <NumberInput
           size="xs"
           min={0}
-          precision={2}
-          step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+          precision={MAX_PRECISION}
+          step={STEP_BY_UNIT[paperLayout.unit]}
           value={paperLayout.w}
           onChange={(value) =>
             dispatch(
@@ -132,8 +134,8 @@ function PaperSize() {
         <NumberInput
           size="xs"
           min={0}
-          precision={2}
-          step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+          precision={MAX_PRECISION}
+          step={STEP_BY_UNIT[paperLayout.unit]}
           value={paperLayout.h}
           onChange={(value) =>
             dispatch(
@@ -246,8 +248,8 @@ function PaperAdjust() {
               size="xs"
               min={0}
               description={paperLayout.unit}
-              precision={2}
-              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              precision={MAX_PRECISION}
+              step={STEP_BY_UNIT[paperLayout.unit]}
               value={paperLayout.l}
               onChange={(value) =>
                 dispatch(setLayout({ ...paperLayout, l: value }))
@@ -279,8 +281,8 @@ function PaperAdjust() {
               size="xs"
               min={0}
               description={paperLayout.unit}
-              precision={2}
-              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              precision={MAX_PRECISION}
+              step={STEP_BY_UNIT[paperLayout.unit]}
               value={paperLayout.t}
               onChange={(value) =>
                 dispatch(setLayout({ ...paperLayout, t: value }))
@@ -312,8 +314,8 @@ function PaperAdjust() {
               size="xs"
               min={0}
               description={paperLayout.unit}
-              precision={2}
-              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              precision={MAX_PRECISION}
+              step={STEP_BY_UNIT[paperLayout.unit]}
               value={paperLayout.r}
               onChange={(value) =>
                 dispatch(setLayout({ ...paperLayout, r: value }))
@@ -345,8 +347,8 @@ function PaperAdjust() {
               size="xs"
               min={0}
               description={paperLayout.unit}
-              precision={2}
-              step={paperLayout.unit === UNIT.inch ? 0.1 : 1}
+              precision={MAX_PRECISION}
+              step={STEP_BY_UNIT[paperLayout.unit]}
               value={paperLayout.b}
               onChange={(value) =>
                 dispatch(setLayout({ ...paperLayout, b: value }))

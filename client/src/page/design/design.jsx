@@ -17,7 +17,7 @@ import {
   setLayoutRatio,
   setPage,
 } from "./drawSlice";
-import { UNIT } from "../calibrate/paperSlice";
+import { MAX_PRECISION, STEP_BY_UNIT, UNIT } from "../calibrate/paperSlice";
 import { Variable } from "./variable";
 import { Tool } from "./tool";
 import { Canvas } from "./canvas";
@@ -42,8 +42,8 @@ function LayoutSize() {
         <NumberInput
           value={layout.w}
           size="xs"
-          precision={2}
-          step={layout.unit === UNIT.inch ? 0.1 : 1}
+          precision={MAX_PRECISION}
+          step={STEP_BY_UNIT[layout.unit]}
           onChange={(value) =>
             dispatch(
               setLayout({
@@ -58,8 +58,8 @@ function LayoutSize() {
         <NumberInput
           value={layout.h}
           size="xs"
-          precision={2}
-          step={layout.unit === UNIT.inch ? 0.1 : 1}
+          precision={MAX_PRECISION}
+          step={STEP_BY_UNIT[layout.unit]}
           onChange={(value) =>
             dispatch(
               setLayout({

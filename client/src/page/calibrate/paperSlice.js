@@ -2,6 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export const CONTAINER_HEIGHT = 830;
 export const UNIT = { inch: "inch", mm: "mm", px: "px" };
+export const MAX_PRECISION = 4;
+export const STEP_BY_UNIT = { inch: 0.0625, mm: 1, px: 1 };
+
 export const CONVERT_RATIO = {
   inch: {
     inch: 1,
@@ -41,6 +44,11 @@ export function convertSize(layout, unit) {
     .forEach((k) => (result[k] = Math.round(result[k] * 10000) / 10000));
 
   return result;
+}
+export function getPrecisionCount(num) {
+  const strNum = String(num);
+  const idx = strNum.indexOf(".");
+  return idx === -1 ? 0 : strNum.length - idx - 1;
 }
 
 /**
