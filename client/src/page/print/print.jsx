@@ -201,7 +201,6 @@ function LabelPaper(props) {
         boxSizing: "content-box",
         background: "#fff",
       }}
-      key={props?.key}
       radius={0}
     >
       {props.pages.map((page, i) => {
