@@ -28,7 +28,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
 import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
-import { UNIT, CONTAINER_HEIGHT, convertSize } from "../calibrate/paperSlice";
+import { UNIT, containerHeight, convertSize } from "../calibrate/paperSlice";
 import { calculatePageMap, setFilter, setQtyFormat } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
@@ -201,13 +201,14 @@ function LabelPaper(props) {
         boxSizing: "content-box",
         background: "#fff",
       }}
+      key={props?.key}
       radius={0}
     >
       {props.pages.map((page, i) => {
         const item =
           page === -1 ? null : (
             <div
-              key={`paper-entry-${i}`}
+              key={"paper-entry-" + i}
               style={{ position: "absolute", left: x, top: y }}
             >
               <Canvas page={page} />
@@ -296,10 +297,16 @@ function Preview() {
   );
 
   const Row = ({ index, style }) => (
-    <Stack key={`preview-${index}`} align="center" spacing={1} style={style}>
+    <Stack
+      key={`preview-${index}`}
+      align="flex-start"
+      spacing={1}
+      style={style}
+    >
       <Group
         style={{
           width: paperLayoutPx.w,
+          margin: "0 auto",
         }}
         spacing="xs"
         align="flex-end"
@@ -314,11 +321,12 @@ function Preview() {
       <div
         style={{
           border: "1px solid rgb(222, 226, 230)",
+          margin: "0 auto",
           cursor: "pointer",
         }}
         onClick={() => setReqPrint(index)}
       >
-        <LabelPaper pages={pageMap[index]} preview />
+        <LabelPaper pages={pageMap[index]} />
       </div>
       {reqPrint === index && (
         // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
@@ -351,7 +359,7 @@ function Preview() {
     <>
       <FixedSizeList
         width="100%"
-        height={CONTAINER_HEIGHT}
+        height={containerHeight()}
         className="List"
         itemCount={pageMap.length}
         itemSize={paperLayoutPx.h + 30}
@@ -515,8 +523,8 @@ function Control() {
             drawLayoutPx,
             filter,
             qtyFormat
-          ).map((pages) => (
-            <LabelPaper pages={pages} />
+          ).map((pages, i) => (
+            <LabelPaper pages={pages} key={"paper-" + i} />
           ))}
         </NewWindow>
       )}
