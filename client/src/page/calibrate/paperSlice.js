@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-export const CONTAINER_HEIGHT = 830;
 export const UNIT = { inch: "inch", mm: "mm", px: "px" };
 export const MAX_PRECISION = 4;
 export const STEP_BY_UNIT = { inch: 0.0625, mm: 1, px: 1 };
@@ -33,6 +32,7 @@ export const DEFAULT_PAPER_SIZE = {
   a4: { w: 210, h: 296, unit: UNIT.mm },
 };
 
+export const containerHeight = () => window.innerHeight - 140;
 export function convertSize(layout, unit) {
   let result = { ...layout, unit };
   ["w", "h", "l", "t", "r", "b"].forEach(
@@ -75,7 +75,7 @@ const slice = createSlice({
 
       const con = {
         w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
-        h: CONTAINER_HEIGHT,
+        h: containerHeight(),
       };
       const pap = convertSize(state.layout, UNIT.px);
       state.layout.ratio =
