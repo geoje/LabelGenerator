@@ -12,10 +12,13 @@ import {
   useMantineTheme,
   Button,
   Title,
+  Overlay,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconAlertTriangle,
+  IconCircleMinus,
+  IconCirclePlus,
   IconCopy,
   IconFilter,
   IconPrinter,
@@ -29,7 +32,13 @@ import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
 import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
 import { UNIT, containerHeight, convertSize } from "../calibrate/paperSlice";
-import { calculatePageMap, setCondition } from "./copySlice";
+import {
+  addExclude,
+  calculatePageMap,
+  delExclude,
+  setCondition,
+  setExclude,
+} from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
 const RECOMMENDED_COUNT = 1000;
@@ -181,6 +190,7 @@ function Canvas(props) {
   );
 }
 function LabelPaper(props) {
+  const dispatch = useDispatch();
   const drawLayoutPx = convertSize(
     useSelector((state) => state.draw.layout),
     UNIT.px
@@ -191,6 +201,8 @@ function LabelPaper(props) {
   );
   let x = paperLayoutPx.l,
     y = paperLayoutPx.t;
+
+  let [hovers, setHovers] = useState([]);
 
   return (
     <Paper
@@ -205,14 +217,82 @@ function LabelPaper(props) {
     >
       {props.pages.map((page, i) => {
         const item =
-          page === -1 ? null : (
+          page !== -1 ? (
             <div
               key={"paper-entry-" + i}
               style={{ position: "absolute", left: x, top: y }}
+              onMouseEnter={
+                props.preview
+                  ? () => {
+                      const temp = [];
+                      temp[i] = true;
+                      setHovers(temp);
+                    }
+                  : null
+              }
+              onMouseLeave={
+                props.preview
+                  ? () => {
+                      const temp = [];
+                      temp[i] = false;
+                      setHovers(temp);
+                    }
+                  : null
+              }
             >
               <Canvas page={page} />
+              {hovers[i] && (
+                <Overlay
+                  opacity={1}
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    placeContent: "center",
+                    gap: 8,
+                    backgroundColor: "rgba(0, 0, 0, 0.4)",
+                  }}
+                >
+                  <ActionIcon
+                    variant="transparent"
+                    onClick={() =>
+                      dispatch(addExclude([props.pageMapIndex, i]))
+                    }
+                  >
+                    <IconCircleMinus color="#fff" />
+                  </ActionIcon>
+                  <ActionIcon variant="transparent" onClick={props.onPrint}>
+                    <IconPrinter color="#fff" />
+                  </ActionIcon>
+                </Overlay>
+              )}
             </div>
-          );
+          ) : props.preview ? (
+            <div
+              key={"paper-entry-" + i}
+              style={{
+                position: "absolute",
+                left: x,
+                top: y,
+                width: drawLayoutPx.w,
+                height: drawLayoutPx.h,
+
+                display: "flex",
+                flexWrap: "wrap",
+                placeContent: "center",
+                gap: 8,
+
+                border: "1px solid #868e96",
+                borderStyle: "dashed",
+              }}
+            >
+              <ActionIcon
+                variant="transparent"
+                onClick={() => dispatch(delExclude([props.pageMapIndex, i]))}
+              >
+                <IconCirclePlus color="#868e96" />
+              </ActionIcon>
+            </div>
+          ) : null;
 
         x += drawLayoutPx.w + paperLayoutPx.r;
         // if item overflow from paper
@@ -284,15 +364,17 @@ function Preview() {
     useSelector((state) => state.paper.layout),
     UNIT.px
   );
-  const condition = useSelector((state) => state.copy.condition);
 
   const [reqPrint, setReqPrint] = useState(null);
 
+  const condition = useSelector((state) => state.copy.condition);
+  const exclude = useSelector((state) => state.copy.exclude);
   const pageMap = calculatePageMap(
     data,
     paperLayoutPx,
     drawLayoutPx,
-    condition
+    condition,
+    exclude
   );
 
   const Row = ({ index, style }) => (
@@ -314,24 +396,29 @@ function Preview() {
         <Title order={6} color="gray">
           {index + 1}p
         </Title>
-        {[...new Set(pageMap[index])].map((page, i) => {
-          const count = pageMap[index].filter((p) => p === page).length;
-          return (
-            <Text size="xs" color="gray" key={"preview-subtitle-" + i}>
-              {`#${page}${count > 1 ? `(${count})` : ""}`}
-            </Text>
-          );
-        })}
+        {[...new Set(pageMap[index])]
+          .filter((page) => page !== -1)
+          .map((page, i) => {
+            const count = pageMap[index].filter((p) => p === page).length;
+            return (
+              <Text size="xs" color="gray" key={"preview-subtitle-" + i}>
+                {`#${page}${count > 1 ? `(${count})` : ""}`}
+              </Text>
+            );
+          })}
       </Group>
       <div
         style={{
           border: "1px solid rgb(222, 226, 230)",
           margin: "0 auto",
-          cursor: "pointer",
         }}
-        onClick={() => setReqPrint(index)}
       >
-        <LabelPaper pages={pageMap[index]} />
+        <LabelPaper
+          preview
+          pageMapIndex={index}
+          pages={pageMap[index]}
+          onPrint={() => setReqPrint(index)}
+        />
       </div>
       {reqPrint === index && (
         // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
@@ -386,16 +473,19 @@ function Control() {
     useSelector((state) => state.paper.layout),
     UNIT.px
   );
+
+  const [reqPrint, setReqPrint] = useState(false);
+  const [opened, { close, open }] = useDisclosure(false);
+
   const condition = useSelector((state) => state.copy.condition);
+  const exclude = useSelector((state) => state.copy.exclude);
   const pageMap = calculatePageMap(
     data,
     paperLayoutPx,
     drawLayoutPx,
-    condition
+    condition,
+    exclude
   );
-
-  const [reqPrint, setReqPrint] = useState(false);
-  const [opened, { close, open }] = useDisclosure(false);
 
   return (
     <Stack pt="xl" align="center" spacing="xs">
@@ -526,11 +616,9 @@ function Control() {
             w.print();
           }}
         >
-          {calculatePageMap(data, paperLayoutPx, drawLayoutPx, condition).map(
-            (pages, i) => (
-              <LabelPaper pages={pages} key={"paper-" + i} />
-            )
-          )}
+          {pageMap.map((pages, i) => (
+            <LabelPaper pages={pages} key={"paper-" + i} />
+          ))}
         </NewWindow>
       )}
     </Stack>

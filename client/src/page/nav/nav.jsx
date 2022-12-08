@@ -27,13 +27,12 @@ import {
   setLayer,
 } from "../design/drawSlice";
 import { setLayout as setPaperLayout } from "../calibrate/paperSlice";
-import { setCondition } from "../print/copySlice";
+import { setCondition, setExclude } from "../print/copySlice";
 import { MAX_NAV, next, prev, set as setNav } from "./stepSlice";
 import { showNotification } from "@mantine/notifications";
 import WebFont from "webfontloader";
 
 const ICON_SIZE = 18;
-const JSON_COUNT = 5;
 const DOMAIN = "label.ddsgit.com";
 const mimeToExt = {
   "image/avif": ".avi",
@@ -58,6 +57,16 @@ const extToMime = {
   ".webp": "image/webp",
 };
 
+const generalLoadSet = [
+  ["data.value.json", setData],
+  ["draw.layout.json", setDrawLayout],
+  ["paper.layout.json", setPaperLayout],
+  ["copy.condition.json", setCondition],
+  ["copy.exclude.json", setExclude],
+];
+// '+ 1' mean draw.layer.json
+const JSON_COUNT = generalLoadSet.length + 1;
+
 function LoadFile(file, dispatch) {
   // Empty
   if (!file) return;
@@ -70,12 +79,7 @@ function LoadFile(file, dispatch) {
           noFiles = [];
 
         // General load from file
-        [
-          ["data.value.json", setData],
-          ["draw.layout.json", setDrawLayout],
-          ["paper.layout.json", setPaperLayout],
-          ["copy.condition.json", setCondition],
-        ].forEach((o) => {
+        generalLoadSet.forEach((o) => {
           zo = zip.file(o[0]);
           if (zo)
             zo.async("string").then((str) => dispatch(o[1](JSON.parse(str))));
@@ -186,7 +190,7 @@ function LoadFile(file, dispatch) {
       }
     );
 }
-function SaveFile(data, layer, drawLayout, paperLayout, condition) {
+function SaveFile(data, layer, drawLayout, paperLayout, condition, exclude) {
   // Archive design project
   (async () => {
     const zip = require("jszip")();
@@ -194,6 +198,7 @@ function SaveFile(data, layer, drawLayout, paperLayout, condition) {
     // Save normal data
     zip.file("data.value.json", JSON.stringify(data));
     zip.file("copy.condition.json", JSON.stringify(condition));
+    zip.file("copy.exclude.json", JSON.stringify(exclude));
 
     // Save layout
     zip.file("draw.layout.json", JSON.stringify({ ...drawLayout, ratio: 1 }));
