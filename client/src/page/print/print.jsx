@@ -29,7 +29,7 @@ import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
 import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
 import { UNIT, containerHeight, convertSize } from "../calibrate/paperSlice";
-import { calculatePageMap, setFilter, setQtyFormat } from "./copySlice";
+import { calculatePageMap, setCondition } from "./copySlice";
 import { showNotification } from "@mantine/notifications";
 
 const RECOMMENDED_COUNT = 1000;
@@ -280,10 +280,11 @@ function Preview() {
     useSelector((state) => state.draw.layout),
     UNIT.px
   );
-  const paperLayout = useSelector((state) => state.paper.layout);
-  const paperLayoutPx = convertSize(paperLayout, UNIT.px);
-  const filter = useSelector((state) => state.copy.filter);
-  const qtyFormat = useSelector((state) => state.copy.qtyFormat);
+  const paperLayoutPx = convertSize(
+    useSelector((state) => state.paper.layout),
+    UNIT.px
+  );
+  const condition = useSelector((state) => state.copy.condition);
 
   const [reqPrint, setReqPrint] = useState(null);
 
@@ -291,8 +292,7 @@ function Preview() {
     data,
     paperLayoutPx,
     drawLayoutPx,
-    filter,
-    qtyFormat
+    condition
   );
 
   const Row = ({ index, style }) => (
@@ -386,14 +386,12 @@ function Control() {
     useSelector((state) => state.paper.layout),
     UNIT.px
   );
-  const qtyFormat = useSelector((state) => state.copy.qtyFormat);
-  const filter = useSelector((state) => state.copy.filter);
+  const condition = useSelector((state) => state.copy.condition);
   const pageMap = calculatePageMap(
     data,
     paperLayoutPx,
     drawLayoutPx,
-    filter,
-    qtyFormat
+    condition
   );
 
   const [reqPrint, setReqPrint] = useState(false);
@@ -413,31 +411,33 @@ function Control() {
           data={Object.keys(data.length ? data[0] : []).map((s) => {
             return { value: s, label: s };
           })}
-          value={filter.format}
-          onChange={(value) =>
+          value={condition.filterFormat}
+          onChange={(value) => {
+            if (value === condition.filterFormat) return;
             dispatch(
-              setFilter({
-                format: value,
-                value: value === filter.format ? filter.value : null,
+              setCondition({
+                ...condition,
+                filterFormat: value,
+                filterValue: null,
               })
-            )
-          }
+            );
+          }}
         />
         <Select
           size="xs"
           placeholder="Filter value"
-          disabled={!filter.format}
+          disabled={!condition.filterFormat}
           icon={<IconVariable size={DETAIL_ICON_SIZE} />}
           transitionDuration={100}
           transition="pop-top-left"
           transitionTimingFunction="ease"
           data={
-            filter.format
+            condition.filterFormat
               ? [
                   ...new Set(
                     new Array(data.length)
                       .fill(0)
-                      .map((_, i) => data[i][filter.format])
+                      .map((_, i) => data[i][condition.filterFormat])
                   ),
                 ]
                   .map((v) => {
@@ -446,8 +446,10 @@ function Control() {
                   .sort((a, b) => (a.value < b.value ? -1 : 1))
               : []
           }
-          value={filter.value}
-          onChange={(value) => dispatch(setFilter({ ...filter, value }))}
+          value={condition.filterValue}
+          onChange={(value) =>
+            dispatch(setCondition({ ...condition, filterValue: value }))
+          }
         />
       </Group>
       <Select
@@ -462,8 +464,10 @@ function Control() {
         data={Object.keys(data.length ? data[0] : []).map((s) => {
           return { value: s, label: s };
         })}
-        value={qtyFormat}
-        onChange={(value) => dispatch(setQtyFormat(value))}
+        value={condition.qtyFormat}
+        onChange={(value) =>
+          dispatch(setCondition({ ...condition, qtyFormat: value }))
+        }
       />
 
       <Badge
@@ -522,15 +526,11 @@ function Control() {
             w.print();
           }}
         >
-          {calculatePageMap(
-            data,
-            paperLayoutPx,
-            drawLayoutPx,
-            filter,
-            qtyFormat
-          ).map((pages, i) => (
-            <LabelPaper pages={pages} key={"paper-" + i} />
-          ))}
+          {calculatePageMap(data, paperLayoutPx, drawLayoutPx, condition).map(
+            (pages, i) => (
+              <LabelPaper pages={pages} key={"paper-" + i} />
+            )
+          )}
         </NewWindow>
       )}
     </Stack>

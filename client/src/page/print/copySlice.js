@@ -1,12 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-export function calculatePageMap(
-  data,
-  paperLayoutPx,
-  drawLayoutPx,
-  filter,
-  qtyFormat
-) {
+export function calculatePageMap(data, paperLayoutPx, drawLayoutPx, condition) {
   let result = [[]];
   const qtyPerPaper =
     Math.floor(
@@ -26,13 +20,18 @@ export function calculatePageMap(
     else result.push([index]);
   };
 
-  const existsFilter = filter.format && filter.value;
+  const existsFilter = condition.filterFormat && condition.filterValue;
   for (let i = 0; i < data.length; i++) {
     // Filtering
-    if (existsFilter && data[i][filter.format] !== filter.value) continue;
+    if (
+      existsFilter &&
+      data[i][condition.filterFormat] !== condition.filterValue
+    )
+      continue;
 
     // Quantify
-    if (qtyFormat) for (let j = data[i][qtyFormat]; j; j--) pushResult(i);
+    if (condition.qtyFormat)
+      for (let j = data[i][condition.qtyFormat]; j; j--) pushResult(i);
     else pushResult(i);
   }
 
@@ -42,22 +41,18 @@ export function calculatePageMap(
 const slice = createSlice({
   name: "copy",
   initialState: {
-    qtyFormat: null,
-    filter: { format: null, value: null },
-    exclue: {},
+    condition: { filterFormat: null, filterValue: null, copiesFormat: null },
+    exclude: {},
   },
   reducers: {
-    setQtyFormat: (state, action) => {
-      state.qtyFormat = action.payload;
-    },
-    setFilter: (state, action) => {
-      state.filter = action.payload;
+    setCondition: (state, action) => {
+      state.condition = action.payload;
     },
     setExclude: (state, action) => {
-      state.filter = action.payload;
+      state.exclude = action.payload;
     },
   },
 });
 
-export const { setQtyFormat, setFilter, setExclude } = slice.actions;
+export const { setCondition, setExclude } = slice.actions;
 export default slice.reducer;

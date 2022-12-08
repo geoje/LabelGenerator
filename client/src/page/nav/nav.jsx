@@ -27,6 +27,7 @@ import {
   setLayer,
 } from "../design/drawSlice";
 import { setLayout as setPaperLayout } from "../calibrate/paperSlice";
+import { setCondition } from "../print/copySlice";
 import { MAX_NAV, next, prev, set as setNav } from "./stepSlice";
 import { showNotification } from "@mantine/notifications";
 import WebFont from "webfontloader";
@@ -54,6 +55,14 @@ const extToMime = {
   ".svg": "image/svg+xml",
   ".tiff": "image/tiff",
   ".webp": "image/webp",
+};
+
+const jsonMap = {
+  "data.value": [(state) => state.data.value, setData],
+  "draw.layer": [(state) => state.draw.layer, setLayer],
+  "draw.layout": [(state) => state.draw.layout, setDrawLayout],
+  "paper.layout": [(state) => state.paper.layout, setPaperLayout],
+  "copy.condition": [(state) => state.copy.condition, setCondition],
 };
 
 function LoadFile(file, dispatch) {
@@ -302,6 +311,7 @@ export default function Nav() {
   const step = useSelector((state) => state.step.value);
 
   // For load and save file
+  const jsons = {};
   const data = useSelector((state) => state.data.value);
   const layer = useSelector((state) => state.draw.layer);
   const drawLayout = useSelector((state) => state.draw.layout);
