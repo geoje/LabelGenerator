@@ -33,6 +33,7 @@ import { showNotification } from "@mantine/notifications";
 import WebFont from "webfontloader";
 
 const ICON_SIZE = 18;
+const JSON_COUNT = 5;
 const DOMAIN = "label.ddsgit.com";
 const mimeToExt = {
   "image/avif": ".avi",
@@ -57,14 +58,6 @@ const extToMime = {
   ".webp": "image/webp",
 };
 
-const jsonMap = {
-  "data.value": [(state) => state.data.value, setData],
-  "draw.layer": [(state) => state.draw.layer, setLayer],
-  "draw.layout": [(state) => state.draw.layout, setDrawLayout],
-  "paper.layout": [(state) => state.paper.layout, setPaperLayout],
-  "copy.condition": [(state) => state.copy.condition, setCondition],
-};
-
 function LoadFile(file, dispatch) {
   // Empty
   if (!file) return;
@@ -73,44 +66,25 @@ function LoadFile(file, dispatch) {
     .loadAsync(file)
     .then(
       (zip) => {
-        let noFiles = [];
-        // Check layer.json
-        if (!zip.files["layer.json"]) {
-          showNotification({
-            title: "No layer.json",
-            message: "There is no layer.json file in the root directory",
-            color: "read",
-          });
-          return;
-        }
+        let zo,
+          noFiles = [];
 
-        // data
-        let zo = zip.file("data.json");
-        if (zo)
-          zo.async("string").then((strData) =>
-            dispatch(setData(JSON.parse(strData)))
-          );
-        else noFiles.push("data.json");
-
-        // drawLayout
-        zo = zip.file("drawLayout.json");
-        if (zo)
-          zo.async("string").then((strLayout) =>
-            dispatch(setDrawLayout(JSON.parse(strLayout)))
-          );
-        else noFiles.push("drawLayout.json");
-
-        // paperLayout
-        zo = zip.file("paperLayout.json");
-        if (zo)
-          zo.async("string").then((strLayout) =>
-            dispatch(setPaperLayout(JSON.parse(strLayout)))
-          );
-        else noFiles.push("paperLayout.json");
+        // General load from file
+        [
+          ["data.value.json", setData],
+          ["draw.layout.json", setDrawLayout],
+          ["paper.layout.json", setPaperLayout],
+          ["copy.condition.json", setCondition],
+        ].forEach((o) => {
+          zo = zip.file(o[0]);
+          if (zo)
+            zo.async("string").then((str) => dispatch(o[1](JSON.parse(str))));
+          else noFiles.push(o[0]);
+        });
 
         // layer
-        zo = zip.file("layer.json");
-        if (!zo) noFiles.push("layer.json");
+        zo = zip.file("draw.layer.json");
+        if (!zo) noFiles.push("draw.layer.json");
         else
           zo.async("string").then(async (strLayer) => {
             const imgKeys = Object.keys(zip.files).filter(
@@ -186,7 +160,7 @@ function LoadFile(file, dispatch) {
             }
           });
 
-        if (noFiles.length === 4)
+        if (noFiles.length === JSON_COUNT)
           showNotification({
             title: "Imported failed",
             message: `${noFiles.join(", ")} not be imported`,
@@ -212,17 +186,18 @@ function LoadFile(file, dispatch) {
       }
     );
 }
-function SaveFile(data, layer, drawLayout, paperLayout) {
+function SaveFile(data, layer, drawLayout, paperLayout, condition) {
   // Archive design project
   (async () => {
     const zip = require("jszip")();
 
-    // Save data
-    zip.file("data.json", JSON.stringify(data));
+    // Save normal data
+    zip.file("data.value.json", JSON.stringify(data));
+    zip.file("copy.condition.json", JSON.stringify(condition));
 
     // Save layout
-    zip.file("drawLayout.json", JSON.stringify({ ...drawLayout, ratio: 1 }));
-    zip.file("paperLayout.json", JSON.stringify(paperLayout));
+    zip.file("draw.layout.json", JSON.stringify({ ...drawLayout, ratio: 1 }));
+    zip.file("paper.layout.json", JSON.stringify(paperLayout));
 
     // Save layer
     const copiedLayer = layer.map((l) => {
@@ -240,7 +215,7 @@ function SaveFile(data, layer, drawLayout, paperLayout) {
         },
       };
     });
-    zip.file("layer.json", JSON.stringify(copiedLayer));
+    zip.file("draw.layer.json", JSON.stringify(copiedLayer));
 
     const imgDir = zip.folder("images");
     await Promise.all(
@@ -311,11 +286,11 @@ export default function Nav() {
   const step = useSelector((state) => state.step.value);
 
   // For load and save file
-  const jsons = {};
   const data = useSelector((state) => state.data.value);
   const layer = useSelector((state) => state.draw.layer);
   const drawLayout = useSelector((state) => state.draw.layout);
   const paperLayout = useSelector((state) => state.paper.layout);
+  const condition = useSelector((state) => state.copy.condition);
 
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === "dark";
@@ -370,7 +345,9 @@ export default function Nav() {
               <ActionIcon
                 variant="outline"
                 color={"blue"}
-                onClick={() => SaveFile(data, layer, drawLayout, paperLayout)}
+                onClick={() =>
+                  SaveFile(data, layer, drawLayout, paperLayout, condition)
+                }
                 size="lg"
               >
                 <IconDeviceFloppy size={ICON_SIZE} />
