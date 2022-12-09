@@ -304,7 +304,10 @@ function LabelPaper(props) {
                   >
                     <ActionIcon
                       variant="transparent"
-                      style={{ cursor: "default" }}
+                      style={{
+                        cursor: "default",
+                        transform: "none",
+                      }}
                     >
                       <IconInfoCircle color="#fff" />
                     </ActionIcon>
