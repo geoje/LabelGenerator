@@ -78,7 +78,6 @@ const slice = createSlice({
       if (!temp[action.payload[0]]) temp[action.payload[0]] = {};
       temp[action.payload[0]][action.payload[1]] = true;
       state.exclude = temp;
-      console.log(temp);
     },
     // action.payload: [1d-idx, 2d-idx]
     delExclude: (state, action) => {
@@ -86,7 +85,6 @@ const slice = createSlice({
       if (!temp[action.payload[0]]) temp[action.payload[0]] = {};
       delete temp[action.payload[0]][action.payload[1]];
       state.exclude = temp;
-      console.log(temp);
     },
   },
 });

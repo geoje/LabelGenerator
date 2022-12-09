@@ -22,6 +22,7 @@ import {
   IconCopy,
   IconFilter,
   IconPrinter,
+  IconRotate,
   IconVariable,
 } from "@tabler/icons";
 import Barcode from "react-barcode";
@@ -455,6 +456,7 @@ function Preview() {
         className="List"
         itemCount={pageMap.length}
         itemSize={paperLayoutPx.h + 30}
+        overscanCount={0}
       >
         {Row}
       </FixedSizeList>
@@ -489,6 +491,17 @@ function Control() {
 
   return (
     <Stack pt="xl" align="center" spacing="xs">
+      {Object.keys(exclude).length > 0 && (
+        <Button
+          size="xs"
+          mb="md"
+          leftIcon={<IconRotate size={DETAIL_ICON_SIZE} />}
+          onClick={() => dispatch(setExclude({}))}
+        >
+          Clear exclude
+        </Button>
+      )}
+
       <Group noWrap>
         <Select
           size="xs"
