@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "deploy-dds": "scp -i %HOMEPATH%/.ssh/label.ddsgit.com.pem -r %INIT_CWD%/build bitnami@label.ddsgit.com:~/LabelGenerator/client/",
+    "deploy-sbc": "scp -i %HOMEPATH%/.ssh/label.seattlebc.com.pem -r %INIT_CWD%/build bitnami@label.seattlebc.com:~/LabelGenerator/client/"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
