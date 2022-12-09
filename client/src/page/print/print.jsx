@@ -13,6 +13,8 @@ import {
   Button,
   Title,
   Overlay,
+  Tooltip,
+  Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -21,6 +23,7 @@ import {
   IconCirclePlus,
   IconCopy,
   IconFilter,
+  IconInfoCircle,
   IconPrinter,
   IconRotate,
   IconVariable,
@@ -192,6 +195,7 @@ function Canvas(props) {
 }
 function LabelPaper(props) {
   const dispatch = useDispatch();
+  const data = useSelector((state) => state.data.value);
   const drawLayoutPx = convertSize(
     useSelector((state) => state.draw.layout),
     UNIT.px
@@ -264,6 +268,47 @@ function LabelPaper(props) {
                   <ActionIcon variant="transparent" onClick={props.onPrint}>
                     <IconPrinter color="#fff" />
                   </ActionIcon>
+                  <Tooltip
+                    styles={(theme) => {
+                      return {
+                        tooltip: {
+                          backgroundColor:
+                            theme.colorScheme === "dark"
+                              ? "rgba(37, 38, 43, 0.8)"
+                              : "rgba(33, 37, 41, 0.8)",
+                          whiteSpace: "nowrap",
+                        },
+                      };
+                    }}
+                    position="right"
+                    withArrow
+                    multiline
+                    label={
+                      <>
+                        <Title order={5} align="center">
+                          # {page}
+                        </Title>
+                        <Divider my={4} />
+                        {Object.entries(data[page]).map(([k, v], j) => (
+                          <Group
+                            key={`tooltip-${page}-${j}`}
+                            spacing="xs"
+                            noWrap
+                          >
+                            <Title order={6}>{k}</Title>
+                            <Text size="xs">{v}</Text>
+                          </Group>
+                        ))}
+                      </>
+                    }
+                  >
+                    <ActionIcon
+                      variant="transparent"
+                      style={{ cursor: "default" }}
+                    >
+                      <IconInfoCircle color="#fff" />
+                    </ActionIcon>
+                  </Tooltip>
                 </Overlay>
               )}
             </div>

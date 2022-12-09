@@ -84,6 +84,8 @@ const slice = createSlice({
       let temp = JSON.parse(JSON.stringify(state.exclude));
       if (!temp[action.payload[0]]) temp[action.payload[0]] = {};
       delete temp[action.payload[0]][action.payload[1]];
+      if (!Object.keys(temp[action.payload[0]]).length)
+        delete temp[action.payload[0]];
       state.exclude = temp;
     },
   },

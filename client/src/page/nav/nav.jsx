@@ -81,9 +81,14 @@ function LoadFile(file, dispatch) {
         // General load from file
         generalLoadSet.forEach((o) => {
           zo = zip.file(o[0]);
-          if (zo)
-            zo.async("string").then((str) => dispatch(o[1](JSON.parse(str))));
-          else noFiles.push(o[0]);
+          if (zo) {
+            try {
+              zo.async("string").then((str) => dispatch(o[1](JSON.parse(str))));
+            } catch (err) {
+              console.error(err);
+              noFiles.push(o[0]);
+            }
+          } else noFiles.push(o[0]);
         });
 
         // layer
