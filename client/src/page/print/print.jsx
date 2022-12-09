@@ -257,18 +257,9 @@ function LabelPaper(props) {
                     backgroundColor: "rgba(0, 0, 0, 0.4)",
                   }}
                 >
-                  <ActionIcon
-                    variant="transparent"
-                    onClick={() =>
-                      dispatch(addExclude([props.pageMapIndex, i]))
-                    }
-                  >
-                    <IconCircleMinus color="#fff" />
-                  </ActionIcon>
-                  <ActionIcon variant="transparent" onClick={props.onPrint}>
-                    <IconPrinter color="#fff" />
-                  </ActionIcon>
                   <Tooltip
+                    label="Exclude"
+                    withArrow
                     styles={(theme) => {
                       return {
                         tooltip: {
@@ -280,6 +271,36 @@ function LabelPaper(props) {
                         },
                       };
                     }}
+                  >
+                    <ActionIcon
+                      variant="transparent"
+                      onClick={() =>
+                        dispatch(addExclude([props.pageMapIndex, i]))
+                      }
+                    >
+                      <IconCircleMinus color="#fff" />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip
+                    label="Print"
+                    withArrow
+                    styles={(theme) => {
+                      return {
+                        tooltip: {
+                          backgroundColor:
+                            theme.colorScheme === "dark"
+                              ? "rgba(37, 38, 43, 0.8)"
+                              : "rgba(33, 37, 41, 0.8)",
+                          whiteSpace: "nowrap",
+                        },
+                      };
+                    }}
+                  >
+                    <ActionIcon variant="transparent" onClick={props.onPrint}>
+                      <IconPrinter color="#fff" />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip
                     position="right"
                     withArrow
                     multiline
@@ -301,6 +322,17 @@ function LabelPaper(props) {
                         ))}
                       </>
                     }
+                    styles={(theme) => {
+                      return {
+                        tooltip: {
+                          backgroundColor:
+                            theme.colorScheme === "dark"
+                              ? "rgba(37, 38, 43, 0.8)"
+                              : "rgba(33, 37, 41, 0.8)",
+                          whiteSpace: "nowrap",
+                        },
+                      };
+                    }}
                   >
                     <ActionIcon
                       variant="transparent"
@@ -334,12 +366,14 @@ function LabelPaper(props) {
                 borderStyle: "dashed",
               }}
             >
-              <ActionIcon
-                variant="transparent"
-                onClick={() => dispatch(delExclude([props.pageMapIndex, i]))}
-              >
-                <IconCirclePlus color="#868e96" />
-              </ActionIcon>
+              <Tooltip label="Include" withArrow>
+                <ActionIcon
+                  variant="transparent"
+                  onClick={() => dispatch(delExclude([props.pageMapIndex, i]))}
+                >
+                  <IconCirclePlus color="#868e96" />
+                </ActionIcon>
+              </Tooltip>
             </div>
           ) : null;
 
@@ -628,23 +662,26 @@ function Control() {
       >
         {pageMap.length}
       </Badge>
-      <ActionIcon
-        size={128}
-        variant="filled"
-        radius="md"
-        onClick={() => {
-          if (pageMap.length > MAX_COUNT)
-            showNotification({
-              title: "Too many quantity",
-              message: `The system cannot print more than ${MAX_COUNT} copies.`,
-              color: "red",
-            });
-          else if (pageMap.length > RECOMMENDED_COUNT) open();
-          else setReqPrint(true);
-        }}
-      >
-        <IconPrinter size={128} />
-      </ActionIcon>
+
+      <Tooltip label="Print all" position="bottom" withArrow>
+        <ActionIcon
+          size={128}
+          variant="filled"
+          radius="md"
+          onClick={() => {
+            if (pageMap.length > MAX_COUNT)
+              showNotification({
+                title: "Too many quantity",
+                message: `The system cannot print more than ${MAX_COUNT} copies.`,
+                color: "red",
+              });
+            else if (pageMap.length > RECOMMENDED_COUNT) open();
+            else setReqPrint(true);
+          }}
+        >
+          <IconPrinter size={128} />
+        </ActionIcon>
+      </Tooltip>
       <PrintModal
         qty={pageMap.length}
         opened={opened}
