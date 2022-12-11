@@ -30,8 +30,8 @@ jobs:
       - name: 🛠️ Build client
         run: cd client && npm run build
 
-      - name: 🗑️ Remove modules and sources
-        run: cd client && rm -rf !(build)
+      - name: 🗑️ Remove modules
+        run: rm -rf client/node_modules/
 
       # - name: 📥 Install server modules
       #   run: npm i --omit=dev
