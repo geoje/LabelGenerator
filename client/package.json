@@ -1,10 +1,9 @@
 {
   "name": "client",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
-    "build-to-sbc": "scp -i %HOMEPATH%/.ssh/label.seattlebc.com.pem -r %INIT_CWD%/build bitnami@label.seattlebc.com:~/LabelGenerator/client/"
+    "build": "react-scripts build"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
