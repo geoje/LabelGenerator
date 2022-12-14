@@ -12,12 +12,12 @@ import { IconFile, IconInfoCircle } from "@tabler/icons";
 import {
   TYPE,
   GROUP,
-  MAX_FILE_SIZE,
   convertSize,
   typeToIcon,
   addLayer,
   setLayer,
 } from "./drawSlice";
+import { MAX_FILE_SIZE } from "../import/dataSlice";
 import { UNIT } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";

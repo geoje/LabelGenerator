@@ -23,7 +23,6 @@ export const GROUP = {
   CONST: "Constant",
 };
 export const DETAIL_ICON_SIZE = 14;
-export const MAX_FILE_SIZE = 5 * 1024 ** 2;
 
 export function convertSize(layout, unit) {
   return {

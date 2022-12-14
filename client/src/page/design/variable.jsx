@@ -17,13 +17,13 @@ import { IconCode, IconPhoto, IconVariable } from "@tabler/icons";
 import {
   TYPE,
   GROUP,
-  MAX_FILE_SIZE,
   DETAIL_ICON_SIZE,
   convertSize,
   setLayerSize,
   setLayerVar,
   setLayerVarImg,
 } from "./drawSlice";
+import { MAX_FILE_SIZE } from "../import/dataSlice";
 import { UNIT } from "../calibrate/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";

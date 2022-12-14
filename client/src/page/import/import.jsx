@@ -22,8 +22,8 @@ import { useState, useRef, forwardRef, createContext, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import * as XLSX from "xlsx";
 import { FixedSizeList } from "react-window";
-import { set as setData } from "./dataSlice";
-const MAX_FILE_SIZE = 5 * 1024 ** 2;
+import { MAX_FILE_SIZE, set as setData } from "./dataSlice";
+import { containerHeight } from "../calibrate/paperSlice";
 
 function StringReplaceAt(str, index, replacement) {
   return (
@@ -131,7 +131,7 @@ function DataTable() {
 
   return (
     <VirtualTable
-      height={800}
+      height={containerHeight() - 30}
       itemCount={data.length}
       itemSize={rowHeight}
       header={

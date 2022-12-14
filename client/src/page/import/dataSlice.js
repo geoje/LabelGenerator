@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+export const MAX_FILE_SIZE = 5 * 1024 ** 2;
+
 /**
  * [ {'id': 'abc', 'pw': '123'}, ...]
  */
