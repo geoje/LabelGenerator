@@ -83,7 +83,9 @@ function LoadFile(file, dispatch) {
           zo = zip.file(o[0]);
           if (zo) {
             try {
-              zo.async("string").then((str) => dispatch(o[1](JSON.parse(str))));
+              zo.async("string").then((str) => {
+                if (str.length) dispatch(o[1](JSON.parse(str)));
+              });
             } catch (err) {
               console.error(err);
               noFiles.push(o[0]);

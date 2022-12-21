@@ -32,6 +32,9 @@ import {
   IconBorderOuter,
   IconLayout2,
   IconExternalLink,
+  IconFolder,
+  IconArrowAutofitWidth,
+  IconArrowAutofitHeight,
 } from "@tabler/icons";
 import {
   TYPE,
@@ -426,7 +429,7 @@ export function Detail() {
             </Stack>
           </Grid.Col>
         )}
-        {[TYPE.text].includes(layer[selected].type) && (
+        {layer[selected].type === TYPE.text && (
           <Grid.Col md={4}>
             <Center pb="md">
               <IconTypography size={DETAIL_ICON_SIZE * 3} />
@@ -440,18 +443,24 @@ export function Detail() {
                   disabled={fontLoad}
                   placeholder="Get google font"
                   icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                  rightSectionWidth={28 * 2}
                   rightSection={
-                    <ActionIcon
-                      variant="transparent"
-                      onClick={() =>
-                        window.open("https://fonts.google.com/", "_blank")
-                      }
-                    >
-                      <IconExternalLink
-                        size={DETAIL_ICON_SIZE}
-                        strokeWidth={3}
-                      />
-                    </ActionIcon>
+                    <>
+                      <ActionIcon variant="transparent" onClick={() => {}}>
+                        <IconFolder size={DETAIL_ICON_SIZE} strokeWidth={3} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="transparent"
+                        component="a"
+                        href="https://fonts.google.com"
+                        target="_blank"
+                      >
+                        <IconExternalLink
+                          size={DETAIL_ICON_SIZE}
+                          strokeWidth={3}
+                        />
+                      </ActionIcon>
+                    </>
                   }
                   value={
                     selected === fontRename.index
@@ -584,6 +593,51 @@ export function Detail() {
                   <IconItalic size={DETAIL_ICON_SIZE} />
                 </ActionIcon>
               </Group>
+
+              <NumberInput
+                size="xs"
+                placeholder="Vertical Scale"
+                icon={<IconArrowAutofitHeight size={DETAIL_ICON_SIZE} />}
+                precision={2}
+                min={0}
+                step={0.01}
+                value={layer[selected].font?.vertical ?? 1}
+                onChange={(value) => {
+                  if (!value) return;
+
+                  dispatch(
+                    setLayerFont({
+                      index: selected,
+                      font: {
+                        ...layer[selected].font,
+                        vertical: value,
+                      },
+                    })
+                  );
+                }}
+              />
+              <NumberInput
+                size="xs"
+                placeholder="Horizontal Scale"
+                icon={<IconArrowAutofitWidth size={DETAIL_ICON_SIZE} />}
+                precision={2}
+                min={0}
+                step={0.01}
+                value={layer[selected].font?.horizontal ?? 1}
+                onChange={(value) => {
+                  if (!value) return;
+
+                  dispatch(
+                    setLayerFont({
+                      index: selected,
+                      font: {
+                        ...layer[selected].font,
+                        horizontal: value,
+                      },
+                    })
+                  );
+                }}
+              />
             </Stack>
           </Grid.Col>
         )}
