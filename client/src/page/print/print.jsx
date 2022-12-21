@@ -122,8 +122,8 @@ function Canvas(props) {
               fontStyle: item.font?.style,
               fontSize: item.font?.size ?? 10,
               transformOrigin: "left top",
-              transform: `scale(${item.font?.horizontal ?? 1}, ${
-                item.font?.vertical ?? 1
+              transform: `scale(${item.font?.scale?.w ?? 1}, ${
+                item.font?.scale?.h ?? 1
               })`,
 
               fontWeight: item.font?.weight,

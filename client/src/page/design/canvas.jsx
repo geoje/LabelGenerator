@@ -77,11 +77,11 @@ export function Canvas() {
         y: l.size.y,
         ox:
           event.nativeEvent.offsetX *
-            (l.type === TYPE.text ? l.font?.horizontal ?? 1 : 1) +
+            (l.type === TYPE.text ? l.font?.scale?.w ?? 1 : 1) +
           1,
         oy:
           event.nativeEvent.offsetY *
-            (l.type === TYPE.text ? l.font?.vertical ?? 1 : 1) +
+            (l.type === TYPE.text ? l.font?.scale?.h ?? 1 : 1) +
           1,
         sx: event.pageX,
         sy: event.pageY,
@@ -227,8 +227,8 @@ export function Canvas() {
               fontStyle: item.font?.style,
               fontSize: (item.font?.size ?? 10) * layoutPx.ratio,
               transformOrigin: "left top",
-              transform: `scale(${item.font?.horizontal ?? 1}, ${
-                item.font?.vertical ?? 1
+              transform: `scale(${item.font?.scale?.w ?? 1}, ${
+                item.font?.scale?.h ?? 1
               })`,
 
               fontWeight: item.font?.weight,

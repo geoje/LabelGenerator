@@ -601,7 +601,7 @@ export function Detail() {
                 precision={2}
                 min={0}
                 step={0.01}
-                value={layer[selected].font?.horizontal ?? 1}
+                value={layer[selected].font?.scale?.w ?? 1}
                 onChange={(value) => {
                   if (!value) return;
 
@@ -610,7 +610,7 @@ export function Detail() {
                       index: selected,
                       font: {
                         ...layer[selected].font,
-                        horizontal: value,
+                        scale: { ...layer[selected].font.scale, w: value },
                       },
                     })
                   );
@@ -623,7 +623,7 @@ export function Detail() {
                 precision={2}
                 min={0}
                 step={0.01}
-                value={layer[selected].font?.vertical ?? 1}
+                value={layer[selected].font?.scale?.h ?? 1}
                 onChange={(value) => {
                   if (!value) return;
 
@@ -632,7 +632,7 @@ export function Detail() {
                       index: selected,
                       font: {
                         ...layer[selected].font,
-                        vertical: value,
+                        scale: { ...layer[selected].font.scale, h: value },
                       },
                     })
                   );

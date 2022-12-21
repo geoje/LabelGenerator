@@ -57,12 +57,12 @@ export function getLayerSize(layer, ratio) {
       ...layer.size,
       w: textElement
         ? Math.ceil(
-            (textElement.offsetWidth * (layer.font?.horizontal ?? 1)) / ratio
+            (textElement.offsetWidth * (layer.font?.scale?.w ?? 1)) / ratio
           )
         : 0,
       h: textElement
         ? Math.ceil(
-            (textElement.offsetHeight * (layer.font?.vertical ?? 1)) / ratio
+            (textElement.offsetHeight * (layer.font?.scale?.h ?? 1)) / ratio
           )
         : 0,
     };
@@ -90,7 +90,7 @@ export function getLayerSize(layer, ratio) {
  *    name: "",
  *    type: "",
  *    size: { x: 0, y: 0, w: 0, h: 0, nw, nh },
- *    font: { family: "", style: "", size: 0 , weight: 0, vertical: 1, horizontal: 1, color:{ value, format } }
+ *    font: { family: "", style: "", size: 0 , weight: 0, scale: { w:1, h:1 }, color:{ value, format } }
  *    border: { style: "", width: 0, color: { value, format } }
  *    background: { value, format },
  *    var: { default: "", format:"", img: { [key]: [url] } } // image
