@@ -55,8 +55,16 @@ export function getLayerSize(layer, ratio) {
 
     return {
       ...layer.size,
-      w: textElement ? Math.ceil(textElement.offsetWidth / ratio) : 0,
-      h: textElement ? Math.ceil(textElement.offsetHeight / ratio) : 0,
+      w: textElement
+        ? Math.ceil(
+            (textElement.offsetWidth * (layer.font?.horizontal ?? 1)) / ratio
+          )
+        : 0,
+      h: textElement
+        ? Math.ceil(
+            (textElement.offsetHeight * (layer.font?.vertical ?? 1)) / ratio
+          )
+        : 0,
     };
   } else if (layer.type === TYPE.bar) {
     const textElement = document.getElementById(`layer-${layer.name}`);

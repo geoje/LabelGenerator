@@ -107,11 +107,6 @@ function Canvas(props) {
           ></div>
         );
       case TYPE.text:
-        let fontScale = {};
-        if (item.font?.size) {
-          fontScale.fontSize = item.font.size;
-        } else fontScale.fontSize = 10;
-
         return (
           <Text
             id={`layer-${item.name}`}
@@ -125,7 +120,11 @@ function Canvas(props) {
 
               fontFamily: item.font?.family,
               fontStyle: item.font?.style,
-              ...fontScale,
+              fontSize: item.font?.size ?? 10,
+              transformOrigin: "left top",
+              transform: `scale(${item.font?.horizontal ?? 1}, ${
+                item.font?.vertical ?? 1
+              })`,
 
               fontWeight: item.font?.weight,
               color: item.font?.color?.value,

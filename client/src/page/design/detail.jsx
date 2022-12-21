@@ -596,28 +596,6 @@ export function Detail() {
 
               <NumberInput
                 size="xs"
-                placeholder="Vertical Scale"
-                icon={<IconArrowAutofitHeight size={DETAIL_ICON_SIZE} />}
-                precision={2}
-                min={0}
-                step={0.01}
-                value={layer[selected].font?.vertical ?? 1}
-                onChange={(value) => {
-                  if (!value) return;
-
-                  dispatch(
-                    setLayerFont({
-                      index: selected,
-                      font: {
-                        ...layer[selected].font,
-                        vertical: value,
-                      },
-                    })
-                  );
-                }}
-              />
-              <NumberInput
-                size="xs"
                 placeholder="Horizontal Scale"
                 icon={<IconArrowAutofitWidth size={DETAIL_ICON_SIZE} />}
                 precision={2}
@@ -633,6 +611,28 @@ export function Detail() {
                       font: {
                         ...layer[selected].font,
                         horizontal: value,
+                      },
+                    })
+                  );
+                }}
+              />
+              <NumberInput
+                size="xs"
+                placeholder="Vertical Scale"
+                icon={<IconArrowAutofitHeight size={DETAIL_ICON_SIZE} />}
+                precision={2}
+                min={0}
+                step={0.01}
+                value={layer[selected].font?.vertical ?? 1}
+                onChange={(value) => {
+                  if (!value) return;
+
+                  dispatch(
+                    setLayerFont({
+                      index: selected,
+                      font: {
+                        ...layer[selected].font,
+                        vertical: value,
                       },
                     })
                   );

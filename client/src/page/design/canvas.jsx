@@ -77,15 +77,11 @@ export function Canvas() {
         y: l.size.y,
         ox:
           event.nativeEvent.offsetX *
-            (l.type === TYPE.text && l.font?.size * layoutPx.ratio < 10
-              ? (l.font?.size * layoutPx.ratio) / 10
-              : 1) +
+            (l.type === TYPE.text ? l.font?.horizontal ?? 1 : 1) +
           1,
         oy:
           event.nativeEvent.offsetY *
-            (l.type === TYPE.text && l.font?.size * layoutPx.ratio < 10
-              ? (l.font?.size * layoutPx.ratio) / 10
-              : 1) +
+            (l.type === TYPE.text ? l.font?.vertical ?? 1 : 1) +
           1,
         sx: event.pageX,
         sy: event.pageY,
@@ -214,11 +210,6 @@ export function Canvas() {
           ></div>
         );
       case TYPE.text:
-        let fontScale = {};
-        if (item.font?.size)
-          fontScale.fontSize = item.font.size * layoutPx.ratio;
-        else fontScale.fontSize = 10 * layoutPx.ratio;
-
         return (
           <Text
             id={`layer-${item.name}`}
@@ -234,7 +225,11 @@ export function Canvas() {
 
               fontFamily: item.font?.family,
               fontStyle: item.font?.style,
-              ...fontScale,
+              fontSize: (item.font?.size ?? 10) * layoutPx.ratio,
+              transformOrigin: "left top",
+              transform: `scale(${item.font?.horizontal ?? 1}, ${
+                item.font?.vertical ?? 1
+              })`,
 
               fontWeight: item.font?.weight,
               color: item.font?.color?.value,
