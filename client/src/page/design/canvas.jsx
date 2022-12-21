@@ -5,7 +5,7 @@ import Barcode from "react-barcode";
 import { QRCodeSVG } from "qrcode.react";
 import {
   TYPE,
-  GROUP,
+  GROUP_VAR,
   convertSize,
   removeLayerByIndex,
   setLayerSize,
@@ -182,7 +182,9 @@ export function Canvas() {
         ? item.var.reduce(
             (str, o) =>
               `${str}${
-                o.group === GROUP.DATA && data[page] && o.value in data[page]
+                o.group === GROUP_VAR.DATA &&
+                data[page] &&
+                o.value in data[page]
                   ? data[page][o.value]
                   : o.label
               }`,

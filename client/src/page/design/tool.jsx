@@ -11,7 +11,7 @@ import {
 import { IconFile, IconInfoCircle } from "@tabler/icons";
 import {
   TYPE,
-  GROUP,
+  GROUP_VAR,
   convertSize,
   typeToIcon,
   addLayer,
@@ -127,7 +127,7 @@ export function Tool() {
                   {
                     value: Math.random(),
                     label: "New Text",
-                    group: GROUP.CONST,
+                    group: GROUP_VAR.CONST,
                   },
                 ],
               })

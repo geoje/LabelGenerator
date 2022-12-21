@@ -35,6 +35,7 @@ import {
   IconFolder,
   IconArrowAutofitWidth,
   IconArrowAutofitHeight,
+  IconBrandGoogle,
 } from "@tabler/icons";
 import {
   TYPE,
@@ -514,6 +515,32 @@ export function Detail() {
                   {fontLoad ? <Loader size={18} /> : <IconCheck size={18} />}
                 </ActionIcon>
               </Group>
+              <Select
+                size="xs"
+                placeholder="Font family"
+                icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                data={[
+                  {
+                    value: { value: "Poppins", group: "Google" },
+                    label: "Poppins",
+                    group: "Google",
+                  },
+                ]}
+                rightSectionWidth={28 * 2}
+                rightSection={
+                  <>
+                    <ActionIcon variant="transparent">
+                      <IconFolder size={DETAIL_ICON_SIZE} strokeWidth={3} />
+                    </ActionIcon>
+                    <ActionIcon variant="transparent">
+                      <IconBrandGoogle
+                        size={DETAIL_ICON_SIZE}
+                        strokeWidth={3}
+                      />
+                    </ActionIcon>
+                  </>
+                }
+              />
               <Select
                 size="xs"
                 placeholder="Font weight"

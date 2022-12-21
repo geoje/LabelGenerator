@@ -18,9 +18,13 @@ export const TYPE = {
   bar: "bar",
   qr: "qr",
 };
-export const GROUP = {
+export const GROUP_VAR = {
   DATA: "Data",
   CONST: "Constant",
+};
+export const GROUP_FONT = {
+  GOOGLE: "Google",
+  FILE: "File",
 };
 export const DETAIL_ICON_SIZE = 14;
 
@@ -94,7 +98,7 @@ export function getLayerSize(layer, ratio) {
  *    border: { style: "", width: 0, color: { value, format } }
  *    background: { value, format },
  *    var: { default: "", format:"", img: { [key]: [url] } } // image
- *    var: [ { value: "0.3765313557327803", label: "|", group: GROUP.CONST }, ... ] // text, bar, qr
+ *    var: [ { value: "0.3765313557327803", label: "|", group: GROUP_VAR.CONST }, ... ] // text, bar, qr
  * }, ...]
  *
  * selected: -1
@@ -119,14 +123,14 @@ const slice = createSlice({
         type: "text",
         size: { x: 227, y: 51 },
         font: { size: 10, weight: 400, color: { value: "#000000" } },
-        var: [{ value: "0.1234", label: "ABCD", group: GROUP.CONST }],
+        var: [{ value: "0.1234", label: "ABCD", group: GROUP_VAR.CONST }],
       },
       {
         name: "refText",
         type: "text",
         size: { x: 200, y: 51 },
         font: { size: 10, weight: 700, color: { value: "#000000" } },
-        var: [{ value: "0.1234", label: "REF", group: GROUP.CONST }],
+        var: [{ value: "0.1234", label: "REF", group: GROUP_VAR.CONST }],
       },
       {
         name: "refRect",
@@ -139,14 +143,14 @@ const slice = createSlice({
         type: "text",
         size: { x: 227, y: 74 },
         font: { size: 10, weight: 400, color: { value: "#000000" } },
-        var: [{ value: "0.1234", label: "10010001", group: GROUP.CONST }],
+        var: [{ value: "0.1234", label: "10010001", group: GROUP_VAR.CONST }],
       },
       {
         name: "lotText",
         type: "text",
         size: { x: 200, y: 74 },
         font: { size: 10, weight: 700, color: { value: "#000000" } },
-        var: [{ value: "0.1234", label: "LOT", group: GROUP.CONST }],
+        var: [{ value: "0.1234", label: "LOT", group: GROUP_VAR.CONST }],
       },
       {
         name: "lotRect",
@@ -159,7 +163,9 @@ const slice = createSlice({
         type: "text",
         size: { x: 9, y: 76 },
         font: { size: 8, weight: 400, color: { value: "#000000" } },
-        var: [{ value: "0.1234", label: "Made in Korea", group: GROUP.CONST }],
+        var: [
+          { value: "0.1234", label: "Made in Korea", group: GROUP_VAR.CONST },
+        ],
       },
       {
         name: "titleLine",
@@ -174,7 +180,11 @@ const slice = createSlice({
         size: { x: 186, y: 20 },
         font: { size: 10, weight: 400, color: { value: "#000000" } },
         var: [
-          { value: "0.1234", label: "Sample Sub Title", group: GROUP.CONST },
+          {
+            value: "0.1234",
+            label: "Sample Sub Title",
+            group: GROUP_VAR.CONST,
+          },
         ],
       },
       {
@@ -182,14 +192,16 @@ const slice = createSlice({
         type: "text",
         size: { x: 63, y: 7 },
         font: { size: 20, weight: 700, color: { value: "#000000" } },
-        var: [{ value: "0.1234", label: "Sample Title", group: GROUP.CONST }],
+        var: [
+          { value: "0.1234", label: "Sample Title", group: GROUP_VAR.CONST },
+        ],
       },
       {
         name: "logoText",
         type: "text",
         size: { x: 18, y: 23 },
         font: { size: 9, weight: 400, color: { value: "#000000" } },
-        var: [{ value: "0.1234", label: "image", group: GROUP.CONST }],
+        var: [{ value: "0.1234", label: "image", group: GROUP_VAR.CONST }],
       },
       {
         name: "logoImage",

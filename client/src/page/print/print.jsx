@@ -34,7 +34,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { TYPE, GROUP, DETAIL_ICON_SIZE } from "../design/drawSlice";
+import { TYPE, GROUP_VAR, DETAIL_ICON_SIZE } from "../design/drawSlice";
 import { UNIT, containerHeight, convertSize } from "../calibrate/paperSlice";
 import {
   addExclude,
@@ -79,7 +79,7 @@ function Canvas(props) {
         ? item.var.reduce(
             (str, o) =>
               `${str}${
-                o.group === GROUP.DATA &&
+                o.group === GROUP_VAR.DATA &&
                 data[props.page] &&
                 o.value in data[props.page]
                   ? data[props.page][o.value]

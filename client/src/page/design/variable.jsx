@@ -16,7 +16,7 @@ import {
 import { IconCode, IconPhoto, IconVariable } from "@tabler/icons";
 import {
   TYPE,
-  GROUP,
+  GROUP_VAR,
   DETAIL_ICON_SIZE,
   convertSize,
   setLayerSize,
@@ -65,7 +65,7 @@ export function Variable() {
             cursor: "default",
             alignItems: "center",
             color:
-              group === GROUP.DATA
+              group === GROUP_VAR.DATA
                 ? theme.colorScheme === "dark"
                   ? theme.colors.blue[1]
                   : theme.colors.blue[8]
@@ -73,7 +73,7 @@ export function Variable() {
                 ? theme.colors.dark[0]
                 : theme.colors.gray[7],
             backgroundColor:
-              group === GROUP.DATA
+              group === GROUP_VAR.DATA
                 ? theme.colorScheme === "dark"
                   ? "rgba(24, 100, 171, 0.45)"
                   : theme.colors.blue[0]
@@ -93,7 +93,7 @@ export function Variable() {
             tabIndex={-1}
             sx={(theme) => ({
               color:
-                group === GROUP.DATA
+                group === GROUP_VAR.DATA
                   ? theme.colorScheme === "dark"
                     ? theme.colors.blue[1]
                     : theme.colors.blue[8]
@@ -122,7 +122,9 @@ export function Variable() {
                   ? layer[selected].var.reduce(
                       (str, o) =>
                         `${str}${
-                          o.group === GROUP.DATA ? data[page][o.value] : o.label
+                          o.group === GROUP_VAR.DATA
+                            ? data[page][o.value]
+                            : o.label
                         }`,
                       ""
                     )
@@ -142,7 +144,7 @@ export function Variable() {
               data={(() => {
                 const result = Object.keys(data.length ? data[0] : {}).map(
                   (v) => {
-                    return { value: v, label: v, group: GROUP.DATA };
+                    return { value: v, label: v, group: GROUP_VAR.DATA };
                   }
                 );
 
@@ -162,7 +164,7 @@ export function Variable() {
                 const item = {
                   value: Math.random().toString(),
                   label: query,
-                  group: GROUP.CONST,
+                  group: GROUP_VAR.CONST,
                 };
 
                 // For quick access at onChange event
@@ -172,7 +174,9 @@ export function Variable() {
               onChange={(value) => {
                 const keys = data.length ? Object.keys(data[0]) : [];
                 let constVars = layer[selected].var
-                  ? layer[selected].var.filter((o) => o.group === GROUP.CONST)
+                  ? layer[selected].var.filter(
+                      (o) => o.group === GROUP_VAR.CONST
+                    )
                   : [];
 
                 dispatch(
@@ -180,7 +184,7 @@ export function Variable() {
                     index: selected,
                     var: value.map((v) => {
                       return keys.includes(v)
-                        ? { value: v, label: v, group: GROUP.DATA }
+                        ? { value: v, label: v, group: GROUP_VAR.DATA }
                         : {
                             value: v,
                             label: createdLabel[v]
@@ -190,7 +194,7 @@ export function Variable() {
                                   constVars.findIndex((o) => o.value === v)
                                 ].label
                               : "",
-                            group: GROUP.CONST,
+                            group: GROUP_VAR.CONST,
                           };
                     }),
                   })
