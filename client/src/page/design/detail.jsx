@@ -10,6 +10,7 @@ import {
   Center,
   Popover,
   Button,
+  FileInput,
 } from "@mantine/core";
 import {
   IconTypography,
@@ -37,6 +38,7 @@ import {
   IconArrowAutofitWidth,
   IconArrowAutofitHeight,
   IconBrandGoogle,
+  IconDownload,
 } from "@tabler/icons";
 import {
   TYPE,
@@ -152,8 +154,12 @@ export function Detail() {
   const rename = useSelector((state) => state.draw.rename);
 
   const [linkSize, setLinkSize] = useState(true);
+
+  const [fontFile, setFontFile] = useState(null);
+  const [openedFontFile, setOpenedFontFile] = useState(false);
+
   const [fontLoad, setFontLoad] = useState(false);
-  const [fontError, setFontError] = useState(false);
+  const [fontGoogleError, setFontGoogleError] = useState(false);
   const [openedFontGoogle, setOpenedFontGoogle] = useState(false);
   const fontGoogleRef = useRef(null);
 
@@ -170,14 +176,14 @@ export function Detail() {
       ? layer[selected].font.color
       : {};
 
-  const loadWebFont = () => {
+  const loadWebFontAndApply = () => {
     WebFont.load({
       google: {
         families: [fontGoogleRef.current.value],
       },
       loading: () => {
         setFontLoad(true);
-        setFontError(false);
+        setFontGoogleError(false);
       },
       active: () => {
         setFontLoad(false);
@@ -203,7 +209,7 @@ export function Detail() {
       },
       inactive: () => {
         setFontLoad(false);
-        setFontError(true);
+        setFontGoogleError(true);
       },
     });
   };
@@ -516,13 +522,111 @@ export function Detail() {
                 rightSectionWidth={28 * 2}
                 rightSection={
                   <>
-                    <ActionIcon variant="transparent">
-                      <IconFolder size={DETAIL_ICON_SIZE} strokeWidth={3} />
-                    </ActionIcon>
-
                     <Popover
                       trapFocus
                       position="bottom"
+                      width={200}
+                      withArrow
+                      shadow="md"
+                      opened={openedFontFile}
+                      onChange={setOpenedFontFile}
+                    >
+                      <Popover.Target>
+                        <ActionIcon variant="transparent">
+                          <IconFolder
+                            size={DETAIL_ICON_SIZE}
+                            strokeWidth={3}
+                            onClick={() => setOpenedFontFile((o) => !o)}
+                          />
+                        </ActionIcon>
+                      </Popover.Target>
+                      <Popover.Dropdown
+                        sx={(theme) => ({
+                          background:
+                            theme.colorScheme === "dark"
+                              ? theme.colors.dark[7]
+                              : theme.white,
+                        })}
+                      >
+                        {(layer[selected].font?.family?.group ===
+                          GROUP_FONT.FILE ||
+                          fontFile) && (
+                          <Group position="right" mb={-28}>
+                            <ActionIcon
+                              variant="transparent"
+                              onClick={() => {
+                                showNotification({ title: "Developing" });
+                              }}
+                            >
+                              <IconDownload
+                                size={DETAIL_ICON_SIZE}
+                                strokeWidth={3}
+                              />
+                            </ActionIcon>
+                          </Group>
+                        )}
+                        <FileInput
+                          size="xs"
+                          label="Upload font file"
+                          placeholder="Click here to upload"
+                          accept="font/ttf,font/otf,font/woff,font/woff2"
+                          error={
+                            !fontFile ||
+                            /\.(otf|ttf|woff2?)$/.test(fontFile?.name)
+                              ? false
+                              : "Not supported extension (accept: otf, ttf, woff, woff2)"
+                          }
+                          value={fontFile}
+                          onChange={setFontFile}
+                        />
+
+                        <Group position="right">
+                          <Button
+                            compact
+                            size="xs"
+                            mt="xs"
+                            disabled={
+                              !fontFile ||
+                              !/\.(otf|ttf|woff2?)$/.test(fontFile?.name)
+                            }
+                            onClick={async () => {
+                              const fontData = await fontFile.arrayBuffer();
+                              const font = new FontFace(
+                                fontFile.name,
+                                fontData
+                              );
+                              await font.load();
+                              document.fonts.add(font);
+
+                              dispatch(
+                                setLayerFont({
+                                  index: selected,
+                                  font: {
+                                    ...layer[selected].font,
+                                    family: {
+                                      ...layer[selected].font?.family,
+                                      value: fontFile.name,
+                                      group: GROUP_FONT.FILE,
+                                    },
+                                  },
+                                })
+                              );
+                              console.log(font, layer[selected]);
+                            }}
+                          >
+                            {getFontFamilies(layer)
+                              .filter((o) => o.group === GROUP_FONT.FILE)
+                              .find((o) => o.value === fontFile.name)
+                              ? "Update"
+                              : "Submit"}
+                          </Button>
+                        </Group>
+                      </Popover.Dropdown>
+                    </Popover>
+                    <Popover
+                      trapFocus
+                      position="bottom"
+                      width={200}
                       withArrow
                       shadow="md"
                       opened={openedFontGoogle}
@@ -545,7 +649,7 @@ export function Detail() {
                               : theme.white,
                         })}
                       >
-                        <Group position="right">
+                        <Group position="right" mb={-28}>
                           <ActionIcon
                             variant="transparent"
                             component="a"
@@ -562,13 +666,12 @@ export function Detail() {
                           label="Get Google font"
                           placeholder="Font name"
                           size="xs"
-                          mt={-28}
                           ref={fontGoogleRef}
-                          error={fontError}
+                          error={fontGoogleError}
                           disabled={fontLoad}
-                          onMouseDown={() => setFontError(false)}
+                          onMouseDown={() => setFontGoogleError(false)}
                           onKeyDown={(event) => {
-                            if (event.code === "Enter") loadWebFont();
+                            if (event.code === "Enter") loadWebFontAndApply();
                           }}
                         />
                         <Group position="right">
@@ -576,9 +679,9 @@ export function Detail() {
                             compact
                             size="xs"
                             mt="xs"
-                            color={fontError ? "red.6" : "blue.6"}
+                            color={fontGoogleError ? "red.6" : "blue.6"}
                             loading={fontLoad}
-                            onClick={loadWebFont}
+                            onClick={loadWebFontAndApply}
                           >
                             Submit
                           </Button>
