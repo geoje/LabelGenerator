@@ -91,7 +91,9 @@ export function getLayerSize(layer, ratio) {
  */
 export function getFontFamilies(layers) {
   return layers
-    .filter((l) => l.type === TYPE.text && l.font.family)
+    .filter(
+      (l) => l.type === TYPE.text && l.font.family && l.font.family?.value
+    )
     .map((l) => l.font.family)
     .filter(
       (val, idx, arr) =>

@@ -548,7 +548,7 @@ export function Detail() {
                               : theme.white,
                         })}
                       >
-                        {(layer[selected].font?.family?.group ===
+                        {/* {(layer[selected].font?.family?.group ===
                           GROUP_FONT.FILE ||
                           fontFile) && (
                           <Group position="right" mb={-28}>
@@ -564,7 +564,7 @@ export function Detail() {
                               />
                             </ActionIcon>
                           </Group>
-                        )}
+                        )} */}
                         <FileInput
                           size="xs"
                           label="Upload font file"
@@ -590,6 +590,7 @@ export function Detail() {
                               !/\.(otf|ttf|woff2?)$/.test(fontFile?.name)
                             }
                             onClick={async () => {
+                              if (!fontFile) return;
                               const fontData = await fontFile.arrayBuffer();
                               const font = new FontFace(
                                 fontFile.name,
@@ -611,12 +612,26 @@ export function Detail() {
                                   },
                                 })
                               );
-                              console.log(font, layer[selected]);
+
+                              showNotification({
+                                title: "Font file loaded",
+                                message: `${fontFile.name} font loaded successfully.`,
+                                color: "green",
+                              });
+                              setOpenedFontFile(false);
+                              setFontFile(null);
                             }}
+                            variant={
+                              getFontFamilies(layer)
+                                .filter((o) => o.group === GROUP_FONT.FILE)
+                                .find((o) => o.value === fontFile?.name)
+                                ? "light"
+                                : null
+                            }
                           >
                             {getFontFamilies(layer)
                               .filter((o) => o.group === GROUP_FONT.FILE)
-                              .find((o) => o.value === fontFile.name)
+                              .find((o) => o.value === fontFile?.name)
                               ? "Update"
                               : "Submit"}
                           </Button>

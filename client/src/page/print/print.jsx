@@ -34,7 +34,12 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { TYPE, GROUP_VAR, DETAIL_ICON_SIZE } from "../design/drawSlice";
+import {
+  TYPE,
+  GROUP_VAR,
+  DETAIL_ICON_SIZE,
+  GROUP_FONT,
+} from "../design/drawSlice";
 import { UNIT, containerHeight, convertSize } from "../calibrate/paperSlice";
 import {
   addExclude,
@@ -118,7 +123,10 @@ function Canvas(props) {
               msUserSelect: "none" /* IE 10 and IE 11 */,
               userSelect: "none" /* Standard syntax */,
 
-              fontFamily: item.font?.family?.value,
+              fontFamily:
+                item.font?.family?.group === GROUP_FONT.FILE
+                  ? `"${item.font.family.value}"`
+                  : item.font?.family?.value,
               fontStyle: item.font?.style,
               fontSize: item.font?.size ?? 10,
               transformOrigin: "left top",
