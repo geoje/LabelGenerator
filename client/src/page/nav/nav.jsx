@@ -27,6 +27,7 @@ import {
   setLayer,
   getFontFamilies,
   GROUP_FONT,
+  setFontMap,
 } from "../design/drawSlice";
 import { setLayout as setPaperLayout } from "../calibrate/paperSlice";
 import { setCondition, setExclude } from "../print/copySlice";
@@ -56,6 +57,11 @@ const extToMime = {
   ".svg": "image/svg+xml",
   ".tiff": "image/tiff",
   ".webp": "image/webp",
+
+  ".otf": "font/otf",
+  ".ttf": "font/ttf",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
 };
 
 const generalLoadSet = [
@@ -81,7 +87,7 @@ function LoadFile(file, dispatch) {
 
         // General load from file
         generalLoadSet.forEach((o) => {
-          zo = zip.file(o[0]);
+          zo = zip.file("json/" + o[0]);
           if (zo) {
             try {
               zo.async("string").then((str) => {
@@ -95,12 +101,12 @@ function LoadFile(file, dispatch) {
         });
 
         // layer
-        zo = zip.file("draw.layer.json");
+        zo = zip.file("json/draw.layer.json");
         if (!zo) noFiles.push("draw.layer.json");
         else
           zo.async("string").then(async (strLayer) => {
             const imgKeys = Object.keys(zip.files).filter(
-              (s) => s.startsWith("images/") && !zip.files[s].dir
+              (s) => s.startsWith("image/") && !zip.files[s].dir
             );
             let idxToKey = {};
             imgKeys.forEach((k) => {
@@ -111,12 +117,49 @@ function LoadFile(file, dispatch) {
               idxToKey[idxs[0]][idxs[1]] = k;
             });
 
+            // Load fonts
             let jsonLayer = JSON.parse(strLayer);
-            const families = [
-              ...new Set(jsonLayer.map((l) => l.font?.family)),
-            ].filter((font) => font !== undefined);
-            if (families.length) WebFont.load({ google: { families } });
+            const families = getFontFamilies(jsonLayer);
+            // Google fonts
+            const googleFonts = families
+              .filter((o) => o.group === GROUP_FONT.GOOGLE)
+              .map((o) => o.value);
+            if (googleFonts.length)
+              WebFont.load({ google: { families: [...googleFonts] } });
+            // File fonts
+            let fontMap = {};
+            await Promise.all(
+              Object.keys(zip.files)
+                .filter((s) => /^font\/.+/.test(s))
+                .map(async (key) => {
+                  const filename = key.slice("font/".length);
+                  await zip
+                    .file(key)
+                    .async("blob")
+                    .then((blob) => {
+                      blob = blob.slice(
+                        0,
+                        blob.size,
+                        extToMime[key.match(/\.\w+$/g)[0]]
+                      );
+                      fontMap[filename] = URL.createObjectURL(blob);
+                      return blob.arrayBuffer();
+                    })
+                    .then((buffer) => {
+                      const font = new FontFace(filename, buffer);
+                      return font.load();
+                    })
+                    .then((font) => {
+                      document.fonts.add(font);
+                    });
 
+                  return key;
+                })
+            );
+            console.log(fontMap);
+            dispatch(setFontMap(fontMap));
+
+            // Load images
             try {
               dispatch(
                 setLayer(
@@ -130,12 +173,11 @@ function LoadFile(file, dispatch) {
                             .file(key)
                             .async("blob")
                             .then((blob) => {
-                              const matches = key.match(/\.\w+/g);
                               l.var.default = URL.createObjectURL(
                                 blob.slice(
                                   0,
                                   blob.size,
-                                  extToMime[matches[matches.length - 1]]
+                                  extToMime[key.match(/\.\w+$/g)[0]]
                                 )
                               );
                             });
@@ -288,7 +330,7 @@ function SaveFile(
         })
     );
 
-    // Save web shortcut
+    // Save web shortcut with creation date
     zip.file(
       `${window.location.hostname}.url`,
       `[InternetShortcut]\n` +
@@ -303,7 +345,6 @@ function SaveFile(
       saveAs(content, "LabelProject.zip");
 
       // create size content
-
       showNotification({
         title: "Saving design project successfully",
         message: `File size is ${Math.ceil(

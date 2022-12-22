@@ -11,6 +11,7 @@ import {
   Popover,
   Button,
   FileInput,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconTypography,
@@ -38,6 +39,7 @@ import {
   IconArrowAutofitWidth,
   IconArrowAutofitHeight,
   IconBrandGoogle,
+  IconDownload,
 } from "@tabler/icons";
 import {
   TYPE,
@@ -63,6 +65,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import WebFont from "webfontloader";
 import { useRef } from "react";
+import { saveAs } from "file-saver";
 
 const nextColorFormat = (color) => {
   if (color.format === "rgba") return "hsla";
@@ -494,6 +497,10 @@ export function Detail() {
                   return { value: o.value, label: o.value, group: o.group };
                 })}
                 value={layer[selected].font?.family?.value ?? null}
+                error={
+                  layer[selected].font?.family?.group === GROUP_FONT.FILE &&
+                  !fontMap[layer[selected].font.family.value]
+                }
                 allowDeselect
                 onChange={(value) => {
                   if (value) {
@@ -533,13 +540,15 @@ export function Detail() {
                       onChange={setOpenedFontFile}
                     >
                       <Popover.Target>
-                        <ActionIcon variant="transparent">
-                          <IconFolder
-                            size={DETAIL_ICON_SIZE}
-                            strokeWidth={3}
-                            onClick={() => setOpenedFontFile((o) => !o)}
-                          />
-                        </ActionIcon>
+                        <Tooltip withArrow label="Upload font file">
+                          <ActionIcon variant="transparent">
+                            <IconFolder
+                              size={DETAIL_ICON_SIZE}
+                              strokeWidth={3}
+                              onClick={() => setOpenedFontFile((o) => !o)}
+                            />
+                          </ActionIcon>
+                        </Tooltip>
                       </Popover.Target>
                       <Popover.Dropdown
                         sx={(theme) => ({
@@ -549,23 +558,32 @@ export function Detail() {
                               : theme.white,
                         })}
                       >
-                        {/* {(layer[selected].font?.family?.group ===
+                        {(layer[selected].font?.family?.group ===
                           GROUP_FONT.FILE ||
                           fontFile) && (
                           <Group position="right" mb={-28}>
-                            <ActionIcon
-                              variant="transparent"
-                              onClick={() => {
-                                showNotification({ title: "Developing" });
-                              }}
+                            <Tooltip
+                              withArrow
+                              label={
+                                "Download " + layer[selected].font.family.value
+                              }
                             >
-                              <IconDownload
-                                size={DETAIL_ICON_SIZE}
-                                strokeWidth={3}
-                              />
-                            </ActionIcon>
+                              <ActionIcon
+                                variant="transparent"
+                                onClick={() => {
+                                  const filename =
+                                    layer[selected].font.family.value;
+                                  saveAs(fontMap[filename], filename);
+                                }}
+                              >
+                                <IconDownload
+                                  size={DETAIL_ICON_SIZE}
+                                  strokeWidth={3}
+                                />
+                              </ActionIcon>
+                            </Tooltip>
                           </Group>
-                        )} */}
+                        )}
                         <FileInput
                           size="xs"
                           label="Upload font file"
@@ -656,13 +674,15 @@ export function Detail() {
                       onChange={setOpenedFontGoogle}
                     >
                       <Popover.Target>
-                        <ActionIcon variant="transparent">
-                          <IconBrandGoogle
-                            size={DETAIL_ICON_SIZE}
-                            strokeWidth={3}
-                            onClick={() => setOpenedFontGoogle((o) => !o)}
-                          />
-                        </ActionIcon>
+                        <Tooltip withArrow label="Get Google font">
+                          <ActionIcon variant="transparent">
+                            <IconBrandGoogle
+                              size={DETAIL_ICON_SIZE}
+                              strokeWidth={3}
+                              onClick={() => setOpenedFontGoogle((o) => !o)}
+                            />
+                          </ActionIcon>
+                        </Tooltip>
                       </Popover.Target>
                       <Popover.Dropdown
                         sx={(theme) => ({
@@ -739,34 +759,27 @@ export function Detail() {
                   )
                 }
               />
-              <NumberInput
-                size="xs"
-                placeholder="Font size"
-                icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
-                min={1}
-                value={layer[selected].font?.size}
-                onChange={(value) => {
-                  if (!value) return;
 
-                  dispatch(
-                    setLayerFont({
-                      index: selected,
-                      font: {
-                        ...layer[selected].font,
-                        size: value,
-                      },
-                    })
-                  );
-                }}
-              />
               <Group noWrap spacing="xs" align="flex-start">
-                <CustomColorInput
-                  sx={{ flex: 1 }}
-                  placeholder="Font color"
-                  selected={selected}
-                  color={fontColor}
-                  action={setLayerFontColor}
-                  icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                <NumberInput
+                  size="xs"
+                  placeholder="Font size"
+                  icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
+                  min={1}
+                  value={layer[selected].font?.size}
+                  onChange={(value) => {
+                    if (!value) return;
+
+                    dispatch(
+                      setLayerFont({
+                        index: selected,
+                        font: {
+                          ...layer[selected].font,
+                          size: value,
+                        },
+                      })
+                    );
+                  }}
                 />
                 <ActionIcon
                   size="md"
@@ -793,6 +806,14 @@ export function Detail() {
                   <IconItalic size={DETAIL_ICON_SIZE} />
                 </ActionIcon>
               </Group>
+              <CustomColorInput
+                sx={{ flex: 1 }}
+                placeholder="Font color"
+                selected={selected}
+                color={fontColor}
+                action={setLayerFontColor}
+                icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+              />
 
               <NumberInput
                 size="xs"
