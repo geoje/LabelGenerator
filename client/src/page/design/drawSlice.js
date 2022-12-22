@@ -84,6 +84,21 @@ export function getLayerSize(layer, ratio) {
     };
   } else return layer.size;
 }
+/**
+ *
+ * @param {*} layers state.draw.layer
+ * @returns [ {value: "Poppins", group: GROUP_FONT.GOOGLE}, ...]
+ */
+export function getFontFamilies(layers) {
+  return layers
+    .filter((l) => l.type === TYPE.text && l.font.family)
+    .map((l) => l.font.family)
+    .filter(
+      (val, idx, arr) =>
+        arr.findIndex((o) => o.value === val.value && o.group === val.group) ===
+        idx
+    );
+}
 
 /**
  * size: {w, h, unit, ratio}

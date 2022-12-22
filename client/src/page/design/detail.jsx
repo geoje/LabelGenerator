@@ -52,6 +52,7 @@ import {
   setLayerFont,
   getLayerSize,
   GROUP_FONT,
+  getFontFamilies,
 } from "./drawSlice";
 import { UNIT } from "../calibrate/paperSlice";
 import React from "react";
@@ -186,7 +187,11 @@ export function Detail() {
             index: selected,
             font: {
               ...layer[selected].font,
-              family: fontGoogleRef.current.value,
+              family: {
+                ...layer[selected].font?.family,
+                value: fontGoogleRef.current.value,
+                group: GROUP_FONT.GOOGLE,
+              },
             },
           })
         );
@@ -478,6 +483,36 @@ export function Detail() {
                 size="xs"
                 placeholder="Font family"
                 icon={<IconTypography size={DETAIL_ICON_SIZE} />}
+                data={getFontFamilies(layer).map((o) => {
+                  return { value: o.value, label: o.value, group: o.group };
+                })}
+                value={layer[selected].font?.family?.value ?? null}
+                allowDeselect
+                onChange={(value) => {
+                  if (value) {
+                    const existsFont = getFontFamilies(layer).find(
+                      (o) => o.value === value
+                    );
+                    if (!existsFont) return;
+
+                    dispatch(
+                      setLayerFont({
+                        index: selected,
+                        font: {
+                          ...layer[selected].font,
+                          family: { ...existsFont },
+                        },
+                      })
+                    );
+                  } else {
+                    let newFont = {
+                      index: selected,
+                      font: { ...layer[selected].font },
+                    };
+                    delete newFont.font.family;
+                    dispatch(setLayerFont(newFont));
+                  }
+                }}
                 rightSectionWidth={28 * 2}
                 rightSection={
                   <>
@@ -552,13 +587,6 @@ export function Detail() {
                     </Popover>
                   </>
                 }
-                data={[
-                  {
-                    value: { value: "Poppins", group: GROUP_FONT.GOOGLE },
-                    label: "Poppins",
-                    group: "Google",
-                  },
-                ]}
               />
               <Select
                 size="xs"

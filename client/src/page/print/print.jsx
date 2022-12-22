@@ -118,7 +118,7 @@ function Canvas(props) {
               msUserSelect: "none" /* IE 10 and IE 11 */,
               userSelect: "none" /* Standard syntax */,
 
-              fontFamily: item.font?.family,
+              fontFamily: item.font?.family?.value,
               fontStyle: item.font?.style,
               fontSize: item.font?.size ?? 10,
               transformOrigin: "left top",
