@@ -94,7 +94,7 @@ export function getLayerSize(layer, ratio) {
  *    name: "",
  *    type: "",
  *    size: { x: 0, y: 0, w: 0, h: 0, nw, nh },
- *    font: { family: "", style: "", size: 0 , weight: 0, scale: { w:1, h:1 }, color:{ value, format } }
+ *    font: { family: { value: "", group: "" }, style: "", size: 0 , weight: 0, scale: { w:1, h:1 }, color:{ value, format } }
  *    border: { style: "", width: 0, color: { value, format } }
  *    background: { value, format },
  *    var: { default: "", format:"", img: { [key]: [url] } } // image

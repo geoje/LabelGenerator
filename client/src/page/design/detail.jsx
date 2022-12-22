@@ -7,8 +7,9 @@ import {
   Select,
   TextInput,
   ColorInput,
-  Loader,
   Center,
+  Popover,
+  Button,
 } from "@mantine/core";
 import {
   IconTypography,
@@ -50,6 +51,7 @@ import {
   setLayerBorder,
   setLayerFont,
   getLayerSize,
+  GROUP_FONT,
 } from "./drawSlice";
 import { UNIT } from "../calibrate/paperSlice";
 import React from "react";
@@ -57,6 +59,7 @@ import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import WebFont from "webfontloader";
+import { useRef } from "react";
 
 const nextColorFormat = (color) => {
   if (color.format === "rgba") return "hsla";
@@ -148,9 +151,10 @@ export function Detail() {
   const rename = useSelector((state) => state.draw.rename);
 
   const [linkSize, setLinkSize] = useState(true);
-  const [fontRename, setFontRename] = useState({ index: -1, value: "" });
   const [fontLoad, setFontLoad] = useState(false);
   const [fontError, setFontError] = useState(false);
+  const [openedFontGoogle, setOpenedFontGoogle] = useState(false);
+  const fontGoogleRef = useRef(null);
 
   const borderColor =
     selected !== -1 && layer[selected].border?.color
@@ -164,6 +168,40 @@ export function Detail() {
     selected !== -1 && layer[selected].font?.color
       ? layer[selected].font.color
       : {};
+
+  const loadWebFont = () => {
+    WebFont.load({
+      google: {
+        families: [fontGoogleRef.current.value],
+      },
+      loading: () => {
+        setFontLoad(true);
+        setFontError(false);
+      },
+      active: () => {
+        setFontLoad(false);
+        setOpenedFontGoogle(false);
+        dispatch(
+          setLayerFont({
+            index: selected,
+            font: {
+              ...layer[selected].font,
+              family: fontGoogleRef.current.value,
+            },
+          })
+        );
+        showNotification({
+          title: "Google font loaded",
+          message: `${fontGoogleRef.current.value} font loaded successfully.`,
+          color: "green",
+        });
+      },
+      inactive: () => {
+        setFontLoad(false);
+        setFontError(true);
+      },
+    });
+  };
 
   return (
     selected !== -1 && (
@@ -436,110 +474,91 @@ export function Detail() {
               <IconTypography size={DETAIL_ICON_SIZE * 3} />
             </Center>
             <Stack spacing={2}>
-              <Group noWrap spacing="xs" align="flex-start">
-                <TextInput
-                  sx={{ flex: 1 }}
-                  size="xs"
-                  error={fontError}
-                  disabled={fontLoad}
-                  placeholder="Get google font"
-                  icon={<IconTypography size={DETAIL_ICON_SIZE} />}
-                  rightSectionWidth={28 * 2}
-                  rightSection={
-                    <>
-                      <ActionIcon variant="transparent" onClick={() => {}}>
-                        <IconFolder size={DETAIL_ICON_SIZE} strokeWidth={3} />
-                      </ActionIcon>
-                      <ActionIcon
-                        variant="transparent"
-                        component="a"
-                        href="https://fonts.google.com"
-                        target="_blank"
-                      >
-                        <IconExternalLink
-                          size={DETAIL_ICON_SIZE}
-                          strokeWidth={3}
-                        />
-                      </ActionIcon>
-                    </>
-                  }
-                  value={
-                    selected === fontRename.index
-                      ? fontRename.value
-                      : layer[selected].font?.family
-                      ? layer[selected].font.family
-                      : ""
-                  }
-                  onMouseDown={() => setFontError(false)}
-                  onChange={(event) => {
-                    setFontError(false);
-                    setFontRename({
-                      index: selected,
-                      value: event.target.value,
-                    });
-                  }}
-                />
-                <ActionIcon
-                  variant=""
-                  size="md"
-                  color={fontError ? "red.6" : "blue.6"}
-                  disabled={fontLoad}
-                  onClick={() => {
-                    WebFont.load({
-                      google: {
-                        families: [fontRename.value],
-                      },
-                      loading: () => {
-                        setFontLoad(true);
-                        setFontError(false);
-                      },
-                      active: () => {
-                        setFontLoad(false);
-                        dispatch(
-                          setLayerFont({
-                            index: selected,
-                            font: {
-                              ...layer[selected].font,
-                              family: fontRename.value,
-                            },
-                          })
-                        );
-                      },
-                      inactive: () => {
-                        setFontLoad(false);
-                        setFontError(true);
-                      },
-                    });
-                  }}
-                >
-                  {fontLoad ? <Loader size={18} /> : <IconCheck size={18} />}
-                </ActionIcon>
-              </Group>
               <Select
                 size="xs"
                 placeholder="Font family"
                 icon={<IconTypography size={DETAIL_ICON_SIZE} />}
-                data={[
-                  {
-                    value: { value: "Poppins", group: "Google" },
-                    label: "Poppins",
-                    group: "Google",
-                  },
-                ]}
                 rightSectionWidth={28 * 2}
                 rightSection={
                   <>
                     <ActionIcon variant="transparent">
                       <IconFolder size={DETAIL_ICON_SIZE} strokeWidth={3} />
                     </ActionIcon>
-                    <ActionIcon variant="transparent">
-                      <IconBrandGoogle
-                        size={DETAIL_ICON_SIZE}
-                        strokeWidth={3}
-                      />
-                    </ActionIcon>
+
+                    <Popover
+                      trapFocus
+                      position="bottom"
+                      withArrow
+                      shadow="md"
+                      opened={openedFontGoogle}
+                      onChange={setOpenedFontGoogle}
+                    >
+                      <Popover.Target>
+                        <ActionIcon variant="transparent">
+                          <IconBrandGoogle
+                            size={DETAIL_ICON_SIZE}
+                            strokeWidth={3}
+                            onClick={() => setOpenedFontGoogle((o) => !o)}
+                          />
+                        </ActionIcon>
+                      </Popover.Target>
+                      <Popover.Dropdown
+                        sx={(theme) => ({
+                          background:
+                            theme.colorScheme === "dark"
+                              ? theme.colors.dark[7]
+                              : theme.white,
+                        })}
+                      >
+                        <Group position="right">
+                          <ActionIcon
+                            variant="transparent"
+                            component="a"
+                            href="https://fonts.google.com"
+                            target="_blank"
+                          >
+                            <IconExternalLink
+                              size={DETAIL_ICON_SIZE}
+                              strokeWidth={3}
+                            />
+                          </ActionIcon>
+                        </Group>
+                        <TextInput
+                          label="Get Google font"
+                          placeholder="Font name"
+                          size="xs"
+                          mt={-28}
+                          ref={fontGoogleRef}
+                          error={fontError}
+                          disabled={fontLoad}
+                          onMouseDown={() => setFontError(false)}
+                          onKeyDown={(event) => {
+                            if (event.code === "Enter") loadWebFont();
+                          }}
+                        />
+                        <Group position="right">
+                          <Button
+                            compact
+                            size="xs"
+                            mt="xs"
+                            color={fontError ? "red.6" : "blue.6"}
+                            loading={fontLoad}
+                            onClick={loadWebFont}
+                          >
+                            Submit
+                          </Button>
+                        </Group>
+                      </Popover.Dropdown>
+                    </Popover>
                   </>
                 }
+                data={[
+                  {
+                    value: { value: "Poppins", group: GROUP_FONT.GOOGLE },
+                    label: "Poppins",
+                    group: "Google",
+                  },
+                ]}
               />
               <Select
                 size="xs"
