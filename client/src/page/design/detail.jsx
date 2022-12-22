@@ -693,17 +693,19 @@ export function Detail() {
                         })}
                       >
                         <Group position="right" mb={-28}>
-                          <ActionIcon
-                            variant="transparent"
-                            component="a"
-                            href="https://fonts.google.com"
-                            target="_blank"
-                          >
-                            <IconExternalLink
-                              size={DETAIL_ICON_SIZE}
-                              strokeWidth={3}
-                            />
-                          </ActionIcon>
+                          <Tooltip withArrow label="Browse Google Fonts">
+                            <ActionIcon
+                              variant="transparent"
+                              component="a"
+                              href="https://fonts.google.com"
+                              target="_blank"
+                            >
+                              <IconExternalLink
+                                size={DETAIL_ICON_SIZE}
+                                strokeWidth={3}
+                              />
+                            </ActionIcon>
+                          </Tooltip>
                         </Group>
                         <TextInput
                           label="Get Google font"
@@ -781,30 +783,32 @@ export function Detail() {
                     );
                   }}
                 />
-                <ActionIcon
-                  size="md"
-                  variant={
-                    layer[selected].font?.style === "italic"
-                      ? "filled"
-                      : "outline"
-                  }
-                  onClick={() =>
-                    dispatch(
-                      setLayerFont({
-                        index: selected,
-                        font: {
-                          ...layer[selected].font,
-                          style:
-                            layer[selected].font?.style === "italic"
-                              ? ""
-                              : "italic",
-                        },
-                      })
-                    )
-                  }
-                >
-                  <IconItalic size={DETAIL_ICON_SIZE} />
-                </ActionIcon>
+                <Tooltip withArrow label="Italic">
+                  <ActionIcon
+                    size="md"
+                    variant={
+                      layer[selected].font?.style === "italic"
+                        ? "filled"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      dispatch(
+                        setLayerFont({
+                          index: selected,
+                          font: {
+                            ...layer[selected].font,
+                            style:
+                              layer[selected].font?.style === "italic"
+                                ? ""
+                                : "italic",
+                          },
+                        })
+                      )
+                    }
+                  >
+                    <IconItalic size={DETAIL_ICON_SIZE} />
+                  </ActionIcon>
+                </Tooltip>
               </Group>
               <CustomColorInput
                 sx={{ flex: 1 }}
