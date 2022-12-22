@@ -38,7 +38,6 @@ import {
   IconArrowAutofitWidth,
   IconArrowAutofitHeight,
   IconBrandGoogle,
-  IconDownload,
 } from "@tabler/icons";
 import {
   TYPE,
@@ -55,6 +54,7 @@ import {
   getLayerSize,
   GROUP_FONT,
   getFontFamilies,
+  setFontMap,
 } from "./drawSlice";
 import { UNIT } from "../calibrate/paperSlice";
 import React from "react";
@@ -152,6 +152,7 @@ export function Detail() {
   const layer = useSelector((state) => state.draw.layer);
   const selected = useSelector((state) => state.draw.selected);
   const rename = useSelector((state) => state.draw.rename);
+  const fontMap = useSelector((state) => state.draw.fontMap);
 
   const [linkSize, setLinkSize] = useState(true);
 
@@ -599,6 +600,7 @@ export function Detail() {
                               await font.load();
                               document.fonts.add(font);
 
+                              // Update variable
                               dispatch(
                                 setLayerFont({
                                   index: selected,
@@ -612,6 +614,12 @@ export function Detail() {
                                   },
                                 })
                               );
+
+                              // Add or update font url map
+                              const newFontMap = { ...fontMap };
+                              newFontMap[fontFile.name] =
+                                URL.createObjectURL(fontFile);
+                              dispatch(setFontMap(newFontMap));
 
                               showNotification({
                                 title: "Font file loaded",

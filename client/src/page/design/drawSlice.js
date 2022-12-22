@@ -233,6 +233,7 @@ const slice = createSlice({
     selected: -1,
     page: 0,
     rename: { value: "", error: "" },
+    fontMap: {},
   },
   reducers: {
     setLayout: (state, action) => {
@@ -326,6 +327,9 @@ const slice = createSlice({
     setRename: (state, action) => {
       state.rename = action.payload;
     },
+    setFontMap: (state, action) => {
+      state.fontMap = action.payload;
+    },
   },
 });
 
@@ -348,5 +352,6 @@ export const {
   setSelected,
   setPage,
   setRename,
+  setFontMap,
 } = slice.actions;
 export default slice.reducer;

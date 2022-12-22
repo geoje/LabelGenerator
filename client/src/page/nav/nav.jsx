@@ -25,6 +25,8 @@ import {
   TYPE,
   setLayout as setDrawLayout,
   setLayer,
+  getFontFamilies,
+  GROUP_FONT,
 } from "../design/drawSlice";
 import { setLayout as setPaperLayout } from "../calibrate/paperSlice";
 import { setCondition, setExclude } from "../print/copySlice";
@@ -33,7 +35,6 @@ import { showNotification } from "@mantine/notifications";
 import WebFont from "webfontloader";
 
 const ICON_SIZE = 18;
-const DOMAIN = "label.ddsgit.com";
 const mimeToExt = {
   "image/avif": ".avi",
   "image/bmp": ".bmp",
@@ -197,19 +198,31 @@ function LoadFile(file, dispatch) {
       }
     );
 }
-function SaveFile(data, layer, drawLayout, paperLayout, condition, exclude) {
+function SaveFile(
+  data,
+  layer,
+  fontMap,
+  drawLayout,
+  paperLayout,
+  condition,
+  exclude
+) {
   // Archive design project
   (async () => {
     const zip = require("jszip")();
 
     // Save normal data
-    zip.file("data.value.json", JSON.stringify(data));
-    zip.file("copy.condition.json", JSON.stringify(condition));
-    zip.file("copy.exclude.json", JSON.stringify(exclude));
+    const jsonDir = zip.folder("json");
+    jsonDir.file("data.value.json", JSON.stringify(data));
+    jsonDir.file("copy.condition.json", JSON.stringify(condition));
+    jsonDir.file("copy.exclude.json", JSON.stringify(exclude));
 
     // Save layout
-    zip.file("draw.layout.json", JSON.stringify({ ...drawLayout, ratio: 1 }));
-    zip.file("paper.layout.json", JSON.stringify(paperLayout));
+    jsonDir.file(
+      "draw.layout.json",
+      JSON.stringify({ ...drawLayout, ratio: 1 })
+    );
+    jsonDir.file("paper.layout.json", JSON.stringify(paperLayout));
 
     // Save layer
     const copiedLayer = layer.map((l) => {
@@ -227,9 +240,10 @@ function SaveFile(data, layer, drawLayout, paperLayout, condition, exclude) {
         },
       };
     });
-    zip.file("draw.layer.json", JSON.stringify(copiedLayer));
+    jsonDir.file("draw.layer.json", JSON.stringify(copiedLayer));
 
-    const imgDir = zip.folder("images");
+    // Save images
+    const imgDir = zip.folder("image");
     await Promise.all(
       layer.map(async (o, i) => {
         // Only image filter and var
@@ -261,11 +275,25 @@ function SaveFile(data, layer, drawLayout, paperLayout, condition, exclude) {
       })
     );
 
+    // Save fonts
+    const fontDir = zip.folder("font");
+    await Promise.all(
+      getFontFamilies(layer)
+        .filter((o) => o.group === GROUP_FONT.FILE)
+        .map((o) => o.value)
+        .map(async (fontName) => {
+          await fetch(fontMap[fontName])
+            .then((res) => res.blob())
+            .then((blob) => fontDir.file(fontName, blob));
+        })
+    );
+
     // Save web shortcut
     zip.file(
-      `${DOMAIN}.url`,
-      `[InternetShortcut]
-      URL=https://${DOMAIN}/`
+      `${window.location.hostname}.url`,
+      `[InternetShortcut]\n` +
+        `URL=http://${window.location.host}/\n` +
+        `Date=${new Date().toISOString()}`
     );
 
     return zip;
@@ -300,6 +328,7 @@ export default function Nav() {
   // For load and save file
   const data = useSelector((state) => state.data.value);
   const layer = useSelector((state) => state.draw.layer);
+  const fontMap = useSelector((state) => state.draw.fontMap);
   const drawLayout = useSelector((state) => state.draw.layout);
   const paperLayout = useSelector((state) => state.paper.layout);
   const condition = useSelector((state) => state.copy.condition);
@@ -358,7 +387,14 @@ export default function Nav() {
                 variant="outline"
                 color={"blue"}
                 onClick={() =>
-                  SaveFile(data, layer, drawLayout, paperLayout, condition)
+                  SaveFile(
+                    data,
+                    layer,
+                    fontMap,
+                    drawLayout,
+                    paperLayout,
+                    condition
+                  )
                 }
                 size="lg"
               >
