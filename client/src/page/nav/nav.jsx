@@ -34,6 +34,7 @@ import { setCondition, setExclude } from "../print/copySlice";
 import { MAX_NAV, next, prev, set as setNav } from "./stepSlice";
 import { showNotification } from "@mantine/notifications";
 import WebFont from "webfontloader";
+import iniToJson from "./iniToJson";
 
 const ICON_SIZE = 18;
 const mimeToExt = {
@@ -156,7 +157,6 @@ function LoadFile(file, dispatch) {
                   return key;
                 })
             );
-            console.log(fontMap);
             dispatch(setFontMap(fontMap));
 
             // Load images
@@ -214,26 +214,52 @@ function LoadFile(file, dispatch) {
             }
           });
 
-        if (noFiles.length === JSON_COUNT)
-          showNotification({
-            title: "Imported failed",
-            message: `${noFiles.join(", ")} not be imported`,
-            color: "red",
-          });
-        else if (noFiles.length > 0)
-          showNotification({
-            title: "Partially imported",
-            message: `${noFiles.join(", ")} not be imported`,
-            color: "yellow",
-          });
-        else {
-          showNotification({
-            title: "Imported successfully",
-            message: `Project imported`,
-            color: "green",
-          });
-          dispatch(setNav(MAX_NAV));
-        }
+        // Load creation date
+        const getCreationDate = async () => {
+          let creationDate = "";
+          const urlFilename = Object.keys(zip.files).find((s) =>
+            /^(\w|\.)+\.url$/.test(s)
+          );
+          await zip
+            .file(urlFilename)
+            .async("string")
+            .then((value) => {
+              const json = iniToJson(value);
+              creationDate = json["InternetShortcut"]
+                ? json["InternetShortcut"]["Date"]
+                  ? json["InternetShortcut"]["Date"]
+                  : ""
+                : "";
+            });
+          return new Date(creationDate).toLocaleString();
+        };
+
+        getCreationDate().then((creationDate) => {
+          if (noFiles.length === JSON_COUNT)
+            showNotification({
+              title: "Imported failed",
+              message: `${noFiles.join(
+                ", "
+              )} in the project that was created on ${creationDate} is not imported`,
+              color: "red",
+            });
+          else if (noFiles.length > 0)
+            showNotification({
+              title: "Partially imported",
+              message: `${noFiles.join(
+                ", "
+              )} in the project that was created on ${creationDate} is not imported`,
+              color: "yellow",
+            });
+          else {
+            showNotification({
+              title: "Imported successfully",
+              message: `The project that was created on ${creationDate} imported`,
+              color: "green",
+            });
+            dispatch(setNav(MAX_NAV));
+          }
+        });
       },
       (err) => {
         console.error(err);
