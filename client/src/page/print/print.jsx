@@ -1,3 +1,4 @@
+import "./print.css";
 import {
   ActionIcon,
   Grid,
