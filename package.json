@@ -4,7 +4,7 @@
   "description": "🏷️Bulk label generator with excel or csv file📦",
   "main": "server/app.js",
   "scripts": {
-    "dev": "concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
+    "dev": "set NODE_ENV=development; concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
     "test": "node server/test.js",
     "deploy": "git checkout main && git pull && git merge develop && git push && git checkout develop"
   },
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/geoje/LabelGenerator#readme",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.2"
   },
   "devDependencies": {
