@@ -1,5 +1,0 @@
-@media print {
-  div#new-window-container > div {
-    page-break-before: always;
-  }
-}

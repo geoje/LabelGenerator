@@ -1,29 +1,32 @@
 {
   "name": "label-generator",
-  "version": "1.0.0",
-  "description": "🏷️Bulk label generator with excel or csv file📦",
-  "main": "server/app.js",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "dev": "set NODE_ENV=development && concurrently --kill-others \"nodemon server/app.js\" \"npm run start --prefix client\"",
-    "test": "node server/test.js",
-    "deploy": "git checkout main && git pull && git merge develop && git push && git checkout develop"
+    "dev": "start http://localhost:3001 && next dev -p 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/geoje/LabelGenerator.git"
-  },
-  "author": "github.com/geoje",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/geoje/LabelGenerator/issues"
-  },
-  "homepage": "https://github.com/geoje/LabelGenerator#readme",
   "dependencies": {
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "concurrently": "^7.5.0",
-    "nodemon": "^2.0.20"
+    "@emotion/react": "^11.10.6",
+    "@emotion/server": "^11.10.0",
+    "@mantine/core": "^5.10.5",
+    "@mantine/hooks": "^5.10.5",
+    "@mantine/next": "^5.10.5",
+    "@mantine/notifications": "^5.10.5",
+    "@tabler/icons-react": "^2.6.0",
+    "@types/node": "18.14.2",
+    "@types/react": "18.0.28",
+    "@types/react-dom": "18.0.11",
+    "eslint": "8.35.0",
+    "eslint-config-next": "13.2.2",
+    "i18next": "^22.4.10",
+    "next": "13.2.2",
+    "next-i18next": "^13.1.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-i18next": "^12.2.0",
+    "typescript": "4.9.5"
   }
 }
