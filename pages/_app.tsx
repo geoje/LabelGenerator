@@ -29,7 +29,11 @@ export default appWithTranslation(
           <MantineProvider
             withGlobalStyles
             withNormalizeCSS
-            theme={{ colorScheme }}
+            theme={{
+              colorScheme,
+              fontFamily: `Poppins,"Noto Sans KR"`,
+              headings: { fontFamily: `Poppins,"Noto Sans KR"` },
+            }}
           >
             <NotificationsProvider>
               <Component {...pageProps} />

@@ -9,12 +9,22 @@ import {
   ActionIcon,
   Button,
   useMantineTheme,
+  Menu,
+  Paper,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "next-i18next";
 import process from "process";
+import axios from "axios";
+import {
+  IconUserCircle,
+  IconCoins,
+  IconTrash,
+  IconLogout,
+} from "@tabler/icons-react";
+import { showNotification } from "@mantine/notifications";
 
 const useStyles = createStyles((theme: MantineTheme) => ({
   header: {
@@ -98,9 +108,26 @@ export function HeaderSimple() {
   const { classes, cx } = useStyles();
   const dark = theme.colorScheme === "dark";
 
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
 
   const [opened, { close, toggle }] = useDisclosure(false);
+  const [user, setUser]: [
+    (
+      | { name: string; email: string; image: string; provider: string }
+      | undefined
+    ),
+    any
+  ] = useState();
+
+  useEffect(() => {
+    axios
+      .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/user/info", {
+        withCredentials: true,
+      })
+      .then((res) => res.data)
+      .then(setUser)
+      .catch(console.error);
+  }, []);
 
   return (
     <Header
@@ -144,9 +171,87 @@ export function HeaderSimple() {
         ></Group>
 
         <Group spacing="xs" className={classes.links}>
-          <Link href={process.env.NEXT_PUBLIC_AUTH_HOST + "/login"}>
-            <Button className={classes.linkAuth}>{t("Login")}</Button>
-          </Link>
+          {user ? (
+            <Menu withArrow shadow="md" position={"bottom-end"}>
+              <Menu.Target>
+                <ActionIcon variant="subtle" size={48} radius="xl">
+                  {user.image ? (
+                    <Image
+                      src={user.image}
+                      alt={user.name || "profile"}
+                      width={36}
+                      height={36}
+                      radius="xl"
+                      imageProps={{ referrerPolicy: "no-referrer" }}
+                    />
+                  ) : (
+                    <IconUserCircle size={36} />
+                  )}
+                </ActionIcon>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Group pl="sm" spacing={0}>
+                  {user.provider == "google" ? (
+                    <Image
+                      src={
+                        process.env.NEXT_PUBLIC_AUTH_HOST +
+                        "/asset/logo/google.svg"
+                      }
+                      width={16}
+                      alt="google"
+                    />
+                  ) : user.provider == "naver" ? (
+                    <Paper bg="#03C75A" radius={0} p={4}>
+                      <Image
+                        src={
+                          process.env.NEXT_PUBLIC_AUTH_HOST +
+                          "/asset/logo/naver.svg"
+                        }
+                        width={8}
+                        alt="naver"
+                      />
+                    </Paper>
+                  ) : null}
+                  <Menu.Label>{user.name}</Menu.Label>
+                </Group>
+                <Menu.Label>{user.email}</Menu.Label>
+
+                <Link href={process.env.NEXT_PUBLIC_AUTH_HOST + "/credit"}>
+                  <Menu.Divider />
+                  <Menu.Item icon={<IconCoins size={14} />}>
+                    {t("Credit")}
+                  </Menu.Item>
+                </Link>
+
+                <Menu.Divider />
+                <Menu.Item
+                  color="red"
+                  icon={<IconTrash size={14} />}
+                  onClick={() =>
+                    showNotification({
+                      title: "Oops!",
+                      message: "This function is not developed yet.",
+                      color: "yellow",
+                    })
+                  }
+                >
+                  {t("Delete my account")}
+                </Menu.Item>
+
+                <Menu.Divider />
+                <Link href={process.env.NEXT_PUBLIC_AUTH_HOST + "/logout"}>
+                  <Menu.Item icon={<IconLogout size={14} />}>
+                    {t("Logout")}
+                  </Menu.Item>
+                </Link>
+              </Menu.Dropdown>
+            </Menu>
+          ) : (
+            <Link href={process.env.NEXT_PUBLIC_AUTH_HOST + "/login"}>
+              <Button className={classes.linkAuth}>{t("Login")}</Button>
+            </Link>
+          )}
         </Group>
       </Container>
     </Header>
