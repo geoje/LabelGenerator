@@ -51,8 +51,9 @@
   margin: 0;
 }
 
-html {
-  background-color: #f8f9fa;
+html,
+body {
+  background-color: #f8f9fa !important;
 }
 
 a {

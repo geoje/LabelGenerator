@@ -11,6 +11,8 @@ import {
   useMantineTheme,
   Menu,
   Paper,
+  Breadcrumbs,
+  Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React, { useEffect, useState } from "react";
@@ -23,10 +25,21 @@ import {
   IconCoins,
   IconTrash,
   IconLogout,
+  IconFile,
+  IconFolder,
+  IconDeviceFloppy,
+  IconChevronRight,
+  IconPlugX,
 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { createPathWithLocale } from "@/lib/tool";
+import { useRouter } from "next/router";
 
+const STATUS = {
+  LOAD: 0,
+  GOOD: 1,
+  BAD: 2,
+};
 const useStyles = createStyles((theme: MantineTheme) => ({
   header: {
     display: "flex",
@@ -45,7 +58,6 @@ const useStyles = createStyles((theme: MantineTheme) => ({
 
   links: {
     height: "100%",
-    paddingRight: "16px",
     flexWrap: "nowrap",
   },
 
@@ -66,7 +78,7 @@ const useStyles = createStyles((theme: MantineTheme) => ({
     lineHeight: 1,
     width: "auto",
     height: "100%",
-    padding: "8px 12px",
+    padding: "8px 4px",
     borderRadius: theme.radius.sm,
     transition: "color 0.1s",
     color:
@@ -109,8 +121,10 @@ export function HeaderSimple() {
   const { classes, cx } = useStyles();
   const dark = theme.colorScheme === "dark";
 
+  const router = useRouter();
   const { t, i18n } = useTranslation("common");
 
+  const [authStatus, setAuthStatus]: [number, any] = useState(STATUS.LOAD);
   const [opened, { close, toggle }] = useDisclosure(false);
   const [user, setUser]: [
     (
@@ -125,9 +139,15 @@ export function HeaderSimple() {
       .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/user/info", {
         withCredentials: true,
       })
-      .then((res) => res.data)
+      .then((res) => {
+        setAuthStatus(STATUS.GOOD);
+        return res.data;
+      })
       .then(setUser)
-      .catch(console.error);
+      .catch((error) => {
+        setAuthStatus(STATUS.BAD);
+        console.error(error);
+      });
   }, []);
 
   return (
@@ -169,9 +189,60 @@ export function HeaderSimple() {
         <Group
           className={cx(classes.links, classes.noneSmallerThanXS)}
           mr="auto"
-        ></Group>
+        >
+          <Breadcrumbs
+            separator={
+              <Text sx={(theme) => ({ color: theme.colors.gray[4] })}>
+                <IconChevronRight />
+              </Text>
+            }
+            styles={{ separator: { margin: 0 } }}
+          >
+            {[
+              { title: "Data", href: "/" },
+              { title: "Draw", href: "/draw" },
+              { title: "Paper", href: "/paper" },
+              { title: "Print", href: "/print" },
+            ].map(({ title, href }) => (
+              <Link href={href} key={title}>
+                <ActionIcon
+                  variant="transparent"
+                  className={cx(classes.link, {
+                    [classes.linkActive]:
+                      href === "/"
+                        ? router.pathname === "/"
+                        : router.pathname.startsWith(href),
+                  })}
+                >
+                  {title}
+                </ActionIcon>
+              </Link>
+            ))}
+          </Breadcrumbs>
+        </Group>
 
-        <Group spacing="xs" className={classes.links}>
+        <Group spacing="xs" pr="md" className={classes.links}>
+          <ActionIcon
+            size="lg"
+            variant="subtle"
+            className={classes.noneSmallerThanXS}
+          >
+            <IconFile />
+          </ActionIcon>
+          <ActionIcon
+            size="lg"
+            variant="subtle"
+            className={classes.noneSmallerThanXS}
+          >
+            <IconFolder />
+          </ActionIcon>
+          <ActionIcon
+            size="lg"
+            variant="subtle"
+            className={classes.noneSmallerThanXS}
+          >
+            <IconDeviceFloppy />
+          </ActionIcon>
           {user ? (
             <Menu withArrow shadow="md" position={"bottom-end"}>
               <Menu.Target>
@@ -265,7 +336,14 @@ export function HeaderSimple() {
                 createPathWithLocale("/login?callbackUrl=", i18n.language)
               }
             >
-              <Button className={classes.linkAuth}>{t("Login")}</Button>
+              <Button
+                className={classes.linkAuth}
+                loading={authStatus === STATUS.LOAD}
+                leftIcon={authStatus === STATUS.BAD ? <IconPlugX /> : null}
+                color={authStatus === STATUS.BAD ? "gray" : ""}
+              >
+                {t("Login")}
+              </Button>
             </Link>
           )}
         </Group>

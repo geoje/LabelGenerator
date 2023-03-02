@@ -6,6 +6,8 @@ import { appWithTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { useState } from "react";
+import { Provider } from "react-redux";
+import { store } from "@/lib/store";
 
 export default appWithTranslation(
   ({ Component, pageProps: { session, ...pageProps } }: AppProps) => {
@@ -36,7 +38,9 @@ export default appWithTranslation(
             }}
           >
             <NotificationsProvider>
-              <Component {...pageProps} />
+              <Provider store={store}>
+                <Component {...pageProps} />
+              </Provider>
             </NotificationsProvider>
           </MantineProvider>
         </ColorSchemeProvider>
