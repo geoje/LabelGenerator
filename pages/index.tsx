@@ -3,6 +3,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { HeaderSimple } from "@/components/header";
 import { useTranslation } from "next-i18next";
 import { GetStaticProps } from "next";
+import { ActionIcon, Flex, Grid, Group, Paper, Stack } from "@mantine/core";
+import { IconDeviceFloppy, IconFolder } from "@tabler/icons-react";
 
 export const defaultLocale = "en";
 
@@ -23,6 +25,24 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <HeaderSimple />
+      <Flex>
+        <Paper
+          withBorder
+          shadow="xs"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <ActionIcon size={128}>
+            <IconFolder size={96} />
+          </ActionIcon>
+        </Paper>
+        <ActionIcon size={128}>
+          <IconDeviceFloppy size={96} />
+        </ActionIcon>
+      </Flex>
     </>
   );
 }
