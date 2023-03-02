@@ -25,6 +25,7 @@ import {
   IconLogout,
 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
+import { createPathWithLocale } from "@/lib/tool";
 
 const useStyles = createStyles((theme: MantineTheme) => ({
   header: {
@@ -217,7 +218,12 @@ export function HeaderSimple() {
                 </Group>
                 <Menu.Label>{user.email}</Menu.Label>
 
-                <Link href={process.env.NEXT_PUBLIC_AUTH_HOST + "/credit"}>
+                <Link
+                  href={
+                    process.env.NEXT_PUBLIC_AUTH_HOST +
+                    createPathWithLocale("/credit", i18n.language)
+                  }
+                >
                   <Menu.Divider />
                   <Menu.Item icon={<IconCoins size={14} />}>
                     {t("Credit")}
@@ -240,7 +246,12 @@ export function HeaderSimple() {
                 </Menu.Item>
 
                 <Menu.Divider />
-                <Link href={process.env.NEXT_PUBLIC_AUTH_HOST + "/logout"}>
+                <Link
+                  href={
+                    process.env.NEXT_PUBLIC_AUTH_HOST +
+                    createPathWithLocale("/logout", i18n.language)
+                  }
+                >
                   <Menu.Item icon={<IconLogout size={14} />}>
                     {t("Logout")}
                   </Menu.Item>
@@ -248,7 +259,12 @@ export function HeaderSimple() {
               </Menu.Dropdown>
             </Menu>
           ) : (
-            <Link href={process.env.NEXT_PUBLIC_AUTH_HOST + "/login"}>
+            <Link
+              href={
+                process.env.NEXT_PUBLIC_AUTH_HOST +
+                createPathWithLocale("/login?callbackUrl=", i18n.language)
+              }
+            >
               <Button className={classes.linkAuth}>{t("Login")}</Button>
             </Link>
           )}
