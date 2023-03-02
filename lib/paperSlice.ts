@@ -2,7 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export const UNIT = { inch: "inch", mm: "mm", px: "px" };
 export const MAX_PRECISION = 4;
-export const STEP_BY_UNIT = { inch: 0.0625, mm: 1, px: 1 };
+export const STEP_BY_UNIT: any = { inch: 0.0625, mm: 1, px: 1 };
+export const ADJ_TOOL_SIZE = 21;
 
 export const CONVERT_RATIO: any = {
   inch: {
@@ -27,7 +28,7 @@ export const PAPER_TYPE = {
   a4: "a4",
   custom: "custom",
 };
-export const DEFAULT_PAPER_SIZE = {
+export const DEFAULT_PAPER_SIZE: any = {
   letter: { w: 8.5, h: 11, unit: UNIT.inch },
   a4: { w: 210, h: 296, unit: UNIT.mm },
 };

@@ -39,7 +39,6 @@ export const getStaticProps: GetStaticProps = async ({ locale }) => ({
 });
 
 export default function Home() {
-  // Provider
   const dispatch = useDispatch();
   const data = useSelector((state: any) => state.data.value);
 

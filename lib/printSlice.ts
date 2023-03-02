@@ -1,5 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+export const RECOMMENDED_COUNT = 1000;
+export const MAX_COUNT = 10000;
+
 export function qtyPerPaper(paperLayoutPx: any, drawLayoutPx: any) {
   return (
     Math.floor(

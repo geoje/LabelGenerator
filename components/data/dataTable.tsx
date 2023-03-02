@@ -5,7 +5,6 @@ import { FixedSizeList } from "react-window";
 import { containerHeight } from "@/lib/paperSlice";
 
 export function DataTable() {
-  // Provider
   const data = useSelector((state: any) => state.data.value);
   const rowHeight = 32;
   const keys: string[] = [];

@@ -4,6 +4,7 @@ import { useTranslation } from "next-i18next";
 import { HeaderSimple } from "@/components/header";
 import { defaultLocale } from "@/pages";
 import Head from "next/head";
+import { Grid } from "@mantine/core";
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
   props: {
@@ -20,6 +21,14 @@ export default function Template() {
         <title>{t("common:Title") + " - " + t("common:Womosoft")}</title>
       </Head>
       <HeaderSimple />
+      <Grid m={0} p="sm" pt="xl">
+        <Grid.Col md={3} orderMd={1}>
+          <Control />
+        </Grid.Col>
+        <Grid.Col md={9} orderMd={0}>
+          <Preview />
+        </Grid.Col>
+      </Grid>
     </>
   );
 }
