@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "start http://localhost:3001 && next dev -p 3001",
+    "deploy": "git checkout main && git pull && git merge develop && git push && git checkout develop",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
