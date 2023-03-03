@@ -1,5 +1,30 @@
 {
   "Label Generator": "라벨 생성기",
+  "Data": "데이터",
+  "Draw": "그리기",
+  "Paper": "종이",
+  "Print": "인쇄",
+  "New Project": "새 프로젝트",
+  "Load Project": "프로젝트 열기",
+  "Save Project": "프로젝트 저장",
+  "Login": "로그인",
 
-  "Login": "로그인"
+  "Import data": "데이터 가져오기",
+  "Drag data file or click to select file": "데이터 파일을 드래그 하거나 클릭하여 선택할 수 있어요",
+  "Attach MS Excel or CSV file, file should not exceed 5mb": "MS Excel 또는 CSV 파일 첨부, 파일은 5mb를 초과하면 안되요",
+  "Choose 1 sheet": "시트 선택",
+
+  "Layout size": "레이아웃 크기",
+  "Variable": "변수",
+  "Layer": "레이어",
+  "New canvas": "새 캔버스",
+  "Rectangle": "사각형",
+  "Circle": "원",
+  "Text": "텍스트",
+  "Image": "이미지",
+  "Bar code": "바코드",
+  "QR code": "QR코드",
+
+  "Fit content": "레이아웃 크기에 맞춤",
+  "Custom": "사용자 지정"
 }

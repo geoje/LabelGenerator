@@ -109,7 +109,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>{t("Data") + t("Label Generator")}</title>
+        <title>{t("Data") + " - " + t("Label Generator")}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -126,7 +126,7 @@ export default function Home() {
           })}
         >
           <Title order={6} mr="sm">
-            Import data
+            {t("Import data")}
           </Title>
           {data.length && (
             <Tooltip label="Clear" withArrow>
@@ -268,10 +268,12 @@ export default function Home() {
 
                     <div>
                       <Text size="xl" inline>
-                        Drag data file or click to select file
+                        {t("Drag data file or click to select file")}
                       </Text>
                       <Text size="sm" color="dimmed" inline mt={7}>
-                        Attach MS Excel or CSV file, file should not exceed 5mb
+                        {t(
+                          "Attach MS Excel or CSV file, file should not exceed 5mb"
+                        )}
                       </Text>
                     </div>
                   </Group>
@@ -280,7 +282,7 @@ export default function Home() {
               {workbook && (
                 <>
                   <Text align="center" size="xl" mt="sm">
-                    Choose 1 sheet
+                    {t("Choose 1 sheet")}
                   </Text>
                   <Group position="center" mt="xs">
                     {workbook.SheetNames.map((name: any) => (
