@@ -234,7 +234,7 @@ export function HeaderSimple() {
         </Group>
 
         <Group spacing="xs" pr="md" className={classes.links}>
-          <Tooltip label="New proejct" withArrow>
+          <Tooltip label={t("New project")} withArrow>
             <ActionIcon
               size="lg"
               color="gray"
@@ -259,7 +259,7 @@ export function HeaderSimple() {
             }}
           >
             {(props) => (
-              <Tooltip label="Load project" withArrow>
+              <Tooltip label={t("Load project")} withArrow>
                 <ActionIcon
                   size="lg"
                   color="gray"
@@ -272,7 +272,7 @@ export function HeaderSimple() {
               </Tooltip>
             )}
           </FileButton>
-          <Tooltip label="Save project" withArrow>
+          <Tooltip label={t("Save project")} withArrow>
             <ActionIcon
               size="lg"
               color="gray"

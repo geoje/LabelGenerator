@@ -65,6 +65,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRef } from "react";
 import { saveAs } from "file-saver";
+import { useTranslation } from "next-i18next";
 
 const nextColorFormat = (color: any) => {
   if (color.format === "rgba") return "hsla";
@@ -154,6 +155,7 @@ export function Detail() {
   const selected = useSelector((state: any) => state.draw.selected);
   const rename = useSelector((state: any) => state.draw.rename);
   const fontMap = useSelector((state: any) => state.draw.fontMap);
+  const { t } = useTranslation();
 
   const [linkSize, setLinkSize] = useState(true);
 
@@ -227,7 +229,7 @@ export function Detail() {
         <Stack spacing={2}>
           <Group noWrap spacing="xs" align="flex-start">
             <TextInput
-              placeholder="Layer name"
+              placeholder={t("Layer name") ?? "Layer name"}
               sx={{ flex: 1 }}
               size="xs"
               icon={<IconHash size={DETAIL_ICON_SIZE} />}
@@ -405,7 +407,7 @@ export function Detail() {
           </Center>
           <Stack spacing={2}>
             <Select
-              placeholder="Border style"
+              placeholder={t("Border style") ?? "Border style"}
               size="xs"
               transitionDuration={100}
               transition="pop-top-left"
@@ -439,7 +441,7 @@ export function Detail() {
               }
             />
             <NumberInput
-              placeholder="Border width"
+              placeholder={t("Border width") ?? "Border width"}
               size="xs"
               icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
               min={1}
@@ -458,7 +460,7 @@ export function Detail() {
               }
             />
             <CustomColorInput
-              placeholder="Border color"
+              placeholder={t("Border color") ?? "Border color"}
               selected={selected}
               color={borderColor}
               action={setLayerBorderColor}
@@ -467,7 +469,7 @@ export function Detail() {
 
             {![TYPE.qr, TYPE.image].includes(layer[selected].type) && (
               <CustomColorInput
-                placeholder="Background color"
+                placeholder={t("Background color") ?? "Background color"}
                 selected={selected}
                 color={backColor}
                 action={setLayerBackColor}
@@ -485,7 +487,7 @@ export function Detail() {
           <Stack spacing={2}>
             <Select
               size="xs"
-              placeholder="Font family"
+              placeholder={t("Font family") ?? "Font family"}
               icon={<IconTypography size={DETAIL_ICON_SIZE} />}
               data={getFontFamilies(layer).map((o: any) => {
                 return { value: o.value, label: o.value, group: o.group };
@@ -534,7 +536,7 @@ export function Detail() {
                     onChange={setOpenedFontFile}
                   >
                     <Popover.Target>
-                      <Tooltip withArrow label="Upload font file">
+                      <Tooltip withArrow label={t("Upload font file")}>
                         <ActionIcon variant="transparent">
                           <IconFolder
                             size={DETAIL_ICON_SIZE}
@@ -580,14 +582,18 @@ export function Detail() {
                       )}
                       <FileInput
                         size="xs"
-                        label="Upload font file"
-                        placeholder="Click here to upload"
+                        label={t("Upload font file")}
+                        placeholder={
+                          t("Click here to upload") ?? "Click here to upload"
+                        }
                         accept="font/ttf,font/otf,font/woff,font/woff2"
                         error={
                           !fontFile ||
                           /\.(otf|ttf|woff2?)$/.test(fontFile?.name)
                             ? false
-                            : "Not supported extension (accept: otf, ttf, woff, woff2)"
+                            : t(
+                                "Not supported extension (accept: otf, ttf, woff, woff2)"
+                              )
                         }
                         value={fontFile}
                         onChange={setFontFile}
@@ -649,8 +655,8 @@ export function Detail() {
                           {getFontFamilies(layer)
                             .filter((o: any) => o.group === GROUP_FONT.FILE)
                             .find((o: any) => o.value === fontFile?.name)
-                            ? "Update"
-                            : "Submit"}
+                            ? t("Update")
+                            : t("Submit")}
                         </Button>
                       </Group>
                     </Popover.Dropdown>
@@ -665,7 +671,7 @@ export function Detail() {
                     onChange={setOpenedFontGoogle}
                   >
                     <Popover.Target>
-                      <Tooltip withArrow label="Get Google font">
+                      <Tooltip withArrow label={t("Get Google font")}>
                         <ActionIcon variant="transparent">
                           <IconBrandGoogle
                             size={DETAIL_ICON_SIZE}
@@ -684,7 +690,7 @@ export function Detail() {
                       })}
                     >
                       <Group position="right" mb={-28}>
-                        <Tooltip withArrow label="Browse Google Fonts">
+                        <Tooltip withArrow label={t("Browse Google Fonts")}>
                           <ActionIcon
                             variant="transparent"
                             component="a"
@@ -699,8 +705,8 @@ export function Detail() {
                         </Tooltip>
                       </Group>
                       <TextInput
-                        label="Get Google font"
-                        placeholder="Font name"
+                        label={t("Get Google font")}
+                        placeholder={t("Font name") ?? "Font name"}
                         size="xs"
                         ref={fontGoogleRef}
                         error={fontGoogleError}
@@ -729,7 +735,7 @@ export function Detail() {
             />
             <Select
               size="xs"
-              placeholder="Font weight"
+              placeholder={t("Font weight") ?? "Font weight"}
               icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
               data={[
                 { value: "100", label: "100" },
@@ -756,7 +762,7 @@ export function Detail() {
             <Group noWrap spacing="xs" align="flex-start">
               <NumberInput
                 size="xs"
-                placeholder="Font size"
+                placeholder={t("Font size") ?? "Font size"}
                 icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
                 min={1}
                 value={layer[selected].font?.size}
@@ -803,7 +809,7 @@ export function Detail() {
             </Group>
             <CustomColorInput
               sx={{ flex: 1 }}
-              placeholder="Font color"
+              placeholder={t("Font color") ?? "Font color"}
               selected={selected}
               color={fontColor}
               action={setLayerFontColor}
@@ -812,7 +818,7 @@ export function Detail() {
 
             <NumberInput
               size="xs"
-              placeholder="Horizontal Scale"
+              placeholder={t("Horizontal Scale") ?? "Horizontal Scale"}
               icon={<IconArrowAutofitWidth size={DETAIL_ICON_SIZE} />}
               precision={2}
               min={0}
@@ -834,7 +840,7 @@ export function Detail() {
             />
             <NumberInput
               size="xs"
-              placeholder="Vertical Scale"
+              placeholder={t("Vertical Scale") ?? "Vertical Scale"}
               icon={<IconArrowAutofitHeight size={DETAIL_ICON_SIZE} />}
               precision={2}
               min={0}

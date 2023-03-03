@@ -23,7 +23,7 @@ import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { typeToIcon } from "@/pages/draw";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "next-i18next";
 
 export function Tool() {
   // Provider

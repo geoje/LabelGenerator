@@ -7,6 +7,7 @@ import { UNIT, convertSize } from "@/lib/paperSlice";
 import { calculatePageMap } from "@/lib/printSlice";
 import { showNotification } from "@mantine/notifications";
 import { LabelPaper } from "./labelPaper";
+import { useTranslation } from "next-i18next";
 
 export function Preview() {
   // Provider
@@ -25,6 +26,7 @@ export function Preview() {
 
   const condition = useSelector((state: any) => state.print.condition);
   const exclude = useSelector((state: any) => state.print.exclude);
+  const { t } = useTranslation();
   const pageMap = calculatePageMap(
     data,
     paperLayoutPx,
@@ -80,7 +82,7 @@ export function Preview() {
         // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
         // There is CORS problem. But we can ignore it.
         <NewWindow
-          title="Print Labels"
+          title={t("Print Labels") ?? "Print Labels"}
           onUnload={() => {
             setReqPrint(null);
           }}

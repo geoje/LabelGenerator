@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { UNIT, convertSize } from "@/lib/paperSlice";
 import { addExclude, delExclude } from "@/lib/printSlice";
 import { Canvas } from "./canvas";
+import { useTranslation } from "next-i18next";
 
 export function LabelPaper(props: any) {
   const dispatch = useDispatch();
@@ -31,6 +32,7 @@ export function LabelPaper(props: any) {
     useSelector((state: any) => state.paper.layout),
     UNIT.px
   );
+  const { t } = useTranslation();
   let x = paperLayoutPx.l,
     y = paperLayoutPx.t;
 
@@ -85,7 +87,7 @@ export function LabelPaper(props: any) {
                   }}
                 >
                   <Tooltip
-                    label="Exclude"
+                    label={t("Exclude")}
                     withArrow
                     styles={(theme) => {
                       return {
@@ -109,7 +111,7 @@ export function LabelPaper(props: any) {
                     </ActionIcon>
                   </Tooltip>
                   <Tooltip
-                    label="Print"
+                    label={t("Print")}
                     withArrow
                     styles={(theme) => {
                       return {
@@ -193,7 +195,7 @@ export function LabelPaper(props: any) {
                 borderStyle: "dashed",
               }}
             >
-              <Tooltip label="Include" withArrow>
+              <Tooltip label={t("Include")} withArrow>
                 <ActionIcon
                   variant="transparent"
                   onClick={() => dispatch(delExclude([props.pageMapIndex, i]))}

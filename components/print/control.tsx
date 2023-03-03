@@ -15,7 +15,7 @@ import {
   IconRotate,
   IconVariable,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NewWindow from "react-new-window";
 import { DETAIL_ICON_SIZE } from "@/lib/drawSlice";
@@ -30,6 +30,7 @@ import {
 import { showNotification } from "@mantine/notifications";
 import { PrintModal } from "./printModal";
 import { LabelPaper } from "./labelPaper";
+import { useTranslation } from "next-i18next";
 
 export function Control() {
   // Provider
@@ -43,6 +44,7 @@ export function Control() {
     useSelector((state: any) => state.paper.layout),
     UNIT.px
   );
+  const { t } = useTranslation();
 
   const [reqPrint, setReqPrint] = useState(false);
   const [opened, { close, open }] = useDisclosure(false);
@@ -66,14 +68,14 @@ export function Control() {
           leftIcon={<IconRotate size={DETAIL_ICON_SIZE} />}
           onClick={() => dispatch(setExclude({}))}
         >
-          Clear exclude
+          {t("Clear exclude")}
         </Button>
       )}
 
       <Group noWrap>
         <Select
           size="xs"
-          placeholder="Filter column"
+          placeholder={t("Filter column") ?? "Filter column"}
           clearable
           icon={<IconFilter size={DETAIL_ICON_SIZE} />}
           transitionDuration={100}
@@ -96,7 +98,7 @@ export function Control() {
         />
         <Select
           size="xs"
-          placeholder="Filter value"
+          placeholder={t("Filter value") ?? "Filter value"}
           disabled={!condition.filterFormat}
           icon={<IconVariable size={DETAIL_ICON_SIZE} />}
           transitionDuration={100}
@@ -126,7 +128,7 @@ export function Control() {
       <Select
         size="xs"
         mt="md"
-        placeholder="Copies column"
+        placeholder={t("Copies column") ?? "Copies column"}
         clearable
         icon={<IconCopy size={DETAIL_ICON_SIZE} />}
         transitionDuration={100}
@@ -149,7 +151,7 @@ export function Control() {
         {pageMap.length}
       </Badge>
 
-      <Tooltip label="Print all" position="bottom" withArrow>
+      <Tooltip label={t("Print all")} position="bottom" withArrow>
         <ActionIcon
           size={128}
           variant="filled"
@@ -157,8 +159,10 @@ export function Control() {
           onClick={() => {
             if (pageMap.length > MAX_COUNT)
               showNotification({
-                title: "Too many quantity",
-                message: `The system cannot print more than ${MAX_COUNT} copies.`,
+                title: t("Too many quantity"),
+                message: t(
+                  "The system cannot print more than {0} copies"
+                ).replace("{0}", MAX_COUNT.toLocaleString()),
                 color: "red",
               });
             else if (pageMap.length > RECOMMENDED_COUNT) open();
@@ -189,8 +193,8 @@ export function Control() {
           }}
           onBlock={() =>
             showNotification({
-              title: "New window opening blocked",
-              message: "The browser restricts opening a new window",
+              title: t("New window opening blocked"),
+              message: t("The browser restricted opening a new window"),
               color: "red",
             })
           }

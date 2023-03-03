@@ -129,7 +129,7 @@ export default function Home() {
             {t("Import data")}
           </Title>
           {data.length && (
-            <Tooltip label="Clear" withArrow>
+            <Tooltip label={t("Clear")} withArrow>
               <ActionIcon
                 variant="subtle"
                 onClick={() => {

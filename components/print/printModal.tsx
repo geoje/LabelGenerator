@@ -8,6 +8,7 @@ import {
   Title,
 } from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { useTranslation } from "next-i18next";
 
 export function PrintModal(props: any) {
   const qty = props.qty;
@@ -17,6 +18,7 @@ export function PrintModal(props: any) {
   const onDisagree = props.onDisagree;
 
   const theme = useMantineTheme();
+  const { t } = useTranslation();
 
   return (
     <Modal
@@ -26,7 +28,7 @@ export function PrintModal(props: any) {
       title={
         <Group>
           <IconAlertTriangle size={48} color="#FAB005" />
-          <Title order={4}>Bulk Print Warning</Title>
+          <Title order={4}>{t("Bulk Print Warning")}</Title>
         </Group>
       }
       overlayColor={
@@ -38,19 +40,23 @@ export function PrintModal(props: any) {
       overlayBlur={3}
     >
       <Text>
-        You tried to print <b>{qty}</b> copies more than {RECOMMENDED_COUNT}{" "}
-        that recommended.
+        {t("You tried to print")} <b>{qty.toLocaleString()}</b>{" "}
+        {t("copies more than {0} that recommended").replace(
+          "{0}",
+          RECOMMENDED_COUNT.toLocaleString()
+        )}
       </Text>
       <Text>
-        It causes the browser to freeze, but you can print after waiting for
-        rendering.
+        {t(
+          "It causes the browser to freeze, but you can print after waiting for rendering"
+        )}
       </Text>
-      <Text mt="xs">Are you still going to proceed?</Text>
+      <Text mt="xs">{t("Are you still going to proceed?")}</Text>
 
       <Group mt="xl" position="apart">
-        <Button onClick={onDisagree}>No, I will not print</Button>
+        <Button onClick={onDisagree}>{t("No, I will not print")}</Button>
         <Button onClick={onAgree} variant="outline">
-          Yes, I will print
+          {t("Yes, I will print")}
         </Button>
       </Group>
     </Modal>

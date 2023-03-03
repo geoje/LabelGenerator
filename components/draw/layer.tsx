@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { typeToIcon } from "@/pages/draw";
 import { resetServerContext } from "react-beautiful-dnd";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "next-i18next";
 
 export function Layer() {
   // Provider
