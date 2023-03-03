@@ -100,13 +100,12 @@ export function LabelPaper(props: any) {
                     }}
                   >
                     <ActionIcon
-                      color="#fff"
                       variant="transparent"
                       onClick={() =>
                         dispatch(addExclude([props.pageMapIndex, i]))
                       }
                     >
-                      <IconCircleMinus />
+                      <IconCircleMinus color="white" />
                     </ActionIcon>
                   </Tooltip>
                   <Tooltip
@@ -124,12 +123,8 @@ export function LabelPaper(props: any) {
                       };
                     }}
                   >
-                    <ActionIcon
-                      color="#fff"
-                      variant="transparent"
-                      onClick={props.onPrint}
-                    >
-                      <IconPrinter />
+                    <ActionIcon variant="transparent" onClick={props.onPrint}>
+                      <IconPrinter color="white" />
                     </ActionIcon>
                   </Tooltip>
                   <Tooltip
@@ -167,14 +162,13 @@ export function LabelPaper(props: any) {
                     }}
                   >
                     <ActionIcon
-                      color="#fff"
                       variant="transparent"
                       style={{
                         cursor: "default",
                         transform: "none",
                       }}
                     >
-                      <IconInfoCircle />
+                      <IconInfoCircle color="white" />
                     </ActionIcon>
                   </Tooltip>
                 </Overlay>
@@ -201,11 +195,10 @@ export function LabelPaper(props: any) {
             >
               <Tooltip label="Include" withArrow>
                 <ActionIcon
-                  color="#868e96"
                   variant="transparent"
                   onClick={() => dispatch(delExclude([props.pageMapIndex, i]))}
                 >
-                  <IconCirclePlus />
+                  <IconCirclePlus color="#868e96" />
                 </ActionIcon>
               </Tooltip>
             </div>

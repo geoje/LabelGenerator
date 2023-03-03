@@ -1,8 +1,14 @@
 import { useMantineTheme, Table } from "@mantine/core";
-import { useState, useRef, forwardRef, createContext, useContext } from "react";
+import {
+  useState,
+  useRef,
+  forwardRef,
+  createContext,
+  useContext,
+  useEffect,
+} from "react";
 import { useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
-import { containerHeight } from "@/lib/paperSlice";
 
 export function DataTable() {
   const data = useSelector((state: any) => state.data.value);
@@ -11,6 +17,7 @@ export function DataTable() {
   if (data.length) for (let key of Object.keys(data[0])) keys.push(key);
 
   const theme = useMantineTheme();
+  const [windowSize, setWindowSize] = useState({ w: 0, h: 0 });
 
   /** Context for cross component communication */
   const VirtualTableContext = createContext({
@@ -99,9 +106,14 @@ export function DataTable() {
     );
   });
 
+  useEffect(
+    () => setWindowSize({ w: window.innerWidth, h: window.innerHeight }),
+    []
+  );
+
   return (
     <VirtualTable
-      height={containerHeight() - 30}
+      height={windowSize.h - 170}
       itemCount={data.length}
       itemSize={rowHeight}
       header={
