@@ -1,13 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {
-  IconBarcode,
-  IconCircle,
-  IconPhoto,
-  IconQrcode,
-  IconQuestionMark,
-  IconSquare,
-  IconTypography,
-} from "@tabler/icons-react";
 import { CONVERT_RATIO } from "./paperSlice";
 
 export const TYPE = {
@@ -35,21 +26,6 @@ export function convertSize(layout: any, unit: any) {
     h: layout.h * CONVERT_RATIO[layout.unit][unit],
     unit,
   };
-}
-export function typeToIcon(type: any): JSX.Element {
-  return type === TYPE.rect
-    ? IconSquare({})
-    : type === TYPE.circle
-    ? IconCircle({})
-    : type === TYPE.text
-    ? IconTypography({})
-    : type === TYPE.image
-    ? IconPhoto({})
-    : type === TYPE.bar
-    ? IconBarcode({})
-    : type === TYPE.qr
-    ? IconQrcode({})
-    : IconQuestionMark({});
 }
 export function getLayerSize(layer: any, ratio: any) {
   if (layer.type === TYPE.text) {

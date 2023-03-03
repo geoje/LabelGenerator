@@ -135,7 +135,7 @@ export function HeaderSimple() {
   ] = useState();
 
   useEffect(() => {
-    axios
+    const checkAuthServer = axios
       .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/user/info", {
         withCredentials: true,
       })

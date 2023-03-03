@@ -1,10 +1,9 @@
-import "./print.css";
 import { Group, Text, Stack, Title } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { UNIT, containerHeight, convertSize } from "@/lib/paperSlice";
+import { UNIT, convertSize } from "@/lib/paperSlice";
 import { calculatePageMap } from "@/lib/printSlice";
 import { showNotification } from "@mantine/notifications";
 import { LabelPaper } from "./labelPaper";
@@ -21,10 +20,11 @@ export function Preview() {
     UNIT.px
   );
 
+  const [windowSize, setWindowSize] = useState({ w: 0, h: 0 });
   const [reqPrint, setReqPrint] = useState(null);
 
-  const condition = useSelector((state: any) => state.copy.condition);
-  const exclude = useSelector((state: any) => state.copy.exclude);
+  const condition = useSelector((state: any) => state.print.condition);
+  const exclude = useSelector((state: any) => state.print.exclude);
   const pageMap = calculatePageMap(
     data,
     paperLayoutPx,
@@ -103,11 +103,16 @@ export function Preview() {
     </Stack>
   );
 
+  useEffect(
+    () => setWindowSize({ w: window.innerWidth, h: window.innerHeight }),
+    []
+  );
+
   return (
     <>
       <FixedSizeList
         width="100%"
-        height={containerHeight()}
+        height={windowSize.h - 140}
         className="List"
         itemCount={pageMap.length}
         itemSize={paperLayoutPx.h + 30}

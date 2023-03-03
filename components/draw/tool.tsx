@@ -13,7 +13,6 @@ import {
   TYPE,
   GROUP_VAR,
   convertSize,
-  typeToIcon,
   addLayer,
   setLayer,
 } from "@/lib/drawSlice";
@@ -23,6 +22,7 @@ import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { typeToIcon } from "@/pages/draw";
 
 export function Tool() {
   // Provider

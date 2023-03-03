@@ -1,4 +1,3 @@
-import "./print.css";
 import {
   ActionIcon,
   Group,
@@ -14,7 +13,7 @@ import {
   IconCirclePlus,
   IconInfoCircle,
   IconPrinter,
-} from "@tabler/icons";
+} from "@tabler/icons-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { UNIT, convertSize } from "@/lib/paperSlice";

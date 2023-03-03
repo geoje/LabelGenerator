@@ -13,16 +13,17 @@ import {
   IconStack2,
 } from "@tabler/icons-react";
 import {
-  typeToIcon,
   addLayer,
   changeLayerIndex,
   removeLayerByIndex,
   setSelected,
 } from "@/lib/drawSlice";
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { typeToIcon } from "@/pages/draw";
+import { resetServerContext } from "react-beautiful-dnd";
 
 export function Layer() {
   // Provider
@@ -47,6 +48,10 @@ export function Layer() {
         theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.white,
     },
 
+    itemDragging: {
+      boxShadow: theme.shadows.sm,
+    },
+
     isSelected: {
       borderColor: theme.colors.blue[6],
     },
@@ -65,7 +70,11 @@ export function Layer() {
     },
   }))();
   const items = layer.map((item: any, index: any) => (
-    <Draggable key={`layer-${item.name}`} draggableId={item.name} index={index}>
+    <Draggable
+      draggableId={"layer-" + item.name}
+      key={"layer-" + item.name}
+      index={index}
+    >
       {(provided: any, snapshot: any) => (
         <Group
           spacing={4}
@@ -75,13 +84,13 @@ export function Layer() {
             };
           }}
           className={cx(classes.item, {
-            // [classes.itemDragging]: snapshot.isDragging,
+            [classes.itemDragging]: snapshot.isDragging,
           })}
-          ref={provided.innerRef}
           onClick={() => dispatch(setSelected(index))}
           onMouseOver={() => setHover(index)}
           onMouseOut={() => setHover(-1)}
           {...provided.draggableProps}
+          ref={provided.innerRef}
         >
           <div {...provided.dragHandleProps} className={classes.dragHandle}>
             <IconGripVertical size={16} />
@@ -149,6 +158,7 @@ export function Layer() {
     </Draggable>
   ));
 
+  resetServerContext();
   return (
     <Stack>
       <Group position="center">

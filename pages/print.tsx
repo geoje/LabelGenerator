@@ -5,6 +5,8 @@ import { HeaderSimple } from "@/components/header";
 import { defaultLocale } from "@/pages";
 import Head from "next/head";
 import { Grid } from "@mantine/core";
+import { Control } from "@/components/print/control";
+import { Preview } from "@/components/print/preview";
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
   props: {

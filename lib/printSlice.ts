@@ -63,9 +63,13 @@ export function calculatePageMap(
 }
 
 const slice = createSlice({
-  name: "copy",
+  name: "print",
   initialState: {
-    condition: { filterFormat: null, filterValue: null, copiesFormat: null },
+    condition: {
+      filterFormat: undefined,
+      filterValue: undefined,
+      copiesFormat: undefined,
+    },
     exclude: {},
   },
   reducers: {

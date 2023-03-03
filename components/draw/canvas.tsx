@@ -1,4 +1,3 @@
-import "./canvas.css";
 import { Paper, Text, Image as ManImage } from "@mantine/core";
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";

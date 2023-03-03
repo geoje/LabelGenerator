@@ -63,7 +63,6 @@ import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import WebFont from "webfontloader";
 import { useRef } from "react";
 import { saveAs } from "file-saver";
 
@@ -180,41 +179,43 @@ export function Detail() {
       : {};
 
   const loadWebFontAndApply = () => {
-    WebFont.load({
-      google: {
-        families: [fontGoogleRef.current.value],
-      },
-      loading: () => {
-        setFontLoad(true);
-        setFontGoogleError(false);
-      },
-      active: () => {
-        setFontLoad(false);
-        setOpenedFontGoogle(false);
-        dispatch(
-          setLayerFont({
-            index: selected,
-            font: {
-              ...layer[selected].font,
-              family: {
-                ...layer[selected].font?.family,
-                value: fontGoogleRef.current.value,
-                group: GROUP_FONT.GOOGLE,
+    import("webfontloader").then((loader) =>
+      loader.load({
+        google: {
+          families: [fontGoogleRef.current.value],
+        },
+        loading: () => {
+          setFontLoad(true);
+          setFontGoogleError(false);
+        },
+        active: () => {
+          setFontLoad(false);
+          setOpenedFontGoogle(false);
+          dispatch(
+            setLayerFont({
+              index: selected,
+              font: {
+                ...layer[selected].font,
+                family: {
+                  ...layer[selected].font?.family,
+                  value: fontGoogleRef.current.value,
+                  group: GROUP_FONT.GOOGLE,
+                },
               },
-            },
-          })
-        );
-        showNotification({
-          title: "Google font loaded",
-          message: `${fontGoogleRef.current.value} font loaded successfully.`,
-          color: "green",
-        });
-      },
-      inactive: () => {
-        setFontLoad(false);
-        setFontGoogleError(true);
-      },
-    });
+            })
+          );
+          showNotification({
+            title: "Google font loaded",
+            message: `${fontGoogleRef.current.value} font loaded successfully.`,
+            color: "green",
+          });
+        },
+        inactive: () => {
+          setFontLoad(false);
+          setFontGoogleError(true);
+        },
+      })
+    );
   };
 
   return selected !== -1 ? (

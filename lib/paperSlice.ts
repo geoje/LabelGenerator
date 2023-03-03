@@ -33,7 +33,6 @@ export const DEFAULT_PAPER_SIZE: any = {
   a4: { w: 210, h: 296, unit: UNIT.mm },
 };
 
-export const containerHeight = () => window.innerHeight - 140;
 export function convertSize(layout: any, unit: any) {
   let result = { ...layout, unit };
   ["w", "h", "l", "t", "r", "b"].forEach(
@@ -76,7 +75,7 @@ const slice = createSlice({
 
       const con = {
         w: Math.floor(((window.innerWidth - 30) / 6) * 5 - 20),
-        h: containerHeight(),
+        h: window.innerHeight - 140,
       };
       const pap = convertSize(state.layout, UNIT.px);
       state.layout.ratio =

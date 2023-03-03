@@ -18,11 +18,11 @@ export function StringReplaceAt(
   );
 }
 
-export default function iniToJson(ini) {
-  const result = {};
+export default function iniToJson(ini: any) {
+  const result: any = {};
   let key = "";
 
-  ini.split("\n").forEach((line) => {
+  ini.split("\n").forEach((line: any) => {
     line = line.trim();
 
     if (/^\[.+\]$/.test(line)) {

@@ -1,4 +1,3 @@
-import "./print.css";
 import {
   ActionIcon,
   Group,
@@ -16,7 +15,7 @@ import {
   IconRotate,
   IconVariable,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NewWindow from "react-new-window";
 import { DETAIL_ICON_SIZE } from "@/lib/drawSlice";
@@ -48,8 +47,8 @@ export function Control() {
   const [reqPrint, setReqPrint] = useState(false);
   const [opened, { close, open }] = useDisclosure(false);
 
-  const condition = useSelector((state: any) => state.copy.condition);
-  const exclude = useSelector((state: any) => state.copy.exclude);
+  const condition = useSelector((state: any) => state.print.condition);
+  const exclude = useSelector((state: any) => state.print.exclude);
   const pageMap = calculatePageMap(
     data,
     paperLayoutPx,
