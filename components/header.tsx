@@ -13,6 +13,8 @@ import {
   Paper,
   Breadcrumbs,
   Text,
+  FileButton,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React, { useEffect, useState } from "react";
@@ -32,8 +34,10 @@ import {
   IconPlugX,
 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
-import { createPathWithLocale } from "@/lib/tool";
+import { createPathWithLocale, LoadFile, SaveFile } from "@/lib/tool";
 import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 const STATUS = {
   LOAD: 0,
@@ -117,6 +121,17 @@ const useStyles = createStyles((theme: MantineTheme) => ({
 }));
 
 export function HeaderSimple() {
+  const dispatch = useDispatch();
+
+  // For load and save file
+  const data = useSelector((state: any) => state.data.value);
+  const layer = useSelector((state: any) => state.draw.layer);
+  const fontMap = useSelector((state: any) => state.draw.fontMap);
+  const drawLayout = useSelector((state: any) => state.draw.layout);
+  const paperLayout = useSelector((state: any) => state.paper.layout);
+  const condition = useSelector((state: any) => state.print.condition);
+  const exclude = useSelector((state: any) => state.print.exclude);
+
   const theme = useMantineTheme();
   const { classes, cx } = useStyles();
   const dark = theme.colorScheme === "dark";
@@ -135,7 +150,7 @@ export function HeaderSimple() {
   ] = useState();
 
   useEffect(() => {
-    const checkAuthServer = axios
+    axios
       .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/user/info", {
         withCredentials: true,
       })
@@ -222,27 +237,67 @@ export function HeaderSimple() {
         </Group>
 
         <Group spacing="xs" pr="md" className={classes.links}>
-          <ActionIcon
-            size="lg"
-            variant="subtle"
-            className={classes.noneSmallerThanXS}
+          <Tooltip label="New proejct" withArrow>
+            <ActionIcon
+              size="lg"
+              color="gray"
+              variant="subtle"
+              className={classes.noneSmallerThanXS}
+              onClick={() =>
+                showNotification({
+                  title: "Oops!",
+                  message:
+                    "This function is not developed yet. Please contact to info@womosoft.com.",
+                  color: "yellow",
+                })
+              }
+            >
+              <IconFile />
+            </ActionIcon>
+          </Tooltip>
+          <FileButton
+            accept="application/zip"
+            onChange={(file) => {
+              LoadFile(file, dispatch);
+            }}
           >
-            <IconFile />
-          </ActionIcon>
-          <ActionIcon
-            size="lg"
-            variant="subtle"
-            className={classes.noneSmallerThanXS}
-          >
-            <IconFolder />
-          </ActionIcon>
-          <ActionIcon
-            size="lg"
-            variant="subtle"
-            className={classes.noneSmallerThanXS}
-          >
-            <IconDeviceFloppy />
-          </ActionIcon>
+            {(props) => (
+              <Tooltip label="Load project" withArrow>
+                <ActionIcon
+                  size="lg"
+                  color="gray"
+                  variant="subtle"
+                  className={classes.noneSmallerThanXS}
+                  {...props}
+                >
+                  <IconFolder />
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </FileButton>
+          <Tooltip label="Save project" withArrow>
+            <ActionIcon
+              size="lg"
+              color="gray"
+              variant="subtle"
+              className={classes.noneSmallerThanXS}
+              onClick={() =>
+                console.log(
+                  SaveFile(
+                    data,
+                    layer,
+                    fontMap,
+                    drawLayout,
+                    paperLayout,
+                    condition,
+                    exclude
+                  )
+                )
+              }
+            >
+              <IconDeviceFloppy />
+            </ActionIcon>
+          </Tooltip>
           {user ? (
             <Menu withArrow shadow="md" position={"bottom-end"}>
               <Menu.Target>
