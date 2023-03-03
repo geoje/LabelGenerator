@@ -23,6 +23,7 @@ import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { typeToIcon } from "@/pages/draw";
+import { useTranslation } from "react-i18next";
 
 export function Tool() {
   // Provider
@@ -32,6 +33,8 @@ export function Tool() {
   const layoutPx = convertSize(layout, UNIT.px);
   const layer = useSelector((state: any) => state.draw.layer);
   const page = useSelector((state: any) => state.draw.page);
+
+  const { t } = useTranslation();
 
   let [layerCount, setLayerCount] = useState(1);
   const [openedInfo, setOpenedInfo] = useState(false);
@@ -45,14 +48,14 @@ export function Tool() {
 
   return (
     <Group position="center" spacing="xs">
-      <Tooltip label="New canvas" withArrow>
+      <Tooltip label={t("New canvas")} withArrow>
         <ActionIcon variant="subtle" onClick={() => dispatch(setLayer([]))}>
           <IconFile />
         </ActionIcon>
       </Tooltip>
 
       <Divider orientation="vertical" />
-      <Tooltip label="Rectangle" withArrow>
+      <Tooltip label={t("Rectangle")} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -78,7 +81,7 @@ export function Tool() {
           {typeToIcon(TYPE.rect)}
         </ActionIcon>
       </Tooltip>
-      <Tooltip label="Circle" withArrow>
+      <Tooltip label={t("Circle")} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -106,7 +109,7 @@ export function Tool() {
       </Tooltip>
 
       <Divider orientation="vertical" />
-      <Tooltip label="Text" withArrow>
+      <Tooltip label={t("Text")} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() => {
@@ -191,7 +194,7 @@ export function Tool() {
         }}
       >
         {(props) => (
-          <Tooltip label="Image" withArrow>
+          <Tooltip label={t("Image")} withArrow>
             <Button
               p={0}
               color="gray"
@@ -206,7 +209,7 @@ export function Tool() {
           </Tooltip>
         )}
       </FileButton>
-      <Tooltip label="Bar code" withArrow>
+      <Tooltip label={t("Bar code")} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -226,7 +229,7 @@ export function Tool() {
           {typeToIcon(TYPE.bar)}
         </ActionIcon>
       </Tooltip>
-      <Tooltip label="QR code" withArrow>
+      <Tooltip label={t("QR code")} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>

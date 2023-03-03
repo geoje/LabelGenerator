@@ -137,7 +137,7 @@ export function HeaderSimple() {
   const dark = theme.colorScheme === "dark";
 
   const router = useRouter();
-  const { t, i18n } = useTranslation("common");
+  const { t, i18n } = useTranslation();
 
   const [authStatus, setAuthStatus]: [number, any] = useState(STATUS.LOAD);
   const [opened, { close, toggle }] = useDisclosure(false);
@@ -159,10 +159,7 @@ export function HeaderSimple() {
         return res.data;
       })
       .then(setUser)
-      .catch((error) => {
-        setAuthStatus(STATUS.BAD);
-        console.error(error);
-      });
+      .catch(() => setAuthStatus(STATUS.BAD));
   }, []);
 
   return (
@@ -229,7 +226,7 @@ export function HeaderSimple() {
                         : router.pathname.startsWith(href),
                   })}
                 >
-                  {title}
+                  {t(title)}{" "}
                 </ActionIcon>
               </Link>
             ))}

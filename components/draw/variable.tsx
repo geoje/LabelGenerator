@@ -26,6 +26,7 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconCode, IconPhoto, IconVariable } from "@tabler/icons-react";
+import { useTranslation } from "next-i18next";
 import { useDispatch, useSelector } from "react-redux";
 
 export function Variable() {
@@ -39,12 +40,14 @@ export function Variable() {
   const page = useSelector((state: any) => state.draw.page);
   const selected = useSelector((state: any) => state.draw.selected);
 
+  const { t } = useTranslation();
+
   if (selected === -1) return <></>;
 
   const header = (
     <Group position="center">
       <IconCode />
-      <Title order={5}>Variable</Title>
+      <Title order={5}>{t("Variable")}</Title>
     </Group>
   );
   const valueComponent = ({

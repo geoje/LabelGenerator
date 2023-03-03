@@ -12,12 +12,12 @@ export const getStaticProps: GetStaticProps = async ({ locale }) => ({
 });
 
 export default function Template() {
-  const { t } = useTranslation("common");
+  const { t } = useTranslation();
 
   return (
     <>
       <Head>
-        <title>{t("common:Title") + " - " + t("common:Womosoft")}</title>
+        <title>{t("common:Title") + " - " + t("common:Label Generator")}</title>
       </Head>
       <HeaderSimple />
     </>

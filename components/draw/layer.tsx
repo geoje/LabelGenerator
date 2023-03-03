@@ -18,18 +18,20 @@ import {
   removeLayerByIndex,
   setSelected,
 } from "@/lib/drawSlice";
-import React, { useEffect } from "react";
+import React from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { typeToIcon } from "@/pages/draw";
 import { resetServerContext } from "react-beautiful-dnd";
+import { useTranslation } from "react-i18next";
 
 export function Layer() {
   // Provider
   const dispatch = useDispatch();
   const layer = useSelector((state: any) => state.draw.layer);
   const selected = useSelector((state: any) => state.draw.selected);
+  const { t } = useTranslation();
 
   const [hover, setHover] = useState(-1);
 
@@ -163,7 +165,7 @@ export function Layer() {
     <Stack>
       <Group position="center">
         <IconStack2 />
-        <Title order={5}>Layer</Title>
+        <Title order={5}>{t("Layer")}</Title>
       </Group>
       <DragDropContext
         onDragEnd={({ destination, source }: any) => {

@@ -47,12 +47,12 @@ export function typeToIcon(type: any) {
 }
 
 export default function Template() {
-  const { t } = useTranslation("common");
+  const { t } = useTranslation();
 
   return (
     <>
       <Head>
-        <title>{t("common:Title") + " - " + t("common:Womosoft")}</title>
+        <title>{t("Draw") + " - " + t("Label Generator")}</title>
       </Head>
       <HeaderSimple />
       <Grid m={0} p="sm">

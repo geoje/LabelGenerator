@@ -15,12 +15,12 @@ export const getStaticProps: GetStaticProps = async ({ locale }) => ({
 });
 
 export default function Template() {
-  const { t } = useTranslation("common");
+  const { t } = useTranslation();
 
   return (
     <>
       <Head>
-        <title>{t("common:Title") + " - " + t("common:Womosoft")}</title>
+        <title>{t("Print") + " - " + t("Label Generator")}</title>
       </Head>
       <HeaderSimple />
       <Grid m={0} p="sm" pt="xl">
