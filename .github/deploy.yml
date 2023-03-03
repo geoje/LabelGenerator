@@ -1,0 +1,48 @@
+name: 🚀 Deploy
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔌 Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/srv.key
+          chmod 600 ~/.ssh/srv.key
+          cat >> ~/.ssh/config <<END
+          Host srv
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/srv.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_HOST: ${{ secrets.HOST }}
+          SSH_USER: ${{ secrets.USER }}
+          SSH_KEY: ${{ secrets.KEY }}
+
+      - name: 📥 Pull and Install modules
+        run: ssh srv "cd ${{ github.event.repository.name }} && git pull && npm install"
+
+      - name: 🛠️ Ready to build
+        run: ssh srv "cd ${{ github.event.repository.name }} && sed -i \"s/};/distDir:'build'};/g\" next.config.js"
+
+      - name: 🏗️ Build
+        run: ssh srv "cd ${{ github.event.repository.name }} && npm run build"
+
+      - name: 🗑️ Cleaning
+        run: ssh srv "cd ${{ github.event.repository.name }} && git reset && git checkout ."
+
+      - name: ⏳ Stop pm2
+        run: ssh srv "pm2 stop ${{ github.event.repository.name }}"
+
+      - name: 🚚 Transfer
+        run: ssh srv "cd ${{ github.event.repository.name }} && rm -rf .next && mv build .next"
+
+      - name: 🎉 Start pm2
+        run: ssh srv "pm2 start ${{ github.event.repository.name }}"
