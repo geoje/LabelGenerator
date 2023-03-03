@@ -15,6 +15,8 @@ import {
   Text,
   FileButton,
   Tooltip,
+  Box,
+  NavLink,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React, { useEffect, useState } from "react";
@@ -32,6 +34,10 @@ import {
   IconDeviceFloppy,
   IconChevronRight,
   IconPlugX,
+  IconFileImport,
+  IconBrush,
+  IconPrinter,
+  IconLayoutBoardSplit,
 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { createPathWithLocale, LoadFile, SaveFile } from "@/lib/tool";
@@ -44,6 +50,28 @@ const STATUS = {
   GOOD: 1,
   BAD: 2,
 };
+export const links: { link: string; label: string; icon: React.ReactNode }[] = [
+  {
+    link: "/",
+    label: "Data",
+    icon: <IconFileImport />,
+  },
+  {
+    link: "/draw",
+    label: "Draw",
+    icon: <IconBrush />,
+  },
+  {
+    link: "/paper",
+    label: "Paper",
+    icon: <IconLayoutBoardSplit />,
+  },
+  {
+    link: "/print",
+    label: "Print",
+    icon: <IconPrinter />,
+  },
+];
 const useStyles = createStyles((theme: MantineTheme) => ({
   header: {
     display: "flex",
@@ -141,24 +169,18 @@ export function HeaderSimple() {
 
   const [authStatus, setAuthStatus]: [number, any] = useState(STATUS.LOAD);
   const [opened, { close, toggle }] = useDisclosure(false);
-  const [user, setUser]: [
-    (
-      | { name: string; email: string; image: string; provider: string }
-      | undefined
-    ),
-    any
-  ] = useState();
+  const [session, setSession]: any = useState({});
 
   useEffect(() => {
     axios
-      .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/user/info", {
+      .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/auth/session", {
         withCredentials: true,
       })
       .then((res) => {
         setAuthStatus(STATUS.GOOD);
         return res.data;
       })
-      .then(setUser)
+      .then(setSession)
       .catch(() => setAuthStatus(STATUS.BAD));
   }, []);
 
@@ -210,23 +232,18 @@ export function HeaderSimple() {
             }
             styles={{ separator: { margin: 0 } }}
           >
-            {[
-              { title: "Data", href: "/" },
-              { title: "Draw", href: "/draw" },
-              { title: "Paper", href: "/paper" },
-              { title: "Print", href: "/print" },
-            ].map(({ title, href }) => (
-              <Link href={href} key={title}>
+            {links.map(({ link, label }) => (
+              <Link href={link} key={label}>
                 <ActionIcon
                   variant="transparent"
                   className={cx(classes.link, {
                     [classes.linkActive]:
-                      href === "/"
+                      link === "/"
                         ? router.pathname === "/"
-                        : router.pathname.startsWith(href),
+                        : router.pathname.startsWith(link),
                   })}
                 >
-                  {t(title)}{" "}
+                  {t(label)}{" "}
                 </ActionIcon>
               </Link>
             ))}
@@ -295,14 +312,14 @@ export function HeaderSimple() {
               <IconDeviceFloppy />
             </ActionIcon>
           </Tooltip>
-          {user ? (
+          {session.user ? (
             <Menu withArrow shadow="md" position={"bottom-end"}>
               <Menu.Target>
                 <ActionIcon variant="subtle" size={48} radius="xl">
-                  {user.image ? (
+                  {session.user.image ? (
                     <Image
-                      src={user.image}
-                      alt={user.name || "profile"}
+                      src={session.user.image}
+                      alt={session.user.name || "profile"}
                       width={36}
                       height={36}
                       radius="xl"
@@ -316,7 +333,7 @@ export function HeaderSimple() {
 
               <Menu.Dropdown>
                 <Group pl="sm" spacing={0}>
-                  {user.provider == "google" ? (
+                  {session.user.provider == "google" ? (
                     <Image
                       src={
                         process.env.NEXT_PUBLIC_AUTH_HOST +
@@ -325,7 +342,7 @@ export function HeaderSimple() {
                       width={16}
                       alt="google"
                     />
-                  ) : user.provider == "naver" ? (
+                  ) : session.user.provider == "naver" ? (
                     <Paper bg="#03C75A" radius={0} p={4}>
                       <Image
                         src={
@@ -337,9 +354,9 @@ export function HeaderSimple() {
                       />
                     </Paper>
                   ) : null}
-                  <Menu.Label>{user.name}</Menu.Label>
+                  <Menu.Label>{session.user.name}</Menu.Label>
                 </Group>
-                <Menu.Label>{user.email}</Menu.Label>
+                <Menu.Label>{session.user.email}</Menu.Label>
 
                 <Link
                   href={
@@ -369,37 +386,79 @@ export function HeaderSimple() {
                 </Menu.Item>
 
                 <Menu.Divider />
-                <Link
-                  href={
-                    process.env.NEXT_PUBLIC_AUTH_HOST +
-                    createPathWithLocale("/logout", i18n.language)
-                  }
+                <Menu.Item
+                  icon={<IconLogout size={14} />}
+                  onClick={() => {
+                    router.push(
+                      process.env.NEXT_PUBLIC_AUTH_HOST +
+                        "/api/auth/signout?callbackUrl=" +
+                        window.location.href
+                    );
+                    // axios
+                    //   .post(
+                    //     process.env.NEXT_PUBLIC_AUTH_HOST + "/api/auth/signout"
+                    //   )
+                    //   .then(console.log)
+                    //   .catch(console.error);
+                  }}
                 >
-                  <Menu.Item icon={<IconLogout size={14} />}>
-                    {t("Logout")}
-                  </Menu.Item>
-                </Link>
+                  {t("Logout")}
+                </Menu.Item>
               </Menu.Dropdown>
             </Menu>
           ) : (
-            <Link
-              href={
-                process.env.NEXT_PUBLIC_AUTH_HOST +
-                createPathWithLocale("/login?callbackUrl=", i18n.language)
-              }
+            <Button
+              className={classes.linkAuth}
+              loading={authStatus === STATUS.LOAD}
+              leftIcon={authStatus === STATUS.BAD ? <IconPlugX /> : null}
+              color={authStatus === STATUS.BAD ? "gray" : ""}
+              onClick={async () => {
+                router.push(
+                  process.env.NEXT_PUBLIC_AUTH_HOST +
+                    createPathWithLocale(
+                      "/login?callbackUrl=" + window.location.href,
+                      i18n.language
+                    )
+                );
+              }}
             >
-              <Button
-                className={classes.linkAuth}
-                loading={authStatus === STATUS.LOAD}
-                leftIcon={authStatus === STATUS.BAD ? <IconPlugX /> : null}
-                color={authStatus === STATUS.BAD ? "gray" : ""}
-              >
-                {t("Login")}
-              </Button>
-            </Link>
+              {t("Login")}
+            </Button>
           )}
         </Group>
       </Container>
+      <Box
+        className={classes.noneLargerThanXS}
+        opacity={opened ? 1 : 0}
+        style={{
+          width: "100%",
+          background: dark ? theme.colors.dark[7] : theme.white,
+          visibility: opened ? "visible" : "hidden",
+          transition: "0.2s",
+        }}
+      >
+        {links.map(({ link, label, icon }) => (
+          <Link href={link} key={label} onClick={close}>
+            <NavLink
+              label={t(label)}
+              icon={icon}
+              fw={600}
+              p={16}
+              style={{
+                color: (
+                  link === "/"
+                    ? router.pathname === "/"
+                    : router.pathname.startsWith(link)
+                )
+                  ? theme.colors.blue[6]
+                  : dark
+                  ? theme.colors.dark[0]
+                  : theme.colors.dark[6],
+              }}
+            />
+          </Link>
+        ))}
+      </Box>
     </Header>
   );
 }
