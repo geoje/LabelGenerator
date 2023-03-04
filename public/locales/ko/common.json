@@ -13,8 +13,8 @@
   "Delete my account": "계정 삭제",
 
   "Import data": "데이터 가져오기",
-  "Drag data file or click to select file": "데이터 파일을 드래그 하거나 클릭하여 선택할 수 있어요",
-  "Attach MS Excel or CSV file, file should not exceed 5mb": "MS Excel 또는 CSV 파일 첨부, 파일은 5mb를 초과하면 안되요",
+  "Drag data file or click to select file": "데이터 파일을 드래그 하거나 클릭하여 선택",
+  "Attach MS Excel or CSV file, file should not exceed 5mb": "MS Excel 또는 CSV 파일 첨부, 파일은 5mb를 초과하면 안돼요",
   "Choose 1 sheet": "시트 선택",
   "Clear": "지우기",
 
