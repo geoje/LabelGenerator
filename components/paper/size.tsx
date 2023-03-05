@@ -7,6 +7,7 @@ import {
   Text,
 } from "@mantine/core";
 import {
+  IconFile,
   IconFileHorizontal,
   IconLayoutBoardSplit,
   IconRuler3,
@@ -56,11 +57,11 @@ export function Size() {
             },
             {
               value: PAPER_TYPE.letter,
-              label: SegLabel(<IconLayoutBoardSplit />, "Letter"),
+              label: SegLabel(<IconFile />, "Letter"),
             },
             {
               value: PAPER_TYPE.a4,
-              label: SegLabel(<IconLayoutBoardSplit />, "A4"),
+              label: SegLabel(<IconFile />, "A4"),
             },
             {
               value: PAPER_TYPE.custom,

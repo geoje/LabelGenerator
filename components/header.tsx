@@ -17,6 +17,10 @@ import {
   Tooltip,
   Box,
   NavLink,
+  Popover,
+  Grid,
+  Title,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React, { useEffect, useState } from "react";
@@ -34,10 +38,13 @@ import {
   IconDeviceFloppy,
   IconChevronRight,
   IconPlugX,
-  IconFileImport,
   IconBrush,
   IconPrinter,
-  IconLayoutBoardSplit,
+  IconFileSpreadsheet,
+  IconGridDots,
+  IconWorld,
+  IconSun,
+  IconMoonStars,
 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { createPathWithLocale, LoadFile, SaveFile } from "@/lib/tool";
@@ -50,11 +57,11 @@ const STATUS = {
   GOOD: 1,
   BAD: 2,
 };
-export const links: { link: string; label: string; icon: React.ReactNode }[] = [
+const links: { link: string; label: string; icon: React.ReactNode }[] = [
   {
     link: "/",
     label: "Data",
-    icon: <IconFileImport />,
+    icon: <IconFileSpreadsheet />,
   },
   {
     link: "/draw",
@@ -64,7 +71,7 @@ export const links: { link: string; label: string; icon: React.ReactNode }[] = [
   {
     link: "/paper",
     label: "Paper",
-    icon: <IconLayoutBoardSplit />,
+    icon: <IconFile />,
   },
   {
     link: "/print",
@@ -146,6 +153,20 @@ const useStyles = createStyles((theme: MantineTheme) => ({
     fontWeight: 600,
     transition: "background-color 0.1s",
   },
+
+  menu: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+
+    width: "100%",
+    height: "80px",
+  },
+  mewnuTitle: {
+    marginTop: 4,
+    fontSize: "10px",
+    textAlign: "center",
+  },
 }));
 
 export function HeaderSimple() {
@@ -161,8 +182,9 @@ export function HeaderSimple() {
   const exclude = useSelector((state: any) => state.print.exclude);
 
   const theme = useMantineTheme();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const { classes, cx } = useStyles();
-  const dark = theme.colorScheme === "dark";
+  const dark = colorScheme === "dark";
 
   const router = useRouter();
   const { t, i18n } = useTranslation();
@@ -251,67 +273,128 @@ export function HeaderSimple() {
         </Group>
 
         <Group spacing="xs" pr="md" className={classes.links}>
-          <Tooltip label={t("New project")} withArrow>
-            <ActionIcon
-              size="lg"
-              color="gray"
-              variant="subtle"
-              className={classes.noneSmallerThanXS}
-              onClick={() =>
-                showNotification({
-                  title: "Oops!",
-                  message:
-                    "This function is not developed yet. Please contact to info@womosoft.com.",
-                  color: "yellow",
-                })
-              }
-            >
-              <IconFile />
-            </ActionIcon>
-          </Tooltip>
-          <FileButton
-            accept="application/zip"
-            onChange={(file) => {
-              LoadFile(file, dispatch);
-            }}
-          >
-            {(props) => (
-              <Tooltip label={t("Load project")} withArrow>
-                <ActionIcon
-                  size="lg"
-                  color="gray"
-                  variant="subtle"
-                  className={classes.noneSmallerThanXS}
-                  {...props}
-                >
-                  <IconFolder />
-                </ActionIcon>
-              </Tooltip>
-            )}
-          </FileButton>
-          <Tooltip label={t("Save project")} withArrow>
-            <ActionIcon
-              size="lg"
-              color="gray"
-              variant="subtle"
-              className={classes.noneSmallerThanXS}
-              onClick={() =>
-                console.log(
-                  SaveFile(
-                    data,
-                    layer,
-                    fontMap,
-                    drawLayout,
-                    paperLayout,
-                    condition,
-                    exclude
-                  )
-                )
-              }
-            >
-              <IconDeviceFloppy />
-            </ActionIcon>
-          </Tooltip>
+          <Popover position="bottom" withArrow shadow="md" width={300}>
+            <Popover.Target>
+              <ActionIcon size="lg" color="gray" variant="subtle">
+                <IconGridDots />
+              </ActionIcon>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <Grid gutter="xs">
+                <Grid.Col span={4}>
+                  <ActionIcon
+                    color="gray"
+                    variant="subtle"
+                    className={classes.menu}
+                    onClick={() =>
+                      showNotification({
+                        title: "Oops!",
+                        message:
+                          "This function is not developed yet. Please contact to info@womosoft.com.",
+                        color: "yellow",
+                      })
+                    }
+                  >
+                    <IconFile size={36} stroke={1.5} />
+                    <Title className={classes.mewnuTitle}>
+                      {t("New project")}
+                    </Title>
+                  </ActionIcon>
+                </Grid.Col>
+                <Grid.Col span={4}>
+                  <FileButton
+                    accept="application/zip"
+                    onChange={(file) => {
+                      LoadFile(file, dispatch);
+                    }}
+                  >
+                    {(props) => (
+                      <ActionIcon
+                        color="gray"
+                        variant="subtle"
+                        className={classes.menu}
+                        {...props}
+                      >
+                        <IconFolder size={36} stroke={1.5} />
+                        <Title className={classes.mewnuTitle}>
+                          {t("Load project")}
+                        </Title>
+                      </ActionIcon>
+                    )}
+                  </FileButton>
+                </Grid.Col>
+                <Grid.Col span={4}>
+                  <ActionIcon
+                    color="gray"
+                    variant="subtle"
+                    className={classes.menu}
+                    onClick={() =>
+                      SaveFile(
+                        data,
+                        layer,
+                        fontMap,
+                        drawLayout,
+                        paperLayout,
+                        condition,
+                        exclude
+                      )
+                    }
+                  >
+                    <IconDeviceFloppy size={36} stroke={1.5} />
+                    <Title className={classes.mewnuTitle}>
+                      {t("Save project")}
+                    </Title>
+                  </ActionIcon>
+                </Grid.Col>
+                <Grid.Col span={4}>
+                  <Link locale="en" href={router.asPath}>
+                    <ActionIcon
+                      color="gray"
+                      variant="subtle"
+                      className={classes.menu}
+                    >
+                      <Image width={36} src="/asset/flag/us.svg" alt="us" />
+                      <Title className={classes.mewnuTitle}>English</Title>
+                    </ActionIcon>
+                  </Link>
+                </Grid.Col>
+                <Grid.Col span={4}>
+                  <Link locale="ko" href={router.asPath}>
+                    <ActionIcon
+                      color="gray"
+                      variant="subtle"
+                      className={classes.menu}
+                    >
+                      <Image width={36} src="/asset/flag/kr.svg" alt="kr" />
+                      <Title className={classes.mewnuTitle}>한국어</Title>
+                    </ActionIcon>
+                  </Link>
+                </Grid.Col>
+                <Grid.Col span={4}>
+                  <ActionIcon
+                    color={dark ? "yellow" : "blue"}
+                    variant="subtle"
+                    className={classes.menu}
+                    onClick={() => {
+                      document.body.style.background = dark
+                        ? "#f8f9fa"
+                        : "#1a1b1e";
+                      toggleColorScheme();
+                    }}
+                  >
+                    {dark ? (
+                      <IconSun size={36} stroke={1.5} />
+                    ) : (
+                      <IconMoonStars size={36} stroke={1.5} />
+                    )}
+                    <Title className={classes.mewnuTitle}>
+                      {t(dark ? "Light mode" : "Dark mode")}
+                    </Title>
+                  </ActionIcon>
+                </Grid.Col>
+              </Grid>
+            </Popover.Dropdown>
+          </Popover>
           {session.user ? (
             <Menu withArrow shadow="md" position={"bottom-end"}>
               <Menu.Target>
