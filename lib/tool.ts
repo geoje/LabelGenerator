@@ -1,4 +1,3 @@
-import { defaultLocale } from "@/pages";
 import { showNotification } from "@mantine/notifications";
 import { saveAs } from "file-saver";
 import {
@@ -12,6 +11,8 @@ import { setData } from "./dataSlice";
 import { setLayout as setDrawLayout } from "./drawSlice";
 import { setLayout as setPaperLayout } from "./paperSlice";
 import { setCondition, setExclude } from "./printSlice";
+
+export const defaultLocale = "en";
 
 export function createPathWithLocale(path: string, locale: string): string {
   return locale.length > 0 && locale !== defaultLocale

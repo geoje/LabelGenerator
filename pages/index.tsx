@@ -19,6 +19,7 @@ import { useState } from "react";
 import * as XLSX from "xlsx";
 import { showNotification } from "@mantine/notifications";
 import { StringReplaceAt } from "@/lib/tool";
+import { defaultLocale } from "@/lib/tool";
 import { MAX_FILE_SIZE, setData } from "@/lib/dataSlice";
 import {
   IconFileSpreadsheet,
@@ -29,8 +30,6 @@ import {
 import { DataTable } from "@/components/data/dataTable";
 import { Dropzone } from "@mantine/dropzone";
 import { MIME_TYPES } from "@mantine/dropzone";
-
-export const defaultLocale = "en";
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
   props: {

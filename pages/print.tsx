@@ -2,7 +2,7 @@ import { GetStaticProps } from "next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import { HeaderSimple } from "@/components/header";
-import { defaultLocale } from "@/pages";
+import { defaultLocale } from "@/lib/tool";
 import Head from "next/head";
 import { Grid } from "@mantine/core";
 import { Control } from "@/components/print/control";
