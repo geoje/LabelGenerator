@@ -23,6 +23,7 @@ import { UNIT, convertSize } from "@/lib/paperSlice";
 import {
   calculatePageMap,
   MAX_COUNT,
+  qtyPerPaper,
   RECOMMENDED_COUNT,
   setCondition,
   setExclude,
@@ -31,6 +32,7 @@ import { showNotification } from "@mantine/notifications";
 import { PrintModal } from "./printModal";
 import { LabelPaper } from "./labelPaper";
 import { useTranslation } from "next-i18next";
+import axios from "axios";
 
 export function Control() {
   // Provider
@@ -58,6 +60,11 @@ export function Control() {
     condition,
     exclude
   );
+
+  const calculateLabelCount = () =>
+    qtyPerPaper(paperLayoutPx, drawLayoutPx) * (pageMap.length - 1) +
+    pageMap[pageMap.length - 1].length -
+    Object.keys(exclude).reduce((acc, cur) => acc + exclude[cur].length, 0);
 
   return (
     <Stack pt="xl" align="center" spacing="xs">
@@ -165,8 +172,7 @@ export function Control() {
                 ).replace("{0}", MAX_COUNT.toLocaleString()),
                 color: "red",
               });
-            else if (pageMap.length > RECOMMENDED_COUNT) open();
-            else setReqPrint(true);
+            else open();
           }}
         >
           <IconPrinter size={128} />
@@ -174,13 +180,13 @@ export function Control() {
       </Tooltip>
       <PrintModal
         qty={pageMap.length}
+        useCredit={calculateLabelCount()}
         opened={opened}
         close={close}
         onAgree={() => {
           setReqPrint(true);
           close();
         }}
-        onDisagree={close}
       />
 
       {reqPrint && (
