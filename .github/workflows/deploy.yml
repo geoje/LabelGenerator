@@ -27,7 +27,7 @@ jobs:
           SSH_KEY: ${{ secrets.KEY }}
 
       - name: 📥 Pull and Install modules
-        run: ssh srv "cd ${{ github.event.repository.name }} && git pull && npm install"
+        run: ssh srv "cd ${{ github.event.repository.name }} && git reset && git checkout . && git pull && npm install"
 
       - name: 🛠️ Ready to build
         run: ssh srv "cd ${{ github.event.repository.name }} && sed -i \"s/};/distDir:'build'};/g\" next.config.js"
