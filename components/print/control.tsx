@@ -32,7 +32,6 @@ import { showNotification } from "@mantine/notifications";
 import { PrintModal } from "./printModal";
 import { LabelPaper } from "./labelPaper";
 import { useTranslation } from "next-i18next";
-import axios from "axios";
 
 export function Control() {
   // Provider
@@ -64,7 +63,10 @@ export function Control() {
   const calculateLabelCount = () =>
     qtyPerPaper(paperLayoutPx, drawLayoutPx) * (pageMap.length - 1) +
     pageMap[pageMap.length - 1].length -
-    Object.keys(exclude).reduce((acc, cur) => acc + exclude[cur].length, 0);
+    Object.keys(exclude).reduce(
+      (acc, cur) => acc + Object.keys(exclude[cur]).length,
+      0
+    );
 
   return (
     <Stack pt="xl" align="center" spacing="xs">
