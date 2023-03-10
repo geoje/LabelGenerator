@@ -375,12 +375,7 @@ export function HeaderSimple() {
                     color={dark ? "yellow" : "blue"}
                     variant="subtle"
                     className={classes.menu}
-                    onClick={() => {
-                      document.body.style.background = dark
-                        ? "#f8f9fa"
-                        : "#1a1b1e";
-                      toggleColorScheme();
-                    }}
+                    onClick={() => toggleColorScheme()}
                   >
                     {dark ? (
                       <IconSun size={36} stroke={1.5} />

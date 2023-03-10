@@ -17,7 +17,7 @@ export default appWithTranslation(
     useEffect(() => {
       document.body.style.background =
         colorScheme === "dark" ? "#1a1b1e" : "#f8f9fa";
-    }, []);
+    }, [colorScheme]);
 
     return (
       <>
