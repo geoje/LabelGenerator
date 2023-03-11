@@ -45,13 +45,14 @@ export function PrintModal({ qty, useCredit, opened, close, onAgree }: any) {
           <Title order={4}>{t("Use credit")}</Title>
         </Group>
       }
-      overlayColor={
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[9]
-          : theme.colors.gray[2]
-      }
-      overlayOpacity={0.55}
-      overlayBlur={3}
+      overlayProps={{
+        color:
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2],
+        opacity: 0.55,
+        blur: 3,
+      }}
     >
       {qty > RECOMMENDED_COUNT && (
         <Alert

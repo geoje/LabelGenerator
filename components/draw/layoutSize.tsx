@@ -61,9 +61,6 @@ export function LayoutSize() {
           placeholder="Unit"
           icon={<IconRuler3 size={DETAIL_ICON_SIZE} />}
           size="xs"
-          transitionDuration={100}
-          transition="pop-top-left"
-          transitionTimingFunction="ease"
           data={Object.keys(UNIT).map((s) => {
             return { value: s, label: s };
           })}

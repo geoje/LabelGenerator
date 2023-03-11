@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
 import { ColorScheme } from "@mantine/core";
-import { NotificationsProvider } from "@mantine/notifications";
+import { Notifications } from "@mantine/notifications";
 import { ColorSchemeProvider, MantineProvider } from "@mantine/styles";
 import { appWithTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
@@ -41,11 +41,10 @@ export default appWithTranslation(
               headings: { fontFamily: `Poppins,"Noto Sans KR"` },
             }}
           >
-            <NotificationsProvider>
-              <Provider store={store}>
-                <Component {...pageProps} />
-              </Provider>
-            </NotificationsProvider>
+            <Provider store={store}>
+              <Notifications />
+              <Component {...pageProps} />
+            </Provider>
           </MantineProvider>
         </ColorSchemeProvider>
       </>

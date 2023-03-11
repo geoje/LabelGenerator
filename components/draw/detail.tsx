@@ -85,9 +85,6 @@ function CustomColorInput({ placeholder, selected, color, action, icon }: any) {
     <ColorInput
       placeholder={placeholder}
       size="xs"
-      transitionDuration={100}
-      transition="pop-top-left"
-      transitionTimingFunction="ease"
       value={color.value}
       format={color.format}
       onChange={(value) =>
@@ -409,9 +406,6 @@ export function Detail() {
             <Select
               placeholder={t("Border style") ?? "Border style"}
               size="xs"
-              transitionDuration={100}
-              transition="pop-top-left"
-              transitionTimingFunction="ease"
               icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
               clearable
               data={[

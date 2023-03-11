@@ -138,9 +138,6 @@ export function Variable() {
             creatable
             clearable
             maxDropdownHeight={400}
-            transitionDuration={100}
-            transition="pop-top-left"
-            transitionTimingFunction="ease"
             data={(() => {
               const result = Object.keys(data.length ? data[0] : {}).map(
                 (v) => {
@@ -308,9 +305,6 @@ export function Variable() {
               placeholder="Data column"
               size="xs"
               clearable
-              transitionDuration={100}
-              transition="pop-top-left"
-              transitionTimingFunction="ease"
               icon={<IconVariable size={DETAIL_ICON_SIZE} />}
               data={Object.keys(data.length ? data[0] : []).map((s) => {
                 return { value: s, label: s };

@@ -87,9 +87,6 @@ export function Control() {
           placeholder={t("Filter column") ?? "Filter column"}
           clearable
           icon={<IconFilter size={DETAIL_ICON_SIZE} />}
-          transitionDuration={100}
-          transition="pop-top-left"
-          transitionTimingFunction="ease"
           data={Object.keys(data.length ? data[0] : []).map((s) => {
             return { value: s, label: s };
           })}
@@ -110,9 +107,6 @@ export function Control() {
           placeholder={t("Filter value") ?? "Filter value"}
           disabled={!condition.filterFormat}
           icon={<IconVariable size={DETAIL_ICON_SIZE} />}
-          transitionDuration={100}
-          transition="pop-top-left"
-          transitionTimingFunction="ease"
           data={
             condition.filterFormat
               ? Array.from(
@@ -140,9 +134,6 @@ export function Control() {
         placeholder={t("Copies column") ?? "Copies column"}
         clearable
         icon={<IconCopy size={DETAIL_ICON_SIZE} />}
-        transitionDuration={100}
-        transition="pop-top-left"
-        transitionTimingFunction="ease"
         data={Object.keys(data.length ? data[0] : []).map((s) => {
           return { value: s, label: s };
         })}
