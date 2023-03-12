@@ -191,18 +191,18 @@ export function HeaderSimple() {
 
   const [authStatus, setAuthStatus]: [number, any] = useState(STATUS.LOAD);
   const [opened, { close, toggle }] = useDisclosure(false);
-  const [session, setSession]: any = useState({});
+  const [user, setUser]: any = useState({});
 
   useEffect(() => {
     axios
-      .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/auth/session", {
+      .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/auth/user", {
         withCredentials: true,
       })
       .then((res) => {
         setAuthStatus(STATUS.GOOD);
         return res.data;
       })
-      .then(setSession)
+      .then(setUser)
       .catch(() => setAuthStatus(STATUS.BAD));
   }, []);
 
@@ -390,14 +390,14 @@ export function HeaderSimple() {
               </Grid>
             </Popover.Dropdown>
           </Popover>
-          {session.user ? (
+          {user ? (
             <Menu withArrow shadow="md" position={"bottom-end"}>
               <Menu.Target>
                 <ActionIcon variant="subtle" size={48} radius="xl">
-                  {session.user.image ? (
+                  {user.image ? (
                     <Image
-                      src={session.user.image}
-                      alt={session.user.name || "profile"}
+                      src={user.image}
+                      alt={user.name || "profile"}
                       width={36}
                       height={36}
                       radius="xl"
@@ -411,7 +411,7 @@ export function HeaderSimple() {
 
               <Menu.Dropdown>
                 <Group pl="sm" spacing={0}>
-                  {session.user.provider == "google" ? (
+                  {user.provider == "google" ? (
                     <Image
                       src={
                         process.env.NEXT_PUBLIC_AUTH_HOST +
@@ -420,7 +420,7 @@ export function HeaderSimple() {
                       width={16}
                       alt="google"
                     />
-                  ) : session.user.provider == "naver" ? (
+                  ) : user.provider == "naver" ? (
                     <Paper bg="#03C75A" radius={0} p={4}>
                       <Image
                         src={
@@ -432,9 +432,9 @@ export function HeaderSimple() {
                       />
                     </Paper>
                   ) : null}
-                  <Menu.Label>{session.user.name}</Menu.Label>
+                  <Menu.Label>{user.name}</Menu.Label>
                 </Group>
-                <Menu.Label>{session.user.email}</Menu.Label>
+                <Menu.Label>{user.email}</Menu.Label>
 
                 <Link
                   href={
