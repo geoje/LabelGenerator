@@ -23,10 +23,9 @@ export default appWithTranslation(
       <>
         <Head>
           <title>Label Generator</title>
-          <meta
-            name="viewport"
-            content="minimum-scale=1, initial-scale=1, width=device-width"
-          />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         </Head>
         <ColorSchemeProvider
           colorScheme={colorScheme}
