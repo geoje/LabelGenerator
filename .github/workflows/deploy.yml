@@ -8,7 +8,29 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [18.x]
+
     steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v3
+
+      - name: 🍀 Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: 📥 Install modules
+        run: npm install
+
+      - name: 🌳 Create env file
+        run: echo "${{ secrets.ENV_PROD }}" > .env.production.local
+
+      - name: 🛠️ Build
+        run: npm run build
+
       - name: 🔌 Configure SSH
         run: |
           mkdir -p ~/.ssh/
@@ -29,20 +51,21 @@ jobs:
       - name: 📥 Pull and Install modules
         run: ssh srv "cd ${{ github.event.repository.name }} && git reset && git checkout . && git pull && npm install"
 
-      - name: 🛠️ Ready to build
-        run: ssh srv "cd ${{ github.event.repository.name }} && sed -i \"s/};/distDir:'build'};/g\" next.config.js"
-
-      - name: 🏗️ Build
-        run: ssh srv "cd ${{ github.event.repository.name }} && npm run build"
-
-      - name: 🗑️ Cleaning
-        run: ssh srv "cd ${{ github.event.repository.name }} && git reset && git checkout ."
+      - name: 🌳 Update env file
+        run: echo "${{ secrets.ENV_PROD }}" > .env.production.local
 
       - name: ⏳ Stop pm2
         run: ssh srv "pm2 stop ${{ github.event.repository.name }}"
 
-      - name: 🚚 Transfer
-        run: ssh srv "cd ${{ github.event.repository.name }} && rm -rf .next && mv build .next"
+      - name: 📦 SFTP Deploy
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          username: ${{ secrets.USER }}
+          server: ${{ secrets.HOST }}
+          ssh_private_key: ${{ secrets.KEY }}
+          local_path: ./.next/*
+          remote_path: ${{ github.event.repository.name }}/.next/
+          delete_remote_files: true
 
       - name: 🎉 Start pm2
         run: ssh srv "pm2 start ${{ github.event.repository.name }}"
