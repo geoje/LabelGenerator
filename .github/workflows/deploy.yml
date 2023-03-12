@@ -26,7 +26,9 @@ jobs:
       - name: 📥 Install modules
         run: npm install
 
-      - name: 🌳 Create env file
+      # - name: 🌳 Create env file
+      #   run: echo "${{ secrets.ENV }}" > .env.local
+      - name: 🌳 Create env prod file
         run: echo "${{ secrets.ENV_PROD }}" > .env.production.local
 
       - name: 🛠️ Build
@@ -52,21 +54,26 @@ jobs:
       - name: 📥 Pull and Install modules
         run: ssh srv "cd ${{ github.event.repository.name }} && git checkout main && git pull && npm install"
 
-      - name: 🌳 Update env file
-        run: echo "${{ secrets.ENV_PROD }}" > .env.production.local
+      # - name: 🌳 Create env file
+      #   run: ssh srv "cd ${{ github.event.repository.name }} && echo -e \"${{ secrets.ENV }}\" > .env.local"
+      - name: 🌳 Create env prod file
+        run: ssh srv "cd ${{ github.event.repository.name }} && echo -e \"${{ secrets.ENV_PROD }}\" > .env.production.local"
 
-      - name: ⏳ Stop pm2
-        run: ssh srv "pm2 stop ${{ github.event.repository.name }}"
-
-      - name: 📦 SFTP Deploy
+      - name: 🚚 SFTP Deploy
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           username: ${{ secrets.USER }}
           server: ${{ secrets.HOST }}
           ssh_private_key: ${{ secrets.KEY }}
           local_path: ./.next/*
-          remote_path: ${{ github.event.repository.name }}/.next/
+          remote_path: ${{ github.event.repository.name }}/.next.new/
           delete_remote_files: true
+
+      - name: ⏳ Stop pm2
+        run: ssh srv "pm2 stop ${{ github.event.repository.name }}"
+
+      - name: 📦 Update
+        run: ssh srv "cd ${{ github.event.repository.name }} && rm -rf .next && mv .next.new .next"
 
       - name: 🎉 Start pm2
         run: ssh srv "pm2 start ${{ github.event.repository.name }}"
