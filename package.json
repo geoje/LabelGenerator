@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "start http://localhost:3001 && next dev -p 3001",
+    "dev": "start http://localhost:3000 && next dev",
     "deploy": "git checkout main && git pull && git merge develop && git push && git checkout develop",
     "build": "next build",
     "start": "next start",
