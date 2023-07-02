@@ -46,6 +46,15 @@ jobs:
           SSH_USER: ${{ secrets.USER }}
           SSH_KEY: ${{ secrets.KEY }}
 
+      - name: 🚚 Deploy next.config.js
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          username: ${{ secrets.USER }}
+          server: ${{ secrets.HOST }}
+          ssh_private_key: ${{ secrets.KEY }}
+          local_path: ./next.config.js
+          remote_path: ${{ github.event.repository.name }}/
+
       - name: 🚚 Deploy next-i18next.config.js
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
