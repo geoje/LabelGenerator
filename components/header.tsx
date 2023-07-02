@@ -7,14 +7,10 @@ import {
   Image,
   MantineTheme,
   ActionIcon,
-  Button,
   useMantineTheme,
-  Menu,
-  Paper,
   Breadcrumbs,
   Text,
   FileButton,
-  Tooltip,
   Box,
   NavLink,
   Popover,
@@ -23,40 +19,27 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { useTranslation } from "next-i18next";
-import process from "process";
-import axios from "axios";
 import {
-  IconUserCircle,
-  IconCoins,
-  IconTrash,
-  IconLogout,
   IconFile,
   IconFolder,
   IconDeviceFloppy,
   IconChevronRight,
-  IconPlugX,
   IconBrush,
   IconPrinter,
   IconFileSpreadsheet,
   IconGridDots,
-  IconWorld,
   IconSun,
   IconMoonStars,
 } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
-import { createPathWithLocale, LoadFile, SaveFile } from "@/lib/tool";
+import { LoadFile, SaveFile } from "@/lib/tool";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 
-const STATUS = {
-  LOAD: 0,
-  GOOD: 1,
-  BAD: 2,
-};
 const links: { link: string; label: string; icon: React.ReactNode }[] = [
   {
     link: "/",
@@ -187,24 +170,9 @@ export function HeaderSimple() {
   const dark = colorScheme === "dark";
 
   const router = useRouter();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
-  const [authStatus, setAuthStatus]: [number, any] = useState(STATUS.LOAD);
   const [opened, { close, toggle }] = useDisclosure(false);
-  const [user, setUser]: any = useState({});
-
-  useEffect(() => {
-    axios
-      .get(process.env.NEXT_PUBLIC_AUTH_HOST + "/api/auth/user", {
-        withCredentials: true,
-      })
-      .then((res) => {
-        setAuthStatus(STATUS.GOOD);
-        return res.data;
-      })
-      .then(setUser)
-      .catch(() => setAuthStatus(STATUS.BAD));
-  }, []);
 
   return (
     <Header
@@ -305,7 +273,9 @@ export function HeaderSimple() {
                   <FileButton
                     accept="application/zip"
                     onChange={(file) => {
-                      LoadFile(file, dispatch);
+                      LoadFile(file, dispatch).then((result) => {
+                        if (result) router.push(links[links.length - 1].link);
+                      });
                     }}
                   >
                     {(props) => (
@@ -390,119 +360,6 @@ export function HeaderSimple() {
               </Grid>
             </Popover.Dropdown>
           </Popover>
-          {user ? (
-            <Menu withArrow shadow="md" position={"bottom-end"}>
-              <Menu.Target>
-                <ActionIcon variant="subtle" size={48} radius="xl">
-                  {user.image ? (
-                    <Image
-                      src={user.image}
-                      alt={user.name || "profile"}
-                      width={36}
-                      height={36}
-                      radius="xl"
-                      imageProps={{ referrerPolicy: "no-referrer" }}
-                    />
-                  ) : (
-                    <IconUserCircle size={36} />
-                  )}
-                </ActionIcon>
-              </Menu.Target>
-
-              <Menu.Dropdown>
-                <Group pl="sm" spacing={0}>
-                  {user.provider == "google" ? (
-                    <Image
-                      src={
-                        process.env.NEXT_PUBLIC_AUTH_HOST +
-                        "/asset/logo/google.svg"
-                      }
-                      width={16}
-                      alt="google"
-                    />
-                  ) : user.provider == "naver" ? (
-                    <Paper bg="#03C75A" radius={0} p={4}>
-                      <Image
-                        src={
-                          process.env.NEXT_PUBLIC_AUTH_HOST +
-                          "/asset/logo/naver.svg"
-                        }
-                        width={8}
-                        alt="naver"
-                      />
-                    </Paper>
-                  ) : null}
-                  <Menu.Label>{user.name}</Menu.Label>
-                </Group>
-                <Menu.Label>{user.email}</Menu.Label>
-
-                <Link
-                  href={
-                    process.env.NEXT_PUBLIC_AUTH_HOST +
-                    createPathWithLocale("/credit", i18n.language)
-                  }
-                >
-                  <Menu.Divider />
-                  <Menu.Item icon={<IconCoins size={14} />}>
-                    {t("Credit")}
-                  </Menu.Item>
-                </Link>
-
-                <Menu.Divider />
-                <Menu.Item
-                  color="red"
-                  icon={<IconTrash size={14} />}
-                  onClick={() =>
-                    showNotification({
-                      title: "Oops!",
-                      message: "This function is not developed yet.",
-                      color: "yellow",
-                    })
-                  }
-                >
-                  {t("Delete my account")}
-                </Menu.Item>
-
-                <Menu.Divider />
-                <Menu.Item
-                  icon={<IconLogout size={14} />}
-                  onClick={() => {
-                    router.push(
-                      process.env.NEXT_PUBLIC_AUTH_HOST +
-                        "/api/auth/signout?callbackUrl=" +
-                        window.location.href
-                    );
-                    // axios
-                    //   .post(
-                    //     process.env.NEXT_PUBLIC_AUTH_HOST + "/api/auth/signout"
-                    //   )
-                    //   .then(console.log)
-                    //   .catch(console.error);
-                  }}
-                >
-                  {t("Logout")}
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
-          ) : (
-            <Button
-              className={classes.linkAuth}
-              loading={authStatus === STATUS.LOAD}
-              leftIcon={authStatus === STATUS.BAD ? <IconPlugX /> : null}
-              color={authStatus === STATUS.BAD ? "gray" : ""}
-              onClick={async () => {
-                router.push(
-                  process.env.NEXT_PUBLIC_AUTH_HOST +
-                    createPathWithLocale(
-                      "/login?callbackUrl=" + window.location.href,
-                      i18n.language
-                    )
-                );
-              }}
-            >
-              {t("Login")}
-            </Button>
-          )}
         </Group>
       </Container>
       <Box
