@@ -46,6 +46,15 @@ jobs:
           SSH_USER: ${{ secrets.USER }}
           SSH_KEY: ${{ secrets.KEY }}
 
+      - name: 🚚 Deploy next-i18next.config.js
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          username: ${{ secrets.USER }}
+          server: ${{ secrets.HOST }}
+          ssh_private_key: ${{ secrets.KEY }}
+          local_path: ./next-i18next.config.js
+          remote_path: ${{ github.event.repository.name }}/
+
       - name: 🚚 Deploy package.json
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
@@ -66,16 +75,6 @@ jobs:
 
       - name: 📥 Install modules
         run: ssh srv "cd ${{ github.event.repository.name }} && npm install"
-
-      - name: 🚚 Deploy next-i18next.config.js
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./next-i18next.config.js
-          remote_path: ${{ github.event.repository.name }}/next-i18next.config.js
-          delete_remote_files: true
 
       - name: 🚚 Deploy .next
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
