@@ -59,12 +59,12 @@ import {
   setFontMap,
 } from "../../lib/drawSlice";
 import { UNIT } from "../../lib/paperSlice";
-import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRef } from "react";
 import { saveAs } from "file-saver";
+import { useIntl } from "react-intl";
 
 const nextColorFormat = (color: any) => {
   if (color.format === "rgba") return "hsla";
@@ -161,6 +161,7 @@ export function Detail() {
   const [fontGoogleError, setFontGoogleError] = useState(false);
   const [openedFontGoogle, setOpenedFontGoogle] = useState(false);
   const fontGoogleRef: any = useRef(null);
+  const intl = useIntl();
 
   const borderColor =
     selected !== -1 && layer[selected].border?.color
@@ -224,7 +225,7 @@ export function Detail() {
         <Stack spacing={2}>
           <Group noWrap spacing="xs" align="flex-start">
             <TextInput
-              placeholder={<Message}
+              placeholder={intl.formatMessage({ id: "Layer name" })}
               sx={{ flex: 1 }}
               size="xs"
               icon={<IconHash size={DETAIL_ICON_SIZE} />}
