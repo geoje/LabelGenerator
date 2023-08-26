@@ -57,15 +57,14 @@ import {
   GROUP_FONT,
   getFontFamilies,
   setFontMap,
-} from "@/lib/drawSlice";
-import { UNIT } from "@/lib/paperSlice";
+} from "../../lib/drawSlice";
+import { UNIT } from "../../lib/paperSlice";
 import React from "react";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRef } from "react";
 import { saveAs } from "file-saver";
-import { useTranslation } from "next-i18next";
 
 const nextColorFormat = (color: any) => {
   if (color.format === "rgba") return "hsla";
@@ -152,7 +151,6 @@ export function Detail() {
   const selected = useSelector((state: any) => state.draw.selected);
   const rename = useSelector((state: any) => state.draw.rename);
   const fontMap = useSelector((state: any) => state.draw.fontMap);
-  const { t } = useTranslation();
 
   const [linkSize, setLinkSize] = useState(true);
 
@@ -226,7 +224,7 @@ export function Detail() {
         <Stack spacing={2}>
           <Group noWrap spacing="xs" align="flex-start">
             <TextInput
-              placeholder={t("Layer name") ?? "Layer name"}
+              placeholder={<Message}
               sx={{ flex: 1 }}
               size="xs"
               icon={<IconHash size={DETAIL_ICON_SIZE} />}

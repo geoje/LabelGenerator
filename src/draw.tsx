@@ -1,9 +1,5 @@
-import { GetStaticProps } from "next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useTranslation } from "next-i18next";
-import { HeaderSimple } from "@/components/header";
-import { defaultLocale } from "@/lib/tool";
-import Head from "next/head";
+import { HeaderSimple } from "./components/header";
+import { defaultLocale } from "./lib/tool";
 import { Grid, Space, Stack } from "@mantine/core";
 import {
   IconBarcode,
@@ -14,20 +10,15 @@ import {
   IconSquare,
   IconTypography,
 } from "@tabler/icons-react";
-import { LayoutSize } from "@/components/draw/layoutSize";
-import { Variable } from "@/components/draw/variable";
-import { Tool } from "@/components/draw/tool";
-import { Canvas } from "@/components/draw/canvas";
-import { Pagenation } from "@/components/draw/pagenation";
-import { Detail } from "@/components/draw/detail";
-import { Layer } from "@/components/draw/layer";
-import { TYPE } from "@/lib/drawSlice";
+import { LayoutSize } from "./components/draw/layoutSize";
+import { Variable } from "./components/draw/variable";
+import { Tool } from "./components/draw/tool";
+import { Canvas } from "./components/draw/canvas";
+import { Pagenation } from "./components/draw/pagenation";
+import { Detail } from "./components/draw/detail";
+import { Layer } from "./components/draw/layer";
+import { TYPE } from "./lib/drawSlice";
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-  props: {
-    ...(await serverSideTranslations(locale ?? defaultLocale, ["common"])),
-  },
-});
 export function typeToIcon(type: any) {
   return type === TYPE.rect ? (
     <IconSquare />
@@ -46,14 +37,9 @@ export function typeToIcon(type: any) {
   );
 }
 
-export default function Template() {
-  const { t } = useTranslation();
-
+export default function Draw() {
   return (
     <>
-      <Head>
-        <title>{t("Draw") + " - " + t("Label Generator")}</title>
-      </Head>
       <HeaderSimple />
       <Grid m={0} p="sm">
         <Grid.Col md={2} p="sm">

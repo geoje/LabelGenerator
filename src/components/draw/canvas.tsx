@@ -12,8 +12,8 @@ import {
   setSelected,
   getLayerSize,
   GROUP_FONT,
-} from "@/lib/drawSlice";
-import { UNIT } from "@/lib/paperSlice";
+} from "../../lib/drawSlice";
+import { UNIT } from "../../lib/paperSlice";
 
 export function Canvas() {
   // Provider

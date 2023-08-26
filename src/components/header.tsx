@@ -18,10 +18,6 @@ import {
   Title,
   useMantineColorScheme,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import React from "react";
-import Link from "next/link";
-import { useTranslation } from "next-i18next";
 import {
   IconFile,
   IconFolder,
@@ -34,11 +30,13 @@ import {
   IconSun,
   IconMoonStars,
 } from "@tabler/icons-react";
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
-import { LoadFile, SaveFile } from "@/lib/tool";
-import { useRouter } from "next/router";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { FormattedMessage } from "react-intl";
+import { LoadFile, SaveFile } from "../lib/tool";
 
 const links: { link: string; label: string; icon: React.ReactNode }[] = [
   {
@@ -164,13 +162,12 @@ export function HeaderSimple() {
   const condition = useSelector((state: any) => state.print.condition);
   const exclude = useSelector((state: any) => state.print.exclude);
 
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const theme = useMantineTheme();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const { classes, cx } = useStyles();
   const dark = colorScheme === "dark";
-
-  const router = useRouter();
-  const { t } = useTranslation();
 
   const [opened, { close, toggle }] = useDisclosure(false);
 
@@ -205,7 +202,7 @@ export function HeaderSimple() {
           p={24}
         />
 
-        <Link href="/" className={cx(classes.link, classes.linkLogo)}>
+        <Link to="/" className={cx(classes.link, classes.linkLogo)}>
           <ActionIcon size={64} variant="transparent">
             <Image src="/logo.svg" width={32} alt="home" />
           </ActionIcon>
@@ -223,17 +220,17 @@ export function HeaderSimple() {
             styles={{ separator: { margin: 0 } }}
           >
             {links.map(({ link, label }) => (
-              <Link href={link} key={label}>
+              <Link to={link} key={label}>
                 <ActionIcon
                   variant="transparent"
                   className={cx(classes.link, {
                     [classes.linkActive]:
                       link === "/"
-                        ? router.pathname === "/"
-                        : router.pathname.startsWith(link),
+                        ? pathname === "/"
+                        : pathname.startsWith(link),
                   })}
                 >
-                  {t(label)}{" "}
+                  <FormattedMessage id={label} />{" "}
                 </ActionIcon>
               </Link>
             ))}
@@ -265,7 +262,7 @@ export function HeaderSimple() {
                   >
                     <IconFile size={36} stroke={1.5} />
                     <Title className={classes.mewnuTitle}>
-                      {t("New project")}
+                      <FormattedMessage id="New project" />
                     </Title>
                   </ActionIcon>
                 </Grid.Col>
@@ -274,7 +271,7 @@ export function HeaderSimple() {
                     accept="application/zip"
                     onChange={(file) => {
                       LoadFile(file, dispatch).then((result) => {
-                        if (result) router.push(links[links.length - 1].link);
+                        if (result) navigate(links[links.length - 1].link);
                       });
                     }}
                   >
@@ -287,7 +284,7 @@ export function HeaderSimple() {
                       >
                         <IconFolder size={36} stroke={1.5} />
                         <Title className={classes.mewnuTitle}>
-                          {t("Load project")}
+                          <FormattedMessage id="Load project" />
                         </Title>
                       </ActionIcon>
                     )}
@@ -312,12 +309,12 @@ export function HeaderSimple() {
                   >
                     <IconDeviceFloppy size={36} stroke={1.5} />
                     <Title className={classes.mewnuTitle}>
-                      {t("Save project")}
+                      <FormattedMessage id="Save project" />
                     </Title>
                   </ActionIcon>
                 </Grid.Col>
                 <Grid.Col span={4}>
-                  <Link locale="en" href={router.asPath}>
+                  <Link lang="en" to="">
                     <ActionIcon
                       color="gray"
                       variant="subtle"
@@ -329,7 +326,7 @@ export function HeaderSimple() {
                   </Link>
                 </Grid.Col>
                 <Grid.Col span={4}>
-                  <Link locale="ko" href={router.asPath}>
+                  <Link lang="ko" to="">
                     <ActionIcon
                       color="gray"
                       variant="subtle"
@@ -353,7 +350,9 @@ export function HeaderSimple() {
                       <IconMoonStars size={36} stroke={1.5} />
                     )}
                     <Title className={classes.mewnuTitle}>
-                      {t(dark ? "Light mode" : "Dark mode")}
+                      <FormattedMessage
+                        id={dark ? "Light mode" : "Dark mode"}
+                      />
                     </Title>
                   </ActionIcon>
                 </Grid.Col>
@@ -373,17 +372,15 @@ export function HeaderSimple() {
         }}
       >
         {links.map(({ link, label, icon }) => (
-          <Link href={link} key={label} onClick={close}>
+          <Link to={link} key={label} onClick={close}>
             <NavLink
-              label={t(label)}
+              label={<FormattedMessage id={label} />}
               icon={icon}
               fw={600}
               p={16}
               style={{
                 color: (
-                  link === "/"
-                    ? router.pathname === "/"
-                    : router.pathname.startsWith(link)
+                  link === "/" ? pathname === "/" : pathname.startsWith(link)
                 )
                   ? theme.colors.blue[6]
                   : dark

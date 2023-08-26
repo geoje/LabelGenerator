@@ -1,8 +1,3 @@
-import Head from "next/head";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { HeaderSimple } from "@/components/header";
-import { useTranslation } from "next-i18next";
-import { GetStaticProps } from "next";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ActionIcon,
@@ -18,32 +13,26 @@ import {
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { showNotification } from "@mantine/notifications";
-import { StringReplaceAt } from "@/lib/tool";
-import { defaultLocale } from "@/lib/tool";
-import { MAX_FILE_SIZE, setData } from "@/lib/dataSlice";
+import { MAX_FILE_SIZE, setData } from "./lib/dataSlice";
 import {
   IconFileSpreadsheet,
   IconTrash,
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
-import { DataTable } from "@/components/data/dataTable";
+import { DataTable } from "./components/data/dataTable";
 import { Dropzone } from "@mantine/dropzone";
 import { MIME_TYPES } from "@mantine/dropzone";
+import { StringReplaceAt } from "./lib/tool";
+import { HeaderSimple } from "./components/header";
+import { FormattedMessage } from "react-intl";
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-  props: {
-    ...(await serverSideTranslations(locale ?? defaultLocale, ["common"])),
-  },
-});
-
-export default function Home() {
+export default function Import() {
   const dispatch = useDispatch();
   const data = useSelector((state: any) => state.data.value);
 
   const theme = useMantineTheme();
   const [workbook, setWorkbook]: any = useState(null);
-  const { t } = useTranslation();
 
   /** Raw Excel data to Array
    * {'A1': 'id', 'A2': 'abc', 'B1': 'pw', 'B2': '123', ...} to
@@ -107,9 +96,6 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>{t("Data") + " - " + t("Label Generator")}</title>
-      </Head>
       <HeaderSimple />
       <Box p="xl">
         <Group
@@ -123,10 +109,10 @@ export default function Home() {
           })}
         >
           <Title order={6} mr="sm">
-            {t("Import data")}
+            <FormattedMessage id="Import data" />
           </Title>
           {data.length && (
-            <Tooltip label={t("Clear")} withArrow>
+            <Tooltip label={<FormattedMessage id="Clear" />} withArrow>
               <ActionIcon
                 variant="subtle"
                 onClick={() => {
@@ -265,12 +251,10 @@ export default function Home() {
 
                     <div>
                       <Text size="xl" inline>
-                        {t("Drag data file or click to select file")}
+                        <FormattedMessage id="Drag data file or click to select file" />
                       </Text>
                       <Text size="sm" color="dimmed" inline mt={7}>
-                        {t(
-                          "Attach MS Excel or CSV file, file should not exceed 5mb"
-                        )}
+                        <FormattedMessage id="Attach MS Excel or CSV file, file should not exceed 5mb" />
                       </Text>
                     </div>
                   </Group>
@@ -279,7 +263,7 @@ export default function Home() {
               {workbook && (
                 <>
                   <Text align="center" size="xl" mt="sm">
-                    {t("Choose 1 sheet")}
+                    <FormattedMessage id="Choose 1 sheet" />
                   </Text>
                   <Group position="center" mt="xs">
                     {workbook.SheetNames.map((name: any) => (
