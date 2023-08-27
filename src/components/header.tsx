@@ -35,7 +35,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { useDispatch, useSelector } from "react-redux";
-import Flag from "react-world-flags";
 import { FormattedMessage } from "react-intl";
 import { LoadFile, SaveFile } from "../lib/tool";
 
@@ -321,7 +320,7 @@ export function HeaderSimple() {
                       variant="subtle"
                       className={classes.menu}
                     >
-                      <Flag width={36} code="US" />
+                      <Image width={36} src="/asset/flag/us.svg" alt="us" />
                       <Title className={classes.mewnuTitle}>English</Title>
                     </ActionIcon>
                   </Link>
@@ -333,7 +332,7 @@ export function HeaderSimple() {
                       variant="subtle"
                       className={classes.menu}
                     >
-                      <Flag width={36} code="KR" />
+                      <Image width={36} src="/asset/flag/kr.svg" alt="kr" />
                       <Title className={classes.mewnuTitle}>한국어</Title>
                     </ActionIcon>
                   </Link>
