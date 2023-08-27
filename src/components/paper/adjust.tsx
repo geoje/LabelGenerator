@@ -20,7 +20,7 @@ import {
   MAX_PRECISION,
   STEP_BY_UNIT,
   ADJ_TOOL_SIZE,
-} from "@/lib/paperSlice";
+} from "../../lib/paperSlice";
 
 export function Adjust() {
   const dispatch = useDispatch();

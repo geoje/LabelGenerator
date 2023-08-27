@@ -3,25 +3,24 @@ import {
   DETAIL_ICON_SIZE,
   setLayout,
   setLayoutRatio,
-} from "@/lib/drawSlice";
-import { MAX_PRECISION, STEP_BY_UNIT, UNIT } from "@/lib/paperSlice";
+} from "../../lib/drawSlice";
+import { MAX_PRECISION, STEP_BY_UNIT, UNIT } from "../../lib/paperSlice";
 import { Grid, Group, NumberInput, Select, Slider, Title } from "@mantine/core";
 import { IconDimensions, IconRuler3 } from "@tabler/icons-react";
-import { useTranslation } from "next-i18next";
+import { useIntl } from "react-intl";
 import { useDispatch, useSelector } from "react-redux";
 
 export function LayoutSize() {
   const dispatch = useDispatch();
   const layout = useSelector((state: any) => state.draw.layout);
-
-  const { t } = useTranslation();
+  const intl = useIntl();
 
   return (
     <Grid>
       <Grid.Col>
         <Group position="center">
           <IconDimensions />
-          <Title order={5}>{t("Layout size")}</Title>
+          <Title order={5}>{intl.formatMessage({ id: "Layout size" })}</Title>
         </Group>
       </Grid.Col>
       <Grid.Col span={4} md={6} xl={4}>

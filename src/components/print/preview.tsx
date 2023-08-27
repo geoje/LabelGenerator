@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { FixedSizeList } from "react-window";
 import NewWindow from "react-new-window";
-import { UNIT, convertSize } from "@/lib/paperSlice";
-import { calculatePageMap } from "@/lib/printSlice";
+import { UNIT, convertSize } from "../../lib/paperSlice";
+import { calculatePageMap } from "../../lib/printSlice";
 import { showNotification } from "@mantine/notifications";
 import { LabelPaper } from "./labelPaper";
-import { useTranslation } from "next-i18next";
+import { useIntl } from "react-intl";
 
 export function Preview() {
   // Provider
@@ -26,7 +26,7 @@ export function Preview() {
 
   const condition = useSelector((state: any) => state.print.condition);
   const exclude = useSelector((state: any) => state.print.exclude);
-  const { t } = useTranslation();
+  const intl = useIntl();
   const pageMap = calculatePageMap(
     data,
     paperLayoutPx,
@@ -82,7 +82,7 @@ export function Preview() {
         // Here make DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
         // There is CORS problem. But we can ignore it.
         <NewWindow
-          title={t("Print Labels") ?? "Print Labels"}
+          title={intl.formatMessage({ id: "Print Labels" })}
           onUnload={() => {
             setReqPrint(null);
           }}

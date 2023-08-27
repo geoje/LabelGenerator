@@ -15,15 +15,14 @@ import {
   convertSize,
   addLayer,
   setLayer,
-} from "@/lib/drawSlice";
-import { MAX_FILE_SIZE } from "@/lib/dataSlice";
-import { UNIT } from "@/lib/paperSlice";
-import React from "react";
+} from "../../lib/drawSlice";
+import { MAX_FILE_SIZE } from "../../lib/dataSlice";
+import { UNIT } from "../../lib/paperSlice";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { typeToIcon } from "@/pages/draw";
-import { useTranslation } from "next-i18next";
+import { useIntl } from "react-intl";
+import { typeToIcon } from "../../draw";
 
 export function Tool() {
   // Provider
@@ -34,7 +33,7 @@ export function Tool() {
   const layer = useSelector((state: any) => state.draw.layer);
   const page = useSelector((state: any) => state.draw.page);
 
-  const { t } = useTranslation();
+  const intl = useIntl();
 
   let [layerCount, setLayerCount] = useState(1);
   const [openedInfo, setOpenedInfo] = useState(false);
@@ -48,14 +47,14 @@ export function Tool() {
 
   return (
     <Group position="center" spacing="xs">
-      <Tooltip label={t("New canvas")} withArrow>
+      <Tooltip label={intl.formatMessage({ id: "New canvas" })} withArrow>
         <ActionIcon variant="subtle" onClick={() => dispatch(setLayer([]))}>
           <IconFile />
         </ActionIcon>
       </Tooltip>
 
       <Divider orientation="vertical" />
-      <Tooltip label={t("Rectangle")} withArrow>
+      <Tooltip label={intl.formatMessage({ id: "Rectangle" })} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -81,7 +80,7 @@ export function Tool() {
           {typeToIcon(TYPE.rect)}
         </ActionIcon>
       </Tooltip>
-      <Tooltip label={t("Circle")} withArrow>
+      <Tooltip label={intl.formatMessage({ id: "Circle" })} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -109,7 +108,7 @@ export function Tool() {
       </Tooltip>
 
       <Divider orientation="vertical" />
-      <Tooltip label={t("Text")} withArrow>
+      <Tooltip label={intl.formatMessage({ id: "Text" })} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() => {
@@ -194,7 +193,7 @@ export function Tool() {
         }}
       >
         {(props) => (
-          <Tooltip label={t("Image")} withArrow>
+          <Tooltip label={intl.formatMessage({ id: "Image" })} withArrow>
             <Button
               p={0}
               color="gray"
@@ -209,7 +208,7 @@ export function Tool() {
           </Tooltip>
         )}
       </FileButton>
-      <Tooltip label={t("Bar code")} withArrow>
+      <Tooltip label={intl.formatMessage({ id: "Bar code" })} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -229,7 +228,7 @@ export function Tool() {
           {typeToIcon(TYPE.bar)}
         </ActionIcon>
       </Tooltip>
-      <Tooltip label={t("QR code")} withArrow>
+      <Tooltip label={intl.formatMessage({ id: "QR code" })} withArrow>
         <ActionIcon
           variant="subtle"
           onClick={() =>
@@ -257,7 +256,7 @@ export function Tool() {
             tooltip: {
               backgroundColor:
                 theme.colorScheme === "dark"
-                  ? "rgba(37, 38, 43, 0.8)"
+                  ? "rgba(233, 236, 239, 0.8)"
                   : "rgba(33, 37, 41, 0.8)",
             },
           };

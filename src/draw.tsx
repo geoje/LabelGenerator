@@ -1,5 +1,3 @@
-import { HeaderSimple } from "./components/header";
-import { defaultLocale } from "./lib/tool";
 import { Grid, Space, Stack } from "@mantine/core";
 import {
   IconBarcode,
@@ -39,26 +37,23 @@ export function typeToIcon(type: any) {
 
 export default function Draw() {
   return (
-    <>
-      <HeaderSimple />
-      <Grid m={0} p="sm">
-        <Grid.Col md={2} p="sm">
-          <LayoutSize />
-          <Space h={96} />
-          <Variable />
-        </Grid.Col>
-        <Grid.Col md={8} p="sm">
-          <Stack align="center" spacing="xs">
-            <Tool />
-            <Canvas />
-            <Pagenation />
-            <Detail />
-          </Stack>
-        </Grid.Col>
-        <Grid.Col md={2} p="sm">
-          <Layer />
-        </Grid.Col>
-      </Grid>
-    </>
+    <Grid m={0} p="sm">
+      <Grid.Col md={2} p="sm">
+        <LayoutSize />
+        <Space h={96} />
+        <Variable />
+      </Grid.Col>
+      <Grid.Col md={8} p="sm">
+        <Stack align="center" spacing="xs">
+          <Tool />
+          <Canvas />
+          <Pagenation />
+          <Detail />
+        </Stack>
+      </Grid.Col>
+      <Grid.Col md={2} p="sm">
+        <Layer />
+      </Grid.Col>
+    </Grid>
   );
 }

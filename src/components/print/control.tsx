@@ -18,8 +18,8 @@ import {
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NewWindow from "react-new-window";
-import { DETAIL_ICON_SIZE } from "@/lib/drawSlice";
-import { UNIT, convertSize } from "@/lib/paperSlice";
+import { DETAIL_ICON_SIZE } from "../../lib/drawSlice";
+import { UNIT, convertSize } from "../../lib/paperSlice";
 import {
   calculatePageMap,
   MAX_COUNT,
@@ -27,11 +27,11 @@ import {
   RECOMMENDED_COUNT,
   setCondition,
   setExclude,
-} from "@/lib/printSlice";
+} from "../../lib/printSlice";
 import { showNotification } from "@mantine/notifications";
 import { PrintModal } from "./printModal";
 import { LabelPaper } from "./labelPaper";
-import { useTranslation } from "next-i18next";
+import { useIntl } from "react-intl";
 
 export function Control() {
   // Provider
@@ -45,7 +45,7 @@ export function Control() {
     useSelector((state: any) => state.paper.layout),
     UNIT.px
   );
-  const { t } = useTranslation();
+  const intl = useIntl();
 
   const [reqPrint, setReqPrint] = useState(false);
   const [opened, { close, open }] = useDisclosure(false);
@@ -77,14 +77,14 @@ export function Control() {
           leftIcon={<IconRotate size={DETAIL_ICON_SIZE} />}
           onClick={() => dispatch(setExclude({}))}
         >
-          {t("Clear exclude")}
+          {intl.formatMessage({ id: "Clear exclude" })}
         </Button>
       )}
 
       <Group noWrap>
         <Select
           size="xs"
-          placeholder={t("Filter column") ?? "Filter column"}
+          placeholder={intl.formatMessage({ id: "Filter column" })}
           clearable
           icon={<IconFilter size={DETAIL_ICON_SIZE} />}
           data={Object.keys(data.length ? data[0] : []).map((s) => {
@@ -104,7 +104,7 @@ export function Control() {
         />
         <Select
           size="xs"
-          placeholder={t("Filter value") ?? "Filter value"}
+          placeholder={intl.formatMessage({ id: "Filter value" })}
           disabled={!condition.filterFormat}
           icon={<IconVariable size={DETAIL_ICON_SIZE} />}
           data={
@@ -131,7 +131,7 @@ export function Control() {
       <Select
         size="xs"
         mt="md"
-        placeholder={t("Copies column") ?? "Copies column"}
+        placeholder={intl.formatMessage({ id: "Copies column" })}
         clearable
         icon={<IconCopy size={DETAIL_ICON_SIZE} />}
         data={Object.keys(data.length ? data[0] : []).map((s) => {
@@ -151,7 +151,11 @@ export function Control() {
         {pageMap.length}
       </Badge>
 
-      <Tooltip label={t("Print all")} position="bottom" withArrow>
+      <Tooltip
+        label={intl.formatMessage({ id: "Print all" })}
+        position="bottom"
+        withArrow
+      >
         <ActionIcon
           size={128}
           variant="filled"
@@ -159,10 +163,12 @@ export function Control() {
           onClick={() => {
             if (pageMap.length > MAX_COUNT)
               showNotification({
-                title: t("Too many quantity"),
-                message: t(
-                  "The system cannot print more than {0} copies"
-                ).replace("{0}", MAX_COUNT.toLocaleString()),
+                title: intl.formatMessage({ id: "Too many quantity" }),
+                message: intl
+                  .formatMessage({
+                    id: "The system cannot print more than {0} copies",
+                  })
+                  .replace("{0}", MAX_COUNT.toLocaleString()),
                 color: "red",
               });
             else open();
@@ -192,8 +198,10 @@ export function Control() {
           }}
           onBlock={() =>
             showNotification({
-              title: t("New window opening blocked"),
-              message: t("The browser restricted opening a new window"),
+              title: intl.formatMessage({ id: "New window opening blocked" }),
+              message: intl.formatMessage({
+                id: "The browser restricted opening a new window",
+              }),
               color: "red",
             })
           }

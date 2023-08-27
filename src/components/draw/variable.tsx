@@ -1,4 +1,4 @@
-import { MAX_FILE_SIZE } from "@/lib/dataSlice";
+import { MAX_FILE_SIZE } from "../../lib/dataSlice";
 import {
   convertSize,
   DETAIL_ICON_SIZE,
@@ -7,8 +7,8 @@ import {
   setLayerVar,
   setLayerVarImg,
   TYPE,
-} from "@/lib/drawSlice";
-import { UNIT } from "@/lib/paperSlice";
+} from "../../lib/drawSlice";
+import { UNIT } from "../../lib/paperSlice";
 import {
   Box,
   Button,
@@ -26,7 +26,7 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconCode, IconPhoto, IconVariable } from "@tabler/icons-react";
-import { useTranslation } from "next-i18next";
+import { useIntl } from "react-intl";
 import { useDispatch, useSelector } from "react-redux";
 
 export function Variable() {
@@ -39,15 +39,14 @@ export function Variable() {
   const layer = useSelector((state: any) => state.draw.layer);
   const page = useSelector((state: any) => state.draw.page);
   const selected = useSelector((state: any) => state.draw.selected);
-
-  const { t } = useTranslation();
+  const intl = useIntl();
 
   if (selected === -1) return <></>;
 
   const header = (
     <Group position="center">
       <IconCode />
-      <Title order={5}>{t("Variable")}</Title>
+      <Title order={5}>{intl.formatMessage({ id: "Variable" })}</Title>
     </Group>
   );
   const valueComponent = ({

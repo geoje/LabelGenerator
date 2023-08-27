@@ -21,15 +21,15 @@ import {
   setLayout,
   MAX_PRECISION,
   STEP_BY_UNIT,
-} from "@/lib/paperSlice";
-import { DETAIL_ICON_SIZE } from "@/lib/drawSlice";
-import { useTranslation } from "next-i18next";
+} from "../../lib/paperSlice";
+import { DETAIL_ICON_SIZE } from "../../lib/drawSlice";
+import { useIntl } from "react-intl";
 
 export function Size() {
   const dispatch = useDispatch();
   const drawLayout = useSelector((state: any) => state.draw.layout);
   const paperLayout = useSelector((state: any) => state.paper.layout);
-  const { t } = useTranslation();
+  const intl = useIntl();
 
   const SegLabel = (icon: any, content: any) => (
     <Group noWrap>
@@ -53,7 +53,10 @@ export function Size() {
           data={[
             {
               value: PAPER_TYPE.fit,
-              label: SegLabel(<IconFileHorizontal />, t("Fit content")),
+              label: SegLabel(
+                <IconFileHorizontal />,
+                intl.formatMessage({ id: "Fit content" })
+              ),
             },
             {
               value: PAPER_TYPE.letter,
@@ -65,7 +68,10 @@ export function Size() {
             },
             {
               value: PAPER_TYPE.custom,
-              label: SegLabel(<IconLayoutBoardSplit />, t("Custom")),
+              label: SegLabel(
+                <IconLayoutBoardSplit />,
+                intl.formatMessage({ id: "Custom" })
+              ),
               disabled:
                 isSameSize(drawLayout, paperLayout) ||
                 isSameSize(DEFAULT_PAPER_SIZE.letter, paperLayout) ||

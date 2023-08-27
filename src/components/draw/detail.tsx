@@ -403,7 +403,7 @@ export function Detail() {
           </Center>
           <Stack spacing={2}>
             <Select
-              placeholder={t("Border style") ?? "Border style"}
+              placeholder={intl.formatMessage({ id: "Border style" })}
               size="xs"
               icon={<IconBorderStyle2 size={DETAIL_ICON_SIZE} />}
               clearable
@@ -434,7 +434,7 @@ export function Detail() {
               }
             />
             <NumberInput
-              placeholder={t("Border width") ?? "Border width"}
+              placeholder={intl.formatMessage({ id: "Border width" })}
               size="xs"
               icon={<IconBorderStyle size={DETAIL_ICON_SIZE} />}
               min={1}
@@ -453,7 +453,7 @@ export function Detail() {
               }
             />
             <CustomColorInput
-              placeholder={t("Border color") ?? "Border color"}
+              placeholder={intl.formatMessage({ id: "Border color" })}
               selected={selected}
               color={borderColor}
               action={setLayerBorderColor}
@@ -462,7 +462,7 @@ export function Detail() {
 
             {![TYPE.qr, TYPE.image].includes(layer[selected].type) && (
               <CustomColorInput
-                placeholder={t("Background color") ?? "Background color"}
+                placeholder={intl.formatMessage({ id: "Background color" })}
                 selected={selected}
                 color={backColor}
                 action={setLayerBackColor}
@@ -480,7 +480,7 @@ export function Detail() {
           <Stack spacing={2}>
             <Select
               size="xs"
-              placeholder={t("Font family") ?? "Font family"}
+              placeholder={intl.formatMessage({ id: "Font family" })}
               icon={<IconTypography size={DETAIL_ICON_SIZE} />}
               data={getFontFamilies(layer).map((o: any) => {
                 return { value: o.value, label: o.value, group: o.group };
@@ -529,7 +529,10 @@ export function Detail() {
                     onChange={setOpenedFontFile}
                   >
                     <Popover.Target>
-                      <Tooltip withArrow label={t("Upload font file")}>
+                      <Tooltip
+                        withArrow
+                        label={intl.formatMessage({ id: "Upload font file" })}
+                      >
                         <ActionIcon variant="transparent">
                           <IconFolder
                             size={DETAIL_ICON_SIZE}
@@ -575,18 +578,18 @@ export function Detail() {
                       )}
                       <FileInput
                         size="xs"
-                        label={t("Upload font file")}
-                        placeholder={
-                          t("Click here to upload") ?? "Click here to upload"
-                        }
+                        label={intl.formatMessage({ id: "Upload font file" })}
+                        placeholder={intl.formatMessage({
+                          id: "Click here to upload",
+                        })}
                         accept="font/ttf,font/otf,font/woff,font/woff2"
                         error={
                           !fontFile ||
                           /\.(otf|ttf|woff2?)$/.test(fontFile?.name)
                             ? false
-                            : t(
-                                "Not supported extension (accept: otf, ttf, woff, woff2)"
-                              )
+                            : intl.formatMessage({
+                                id: "Not supported extension (accept: otf, ttf, woff, woff2)",
+                              })
                         }
                         value={fontFile}
                         onChange={setFontFile}
@@ -648,8 +651,8 @@ export function Detail() {
                           {getFontFamilies(layer)
                             .filter((o: any) => o.group === GROUP_FONT.FILE)
                             .find((o: any) => o.value === fontFile?.name)
-                            ? t("Update")
-                            : t("Submit")}
+                            ? intl.formatMessage({ id: "Update" })
+                            : intl.formatMessage({ id: "Submit" })}
                         </Button>
                       </Group>
                     </Popover.Dropdown>
@@ -664,7 +667,10 @@ export function Detail() {
                     onChange={setOpenedFontGoogle}
                   >
                     <Popover.Target>
-                      <Tooltip withArrow label={t("Get Google font")}>
+                      <Tooltip
+                        withArrow
+                        label={intl.formatMessage({ id: "Get Google font" })}
+                      >
                         <ActionIcon variant="transparent">
                           <IconBrandGoogle
                             size={DETAIL_ICON_SIZE}
@@ -683,7 +689,12 @@ export function Detail() {
                       })}
                     >
                       <Group position="right" mb={-28}>
-                        <Tooltip withArrow label={t("Browse Google Fonts")}>
+                        <Tooltip
+                          withArrow
+                          label={intl.formatMessage({
+                            id: "Browse Google Fonts",
+                          })}
+                        >
                           <ActionIcon
                             variant="transparent"
                             component="a"
@@ -698,8 +709,8 @@ export function Detail() {
                         </Tooltip>
                       </Group>
                       <TextInput
-                        label={t("Get Google font")}
-                        placeholder={t("Font name") ?? "Font name"}
+                        label={intl.formatMessage({ id: "Get Google font" })}
+                        placeholder={intl.formatMessage({ id: "Font name" })}
                         size="xs"
                         ref={fontGoogleRef}
                         error={fontGoogleError}
@@ -728,7 +739,7 @@ export function Detail() {
             />
             <Select
               size="xs"
-              placeholder={t("Font weight") ?? "Font weight"}
+              placeholder={intl.formatMessage({ id: "Font weight" })}
               icon={<IconLetterW size={DETAIL_ICON_SIZE} />}
               data={[
                 { value: "100", label: "100" },
@@ -755,7 +766,7 @@ export function Detail() {
             <Group noWrap spacing="xs" align="flex-start">
               <NumberInput
                 size="xs"
-                placeholder={t("Font size") ?? "Font size"}
+                placeholder={intl.formatMessage({ id: "Font size" })}
                 icon={<IconTextSize size={DETAIL_ICON_SIZE} />}
                 min={1}
                 value={layer[selected].font?.size}
@@ -802,7 +813,7 @@ export function Detail() {
             </Group>
             <CustomColorInput
               sx={{ flex: 1 }}
-              placeholder={t("Font color") ?? "Font color"}
+              placeholder={intl.formatMessage({ id: "Font color" })}
               selected={selected}
               color={fontColor}
               action={setLayerFontColor}
@@ -811,7 +822,7 @@ export function Detail() {
 
             <NumberInput
               size="xs"
-              placeholder={t("Horizontal Scale") ?? "Horizontal Scale"}
+              placeholder={intl.formatMessage({ id: "Horizontal Scale" })}
               icon={<IconArrowAutofitWidth size={DETAIL_ICON_SIZE} />}
               precision={2}
               min={0}
@@ -833,7 +844,7 @@ export function Detail() {
             />
             <NumberInput
               size="xs"
-              placeholder={t("Vertical Scale") ?? "Vertical Scale"}
+              placeholder={intl.formatMessage({ id: "Vertical Scale" })}
               icon={<IconArrowAutofitHeight size={DETAIL_ICON_SIZE} />}
               precision={2}
               min={0}

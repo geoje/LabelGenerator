@@ -16,10 +16,10 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { UNIT, convertSize } from "@/lib/paperSlice";
-import { addExclude, delExclude } from "@/lib/printSlice";
+import { UNIT, convertSize } from "../../lib/paperSlice";
+import { addExclude, delExclude } from "../../lib/printSlice";
 import { Canvas } from "./canvas";
-import { useTranslation } from "next-i18next";
+import { useIntl } from "react-intl";
 
 export function LabelPaper(props: any) {
   const dispatch = useDispatch();
@@ -32,7 +32,7 @@ export function LabelPaper(props: any) {
     useSelector((state: any) => state.paper.layout),
     UNIT.px
   );
-  const { t } = useTranslation();
+  const intl = useIntl();
   let x = paperLayoutPx.l,
     y = paperLayoutPx.t;
 
@@ -87,14 +87,14 @@ export function LabelPaper(props: any) {
                   }}
                 >
                   <Tooltip
-                    label={t("Exclude")}
+                    label={intl.formatMessage({ id: "Exclude" })}
                     withArrow
                     styles={(theme) => {
                       return {
                         tooltip: {
                           backgroundColor:
                             theme.colorScheme === "dark"
-                              ? "rgba(37, 38, 43, 0.8)"
+                              ? "rgba(233, 236, 239, 0.8)"
                               : "rgba(33, 37, 41, 0.8)",
                           whiteSpace: "nowrap",
                         },
@@ -111,14 +111,14 @@ export function LabelPaper(props: any) {
                     </ActionIcon>
                   </Tooltip>
                   <Tooltip
-                    label={t("Print")}
+                    label={intl.formatMessage({ id: "Print" })}
                     withArrow
                     styles={(theme) => {
                       return {
                         tooltip: {
                           backgroundColor:
                             theme.colorScheme === "dark"
-                              ? "rgba(37, 38, 43, 0.8)"
+                              ? "rgba(233, 236, 239, 0.8)"
                               : "rgba(33, 37, 41, 0.8)",
                           whiteSpace: "nowrap",
                         },
@@ -156,7 +156,7 @@ export function LabelPaper(props: any) {
                         tooltip: {
                           backgroundColor:
                             theme.colorScheme === "dark"
-                              ? "rgba(37, 38, 43, 0.8)"
+                              ? "rgba(233, 236, 239, 0.8)"
                               : "rgba(33, 37, 41, 0.8)",
                           whiteSpace: "nowrap",
                         },
@@ -195,7 +195,7 @@ export function LabelPaper(props: any) {
                 borderStyle: "dashed",
               }}
             >
-              <Tooltip label={t("Include")} withArrow>
+              <Tooltip label={intl.formatMessage({ id: "Include" })} withArrow>
                 <ActionIcon
                   variant="transparent"
                   onClick={() => dispatch(delExclude([props.pageMapIndex, i]))}

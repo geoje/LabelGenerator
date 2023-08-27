@@ -2,8 +2,8 @@ import { Text, Paper, Image as ManImage } from "@mantine/core";
 import Barcode from "react-barcode";
 import { QRCodeSVG } from "qrcode.react";
 import { useSelector } from "react-redux";
-import { TYPE, GROUP_VAR, GROUP_FONT } from "@/lib/drawSlice";
-import { UNIT, convertSize } from "@/lib/paperSlice";
+import { TYPE, GROUP_VAR, GROUP_FONT } from "../../lib/drawSlice";
+import { UNIT, convertSize } from "../../lib/paperSlice";
 
 export function Canvas(props: any) {
   // Provider

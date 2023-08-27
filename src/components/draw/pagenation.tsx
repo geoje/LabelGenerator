@@ -1,7 +1,6 @@
 import { Slider } from "@mantine/core";
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPage } from "@/lib/drawSlice";
+import { setPage } from "../../lib/drawSlice";
 
 export function Pagenation() {
   // Provider

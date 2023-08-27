@@ -1,5 +1,5 @@
 import "./index.css";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, BrowserRouter } from "react-router-dom";
 import { HeaderSimple } from "./components/header";
 import { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
@@ -16,23 +16,15 @@ import {
 } from "@mantine/core";
 import { IntlProvider } from "react-intl";
 import { store } from "./lib/store";
-import enMsg from "./lang/en.json";
-import koMsg from "./lang/ko.json";
 import { useSelector } from "react-redux";
-
-export const intls: {
-  [index: string]: {
-    flag: string;
-    lang: string;
-    message: { [index: string]: string };
-  };
-} = {
-  en: { flag: "US", lang: "English", message: enMsg },
-  ko: { flag: "KR", lang: "한국어", message: koMsg },
-};
+import { intls } from "./lib/dataSlice";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <App />
+  <BrowserRouter>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </BrowserRouter>
 );
 function App() {
   const { pathname } = useLocation();
@@ -65,18 +57,16 @@ function App() {
             headings: { fontFamily: `Poppins,"Noto Sans KR"` },
           }}
         >
-          <Provider store={store}>
-            <IntlProvider locale={locale} messages={intls[locale].message}>
-              <Notifications />
-              <HeaderSimple />
-              <Routes>
-                <Route path="/" element={<Import />} />
-                {/* <Route path="/draw" element={<Draw />} />
-                <Route path="/paper" element={<Paper />} />
-                <Route path="/print" element={<Print />} /> */}
-              </Routes>
-            </IntlProvider>
-          </Provider>
+          <IntlProvider locale={locale} messages={intls[locale].message}>
+            <Notifications />
+            <HeaderSimple />
+            <Routes>
+              <Route path="/" element={<Import />} />
+              <Route path="/draw" element={<Draw />} />
+              <Route path="/paper" element={<Paper />} />
+              <Route path="/print" element={<Print />} />
+            </Routes>
+          </IntlProvider>
         </MantineProvider>
       </ColorSchemeProvider>
     </>

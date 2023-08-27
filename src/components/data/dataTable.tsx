@@ -96,7 +96,13 @@ export function DataTable() {
       <div {...rest} ref={ref}>
         <Table
           fontSize="xs"
-          style={{ top, position: "absolute", whiteSpace: "nowrap" }}
+          style={{
+            top,
+            position: "absolute",
+            whiteSpace: "nowrap",
+            borderCollapse: "separate",
+            borderSpacing: 0,
+          }}
         >
           {header}
           <tbody>{children}</tbody>
@@ -117,7 +123,17 @@ export function DataTable() {
       itemCount={data.length}
       itemSize={rowHeight}
       header={
-        <thead>
+        <thead
+          style={{
+            position: "sticky",
+            top: 0,
+            backgroundColor:
+              theme.colorScheme === "dark" ? theme.colors.dark[7] : "white",
+            borderBottom: "1px",
+            borderBottomColor:
+              theme.colors.gray[theme.colorScheme === "dark" ? 8 : 3],
+          }}
+        >
           <tr>
             <th>#</th>
             {keys.map((k, i) => (

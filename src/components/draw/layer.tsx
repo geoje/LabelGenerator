@@ -17,21 +17,20 @@ import {
   changeLayerIndex,
   removeLayerByIndex,
   setSelected,
-} from "@/lib/drawSlice";
-import React from "react";
+} from "../../lib/drawSlice";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { typeToIcon } from "@/pages/draw";
 import { resetServerContext } from "react-beautiful-dnd";
-import { useTranslation } from "next-i18next";
+import { typeToIcon } from "../../draw";
+import { useIntl } from "react-intl";
 
 export function Layer() {
   // Provider
   const dispatch = useDispatch();
   const layer = useSelector((state: any) => state.draw.layer);
   const selected = useSelector((state: any) => state.draw.selected);
-  const { t } = useTranslation();
+  const intl = useIntl();
 
   const [hover, setHover] = useState(-1);
 
@@ -165,7 +164,7 @@ export function Layer() {
     <Stack>
       <Group position="center">
         <IconStack2 />
-        <Title order={5}>{t("Layer")}</Title>
+        <Title order={5}>{intl.formatMessage({ id: "Layer" })}</Title>
       </Group>
       <DragDropContext
         onDragEnd={({ destination, source }: any) => {

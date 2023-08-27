@@ -24,7 +24,6 @@ import { DataTable } from "./components/data/dataTable";
 import { Dropzone } from "@mantine/dropzone";
 import { MIME_TYPES } from "@mantine/dropzone";
 import { StringReplaceAt } from "./lib/tool";
-import { HeaderSimple } from "./components/header";
 import { FormattedMessage } from "react-intl";
 
 export default function Import() {
@@ -95,197 +94,194 @@ export default function Import() {
   };
 
   return (
-    <>
-      <HeaderSimple />
-      <Box p="xl">
-        <Group
-          spacing={0}
-          sx={(theme) => ({
-            height: 28,
-            color:
-              theme.colorScheme === "dark"
-                ? theme.colors.dark[0]
-                : theme.colors.gray[8],
-          })}
-        >
-          <Title order={6} mr="sm">
-            <FormattedMessage id="Import data" />
-          </Title>
-          {data.length && (
-            <Tooltip label={<FormattedMessage id="Clear" />} withArrow>
-              <ActionIcon
-                variant="subtle"
-                onClick={() => {
-                  if (data.length) {
-                    dispatch(setData([]));
-                    setWorkbook(null);
+    <Box p="xl">
+      <Group
+        spacing={0}
+        sx={(theme) => ({
+          height: 28,
+          color:
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[0]
+              : theme.colors.gray[8],
+        })}
+      >
+        <Title order={6} mr="sm">
+          <FormattedMessage id="Import data" />
+        </Title>
+        {data.length && (
+          <Tooltip label={<FormattedMessage id="Clear" />} withArrow>
+            <ActionIcon
+              variant="subtle"
+              onClick={() => {
+                if (data.length) {
+                  dispatch(setData([]));
+                  setWorkbook(null);
 
-                    showNotification({
-                      title: "Deleted",
-                      message: "Data deleted successfully",
-                      color: "green",
-                    });
-                  } else if (workbook) {
-                    setWorkbook(null);
+                  showNotification({
+                    title: "Deleted",
+                    message: "Data deleted successfully",
+                    color: "green",
+                  });
+                } else if (workbook) {
+                  setWorkbook(null);
 
+                  showNotification({
+                    title: "Deleted",
+                    message: "Workbook deleted successfully",
+                    color: "green",
+                  });
+                }
+              }}
+            >
+              <IconTrash />
+            </ActionIcon>
+          </Tooltip>
+        )}
+      </Group>
+      <Paper shadow="xs" p={data.length ? 0 : "md"} withBorder>
+        {data.length ? (
+          <DataTable />
+        ) : (
+          <>
+            <Group position="center">
+              <Dropzone
+                onDrop={(files) => {
+                  // More than 2 files are rejected
+                  if (files.length >= 2) {
                     showNotification({
-                      title: "Deleted",
-                      message: "Workbook deleted successfully",
-                      color: "green",
+                      title: "Not single file",
+                      message: "You must upload just single file",
+                      color: "red",
                     });
+                    return;
                   }
-                }}
-              >
-                <IconTrash />
-              </ActionIcon>
-            </Tooltip>
-          )}
-        </Group>
-        <Paper shadow="xs" p={data.length ? 0 : "md"} withBorder>
-          {data.length ? (
-            <DataTable />
-          ) : (
-            <>
-              <Group position="center">
-                <Dropzone
-                  onDrop={(files) => {
-                    // More than 2 files are rejected
-                    if (files.length >= 2) {
+
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    var wb = XLSX.read(event.target?.result, {
+                      type: "binary",
+                    });
+
+                    // More than 2 sheets
+                    if (wb.SheetNames.length >= 2) setWorkbook(wb as any);
+                    // Single sheet
+                    else if (wb.SheetNames.length === 1) {
+                      refineData(wb.Sheets[wb.SheetNames[0]]);
+                    }
+                    // No sheets
+                    else {
                       showNotification({
-                        title: "Not single file",
-                        message: "You must upload just single file",
+                        title: "No sheet in file",
+                        message: "The file must have more than 1 sheet",
                         color: "red",
                       });
                       return;
                     }
+                  };
+                  reader.readAsBinaryString(files[0]);
+                }}
+                onReject={(files: any) => {
+                  let noti: { title: string; message: string } = {
+                    title: "",
+                    message: "",
+                  };
 
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                      var wb = XLSX.read(event.target?.result, {
-                        type: "binary",
-                      });
-
-                      // More than 2 sheets
-                      if (wb.SheetNames.length >= 2) setWorkbook(wb as any);
-                      // Single sheet
-                      else if (wb.SheetNames.length === 1) {
-                        refineData(wb.Sheets[wb.SheetNames[0]]);
-                      }
-                      // No sheets
-                      else {
-                        showNotification({
-                          title: "No sheet in file",
-                          message: "The file must have more than 1 sheet",
-                          color: "red",
-                        });
-                        return;
-                      }
+                  // More than 2 files are rejected
+                  if (files.length >= 2)
+                    noti = {
+                      title: "Not single file",
+                      message: "You must upload just single file",
                     };
-                    reader.readAsBinaryString(files[0]);
-                  }}
-                  onReject={(files: any) => {
-                    let noti: { title: string; message: string } = {
-                      title: "",
-                      message: "",
+                  else if (
+                    files[0].errors.some(
+                      (e: any) => e.code === "file-invalid-type"
+                    )
+                  )
+                    noti = {
+                      title: "Unsupported file type",
+                      message: "File type must be one of (xlsx, xls, csv)",
+                    };
+                  else if (
+                    files[0].errors.some(
+                      (e: any) => e.code === "file-too-large"
+                    )
+                  )
+                    noti = {
+                      title: "Too large file",
+                      message: "File size exceed 5mb",
                     };
 
-                    // More than 2 files are rejected
-                    if (files.length >= 2)
-                      noti = {
-                        title: "Not single file",
-                        message: "You must upload just single file",
-                      };
-                    else if (
-                      files[0].errors.some(
-                        (e: any) => e.code === "file-invalid-type"
-                      )
-                    )
-                      noti = {
-                        title: "Unsupported file type",
-                        message: "File type must be one of (xlsx, xls, csv)",
-                      };
-                    else if (
-                      files[0].errors.some(
-                        (e: any) => e.code === "file-too-large"
-                      )
-                    )
-                      noti = {
-                        title: "Too large file",
-                        message: "File size exceed 5mb",
-                      };
-
-                    // Error notification
-                    showNotification({ ...noti, color: "red" });
-                  }}
-                  maxSize={MAX_FILE_SIZE}
-                  accept={[MIME_TYPES.xlsx, MIME_TYPES.xls, MIME_TYPES.csv]}
+                  // Error notification
+                  showNotification({ ...noti, color: "red" });
+                }}
+                maxSize={MAX_FILE_SIZE}
+                accept={[MIME_TYPES.xlsx, MIME_TYPES.xls, MIME_TYPES.csv]}
+              >
+                <Group
+                  position="center"
+                  spacing="xl"
+                  style={{ minHeight: 220, pointerEvents: "none" }}
                 >
-                  <Group
-                    position="center"
-                    spacing="xl"
-                    style={{ minHeight: 220, pointerEvents: "none" }}
-                  >
-                    <Dropzone.Accept>
-                      <IconUpload
-                        size={50}
-                        stroke={1.5}
-                        color={
-                          theme.colors[theme.primaryColor][
-                            theme.colorScheme === "dark" ? 4 : 6
-                          ]
-                        }
-                      />
-                    </Dropzone.Accept>
-                    <Dropzone.Reject>
-                      <IconX
-                        size={50}
-                        stroke={1.5}
-                        color={
-                          theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]
-                        }
-                      />
-                    </Dropzone.Reject>
-                    <Dropzone.Idle>
-                      <IconFileSpreadsheet size={50} stroke={1.5} />
-                    </Dropzone.Idle>
+                  <Dropzone.Accept>
+                    <IconUpload
+                      size={50}
+                      stroke={1.5}
+                      color={
+                        theme.colors[theme.primaryColor][
+                          theme.colorScheme === "dark" ? 4 : 6
+                        ]
+                      }
+                    />
+                  </Dropzone.Accept>
+                  <Dropzone.Reject>
+                    <IconX
+                      size={50}
+                      stroke={1.5}
+                      color={
+                        theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]
+                      }
+                    />
+                  </Dropzone.Reject>
+                  <Dropzone.Idle>
+                    <IconFileSpreadsheet size={50} stroke={1.5} />
+                  </Dropzone.Idle>
 
-                    <div>
-                      <Text size="xl" inline>
-                        <FormattedMessage id="Drag data file or click to select file" />
-                      </Text>
-                      <Text size="sm" color="dimmed" inline mt={7}>
-                        <FormattedMessage id="Attach MS Excel or CSV file, file should not exceed 5mb" />
-                      </Text>
-                    </div>
-                  </Group>
-                </Dropzone>
-              </Group>
-              {workbook && (
-                <>
-                  <Text align="center" size="xl" mt="sm">
-                    <FormattedMessage id="Choose 1 sheet" />
-                  </Text>
-                  <Group position="center" mt="xs">
-                    {workbook.SheetNames.map((name: any) => (
-                      <Button
-                        key={name}
-                        size="xs"
-                        radius="xl"
-                        onClick={() => {
-                          refineData(workbook.Sheets[name]);
-                          setWorkbook(null);
-                        }}
-                      >
-                        {name}
-                      </Button>
-                    ))}
-                  </Group>
-                </>
-              )}
-            </>
-          )}
-        </Paper>
-      </Box>
-    </>
+                  <div>
+                    <Text size="xl" inline>
+                      <FormattedMessage id="Drag data file or click to select file" />
+                    </Text>
+                    <Text size="sm" color="dimmed" inline mt={7}>
+                      <FormattedMessage id="Attach MS Excel or CSV file, file should not exceed 5mb" />
+                    </Text>
+                  </div>
+                </Group>
+              </Dropzone>
+            </Group>
+            {workbook && (
+              <>
+                <Text align="center" size="xl" mt="sm">
+                  <FormattedMessage id="Choose 1 sheet" />
+                </Text>
+                <Group position="center" mt="xs">
+                  {workbook.SheetNames.map((name: any) => (
+                    <Button
+                      key={name}
+                      size="xs"
+                      radius="xl"
+                      onClick={() => {
+                        refineData(workbook.Sheets[name]);
+                        setWorkbook(null);
+                      }}
+                    >
+                      {name}
+                    </Button>
+                  ))}
+                </Group>
+              </>
+            )}
+          </>
+        )}
+      </Paper>
+    </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { RECOMMENDED_COUNT } from "@/lib/printSlice";
+import { RECOMMENDED_COUNT } from "../../lib/printSlice";
 import {
   Group,
   Text,
@@ -8,7 +8,7 @@ import {
   Title,
 } from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons-react";
-import { useTranslation } from "next-i18next";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export function PrintModal(props: any) {
   const qty = props.qty;
@@ -18,7 +18,7 @@ export function PrintModal(props: any) {
   const onDisagree = props.onDisagree;
 
   const theme = useMantineTheme();
-  const { t } = useTranslation();
+  const intl = useIntl();
 
   return (
     <Modal
@@ -28,7 +28,9 @@ export function PrintModal(props: any) {
       title={
         <Group>
           <IconAlertTriangle size={48} color="#FAB005" />
-          <Title order={4}>{t("Bulk Print Warning")}</Title>
+          <Title order={4}>
+            <FormattedMessage id="Bulk Print Warning" />
+          </Title>
         </Group>
       }
       overlayProps={{
@@ -41,23 +43,27 @@ export function PrintModal(props: any) {
       }}
     >
       <Text>
-        {t("You tried to print")} <b>{qty.toLocaleString()}</b>{" "}
-        {t("copies more than {0} that recommended").replace(
-          "{0}",
-          RECOMMENDED_COUNT.toLocaleString()
-        )}
+        {intl.formatMessage({ id: "You tried to print" })}{" "}
+        <b>{qty.toLocaleString()}</b>{" "}
+        {intl
+          .formatMessage({ id: "copies more than {0} that recommended" })
+          .replace("{0}", RECOMMENDED_COUNT.toLocaleString())}
       </Text>
       <Text>
-        {t(
-          "It causes the browser to freeze, but you can print after waiting for rendering"
-        )}
+        {intl.formatMessage({
+          id: "It causes the browser to freeze, but you can print after waiting for rendering",
+        })}
       </Text>
-      <Text mt="xs">{t("Are you still going to proceed?")}</Text>
+      <Text mt="xs">
+        {intl.formatMessage({ id: "Are you still going to proceed?" })}
+      </Text>
 
       <Group mt="xl" position="apart">
-        <Button onClick={onDisagree}>{t("No, I will not print")}</Button>
+        <Button onClick={onDisagree}>
+          {intl.formatMessage({ id: "No, I will not print" })}
+        </Button>
         <Button onClick={onAgree} variant="outline">
-          {t("Yes, I will print")}
+          {intl.formatMessage({ id: "Yes, I will print" })}
         </Button>
       </Group>
     </Modal>
