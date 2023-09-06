@@ -1,21 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <meta
+      name="description"
+      content="Bulk label generator with excel or csv file"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Label Generator</title>
+    <style>
+      @keyframes borderAnimation {
+        from {
+          background-position: 0 0, -8px 0, 100% -8px, 0 100%;
+        }
+        to {
+          background-position: 0 -8px, 0 0, 100% 0, -8px 100%;
+        }
+      }
+      @media print {
+        div#new-window-container > div {
+          page-break-before: always;
+        }
+      }
+    </style>
   </head>
   <body>
-    <script>
-      if (
-        window.location.hostname === "womolabel.web.app" ||
-        window.location.hostname === "womolabel.firebaseapp.com"
-      ) {
-        window.location.href = "https://label.womosoft.com";
-      }
-    </script>
     <div id="root"></div>
   </body>
 </html>
