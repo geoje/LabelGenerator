@@ -200,7 +200,11 @@ export function Variable() {
         </Stack>
       );
     case TYPE.image:
-      let keys: any = Object.keys(layer[selected].var.img);
+      console.log(layer[selected]);
+
+      let keys: any = layer[selected].var.img
+        ? Object.keys(layer[selected].var.img)
+        : [];
       if (layer[selected].var.format) {
         const fm = layer[selected].var.format;
         keys = Array.from(
