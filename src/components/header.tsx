@@ -254,8 +254,7 @@ export function HeaderSimple() {
                     onClick={() =>
                       showNotification({
                         title: "Oops!",
-                        message:
-                          "This function is not developed yet. Please contact to info@womosoft.com.",
+                        message: "This function is not developed yet.",
                         color: "yellow",
                       })
                     }
